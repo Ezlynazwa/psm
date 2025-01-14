@@ -20,13 +20,13 @@ class Product(models.Model):
         ('Neutral Undertone', 'Neutral Undertone'),
     ]
     SURFACE_TONES = [
-        ('Sangat Cerah','Sangat Cerah'),
-        ('Cerah','Cerah'),
-        ('Terang','Terang'),
-        ('Sederhana','Sederhana'),
-        ('Sawo Matang','Sawo Matang'),
-        ('Gelap','Gelap'),
-        ('Sangat Gelap','Sangat Gelap'),
+        ('Sangat Cerah', 'Sangat Cerah'),
+        ('Cerah', 'Cerah'),
+        ('Terang', 'Terang'),
+        ('Sederhana', 'Sederhana'),
+        ('Sawo Matang', 'Sawo Matang'),
+        ('Gelap', 'Gelap'),
+        ('Sangat Gelap', 'Sangat Gelap'),
     ]
     SENSITIVITY_LEVELS = [
         ('Low', 'Low'),
@@ -58,10 +58,70 @@ class Product(models.Model):
     image = models.ImageField(upload_to='product_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    digital = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} ({self.variation_code})'
 
+    @property
+    def imageURL(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        return url
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date_ordered = models.DateTimeField(auto_now_add=True)
+    complete = models.BooleanField(default=False)
+    transaction_id = models.CharField(max_length=100, null=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.product.name} ({self.quantity})'
+        return str(self.id)
+
+    @property
+    def shipping(self):
+        shipping = False
+        orderitems = self.orderitem_set.all()
+        for i in orderitems:
+            if not i.product.digital:
+                shipping = True
+        return shipping
+
+    @property
+    def get_cart_total(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.get_total for item in orderitems])
+        return total
+
+    @property
+    def get_cart_items(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.quantity for item in orderitems])
+        return total
+
+
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    quantity = models.IntegerField(default=1)  # Ensure default is set to 1
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def get_total(self):
+        return self.product.price * self.quantity
+
+
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    address = models.CharField(max_length=200, null=False)
+    city = models.CharField(max_length=200, null=False)
+    state = models.CharField(max_length=200, null=False)
+    zipcode = models.CharField(max_length=200, null=False)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.address

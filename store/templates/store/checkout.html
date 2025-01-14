@@ -1,0 +1,33 @@
+<!-- store/templates/store/checkout.html -->
+
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h2>Checkout</h2>
+  
+  <h3>Order Summary</h3>
+  <p>Items in Cart: {{ cart_items }}</p>
+  <p>Total Price: RM {{ cart_total }}</p>
+
+  <form method="POST">
+    {% csrf_token %}
+    <h4>Shipping Information</h4>
+    <div>
+      <label for="address">Address:</label>
+      <input type="text" name="address" id="address" required>
+    </div>
+    <div>
+      <label for="city">City:</label>
+      <input type="text" name="city" id="city" required>
+    </div>
+    <div>
+      <label for="state">State:</label>
+      <input type="text" name="state" id="state" required>
+    </div>
+    <div>
+      <label for="zipcode">Zipcode:</label>
+      <input type="text" name="zipcode" id="zipcode" required>
+    </div>
+    <button type="submit">Complete Order</button>
+  </form>
+{% endblock %}

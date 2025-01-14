@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Catalog</title>
+</head>
+<body>
+    <h1>Catalog</h1>
+    <div>
+        {% for product in products %}
+            <div>
+                <img src="{{ product.imageURL }}" alt="{{ product.name }}">
+                <h3><a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a></h3>
+                <p>Price: ${{ product.price }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

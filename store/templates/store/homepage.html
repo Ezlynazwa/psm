@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty - Homepage</title>
+    
+    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'store:homepage' %}">Home</a></li>
+                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
+                <li><a href="{% url 'store:cart' %}">Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Banner -->
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Brew Beauty</h1>
+            <p>Your destination for personalized makeup</p>
+            <a href="{% url 'store:catalog' %}" class="cta-button">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <h2>Featured Products</h2>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.imageURL }}" alt="{{ product.name }}">
+                <h3><a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a></h3>
+                <p>{{ product.description }}</p>
+                <p>Price: ${{ product.price }}</p>
+                <a href="{% url 'store:view_product' product.id %}" class="cta-button">View Product</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
