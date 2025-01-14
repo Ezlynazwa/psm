@@ -8,7 +8,7 @@ class Employee(models.Model):
     contact = models.CharField(max_length=15)
     email = models.EmailField()
     date_hired = models.DateField()
-    photo = models.ImageField(upload_to='media/employee_photos/', blank=True, null=True)
+    photo = models.ImageField(upload_to='media/employee_photo/', blank=True, null=True)
 
     def __str__(self):
         return self.name

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brew Beauty - Homepage</title>
     
-    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
 <body>
     <!-- Header -->
@@ -19,6 +19,13 @@
                 <li><a href="{% url 'store:cart' %}">Cart</a></li>
             </ul>
         </nav>
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form action="{% url 'store:search' %}" method="GET">
+                <input type="text" name="q" placeholder="Search for products..." class="search-bar">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
     </header>
 
     <!-- Main Banner -->

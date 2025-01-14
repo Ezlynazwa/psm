@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'store:homepage' %}">Home</a></li>
+                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
+                <li><a href="{% url 'store:cart' %}">Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Search Results -->
+    <main>
+        <h1>Search Results for "{{ query }}"</h1>
+        {% if results %}
+            <ul>
+                {% for product in results %}
+                <li>
+                    <a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a> - ${{ product.price }}
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No products found.</p>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

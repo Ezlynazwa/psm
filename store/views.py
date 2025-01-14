@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Order, OrderItem, ShippingAddress
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from.forms import ProductForm
 
 
 # Homepage view
@@ -30,7 +31,19 @@ def view_product(request, product_id):
         order_item.save() 
         return redirect('store:cart')  # Redirect to the cart page after adding the item
 
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES,instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'inventori/product_form.html', {'form': form})
+
     return render(request, 'store/view_product.html', {'product': product})
+
 # Cart page view
 def cart(request):
     order, created = Order.objects.get_or_create(user=request.user, complete=False)
@@ -81,3 +94,8 @@ def checkout(request):
         'cart_total': cart_total,
         'cart_items': cart_items
     })
+
+def search(request):
+    query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL
+    results = Product.objects.filter(name__icontains=query) if query else []  # Cari produk berdasarkan nama
+    return render(request, 'store/search.html', {'query': query, 'results': results})
