@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty</title>
+    {% load static %}  <!-- This is required to use the static tag -->
+    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'store:homepage' %}">Home</a></li> <!-- Fix this link -->
+                <li><a href="{% url 'users:login' %}">Login</a></li> <!-- Use namespaced URL -->
+                <li><a href="{% url 'users:signup' %}">Sign Up</a></li> <!-- Use namespaced URL -->
+                <li><a href="{% url 'users:logout' %}">Log Out</a></li> <!-- Use namespaced URL -->
+                <li><a href="/products/">Products</a></li>
+                <li><a href="/contact/">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Welcome to Brew Beauty!</h1>
+        <p>Your go-to destination for personalized makeup recommendations and a great shopping experience.</p>
+
+        <section>
+            <h2>Featured Products</h2>
+            <div class="product-list">
+                <!-- Add your product list dynamically from the database here -->
+                <div class="product-item">
+                    <img src="{% static 'images/product1.jpg' %}" alt="Product 1">
+                    <h3>Product Name 1</h3>
+                    <p>Product Description</p>
+                    <a href="/product/1/">View Product</a>
+                </div>
+                <div class="product-item">
+                    <img src="{% static 'images/product2.jpg' %}" alt="Product 2">
+                    <h3>Product Name 2</h3>
+                    <p>Product Description</p>
+                    <a href="/product/2/">View Product</a>
+                </div>
+                <!-- More product items can be added here -->
+            </div>
+        </section>
+
+        <section>
+            <h2>Why Choose Brew Beauty?</h2>
+            <p>Discover makeup products tailored to your skin type and preferences with our personalized recommendations.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Brew Beauty. All rights reserved.</p>
+    </footer>
+</body>
+</html>

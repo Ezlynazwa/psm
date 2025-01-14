@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Brew Beauty</title>
+    <link rel="stylesheet" href="{% static 'register.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'users:login' %}">Login</a></li>
+                <li><a href="{% url 'users:signup' %}">Sign Up</a></li>
+                <li><a href="{% url 'homepage' %}">Home</a></li>
+                <li><a href="{% url 'product_catalog' %}">Shop</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h1>{{ product.name }}</h1>
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        <p>{{ product.description }}</p>
+        <p>Price: RM {{ product.price }}</p>
+        <p>Available stock: {{ product.quantity }}</p>
+
+        <form action="{% url 'add_to_cart' product.id %}" method="POST">
+            {% csrf_token %}
+            <label for="quantity">Quantity:</label>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.quantity }}" required>
+            <button type="submit" class="btn">Add to Cart</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
