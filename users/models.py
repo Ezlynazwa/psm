@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
+    password = models.CharField(max_length=128, default='defaultpassword')
     position = models.CharField(max_length=100)
     contact = models.CharField(max_length=15)
     email = models.EmailField()

@@ -180,3 +180,16 @@ def order_confirmation(request):
         'order': order,
         'shipping_address': shipping_address,
     })
+
+def track_order(request):
+    if request.user.is_authenticated:
+        # Ambil pesanan untuk pengguna yang log masuk
+        orders = Order.objects.filter(user=request.user).order_by('-date_ordered')
+    else:
+        orders = None
+
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'store/track_order.html', context)
+

@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('photo_display', 'name', 'email', 'contact', 'position', 'date_hired')
+    list_display = ('photo_display', 'name', 'password','email', 'contact', 'position', 'date_hired')
     search_fields = ['name', 'email']  # Membolehkan carian berdasarkan nama atau email
     list_filter = ('position',)
     

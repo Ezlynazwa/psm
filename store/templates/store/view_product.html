@@ -17,7 +17,7 @@
                 <p class="price">RM {{ product.price }}</p>
                 <p class="description">{{ product.description }}</p>
                 <p class="category">Category: {{ product.category }}</p>
-                <p class="stock">Stock: {% if product.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}</p>
+                <p class="variation_code">Code: {{ product.variation_code }}</p>
                 <div class="product-actions">
                     <a href="{% url 'store:add_to_cart' product.id %}" class="cta-button">Add to Cart</a>
                 </div>

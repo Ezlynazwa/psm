@@ -17,6 +17,8 @@
                 <li><a href="{% url 'store:homepage' %}">Home</a></li>
                 <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
                 <li><a href="{% url 'store:cart' %}" class="active">Cart</a></li>
+                <li><a href="{% url 'store:track_order' %}">Track Order</a></li> <!-- Tambah link ini -->
+
             </ul>
         </nav>
     </header>
@@ -29,7 +31,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Product</th>
+                        <th>Product Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
                         <th>Total</th>
@@ -39,7 +41,7 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td><img src="{{ product.images.url }}" alt="{{ Images }}"></td>
+                        <td>{{ item.product.name }}</td>
                         <td>RM {{ item.product.price }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>RM {{ item.get_total }}</td>

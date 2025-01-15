@@ -42,7 +42,7 @@ header nav ul li a.active {
 
 /* Product Details */
 .product-details {
-    padding: 40px;
+    padding: 50px;
     text-align: center;
 }
 
@@ -51,7 +51,7 @@ header nav ul li a.active {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 30px;
+    gap: 40px;
 }
 
 .product-image img {
@@ -110,4 +110,14 @@ footer {
     background-color: #333;
     color: white;
     margin-top: 20px;
+}
+
+.product-info .category,
+.product-info .variation_code {
+    font-size: 1.2em;
+    margin-bottom: 20px; /* Increase the bottom margin */
+}
+
+.product-actions .cta-button {
+    margin-top: 20px; /* Add more space above the button */
 }

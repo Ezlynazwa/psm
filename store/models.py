@@ -79,10 +79,17 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)  # Tambah ini
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=100, null=True)
+
+    def save(self, *args, **kwargs):
+       if self.transaction_id is None:
+           self.transaction_id = f"TRANS-{self.id or ''}"  # Elakkan format NoneType
+       super().save(*args, **kwargs)
+
 
     def __str__(self):
         return str(self.id)

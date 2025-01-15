@@ -3,6 +3,8 @@ from users.models import User
 from .models import Product
 from django.utils.safestring import mark_safe
 from django import forms
+from .models import Order, OrderItem
+
 
 
 class ProductAdmin(admin.ModelAdmin):

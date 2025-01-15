@@ -1,0 +1,48 @@
+{% extends 'store/basestore.html' %}
+{% load static %}
+
+
+{% block content %}
+<h1>Track Your Orders</h1>
+
+{% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date Ordered</th>
+                <th>Status</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
+                <td>{% if order.complete %}
+                    In Process
+                {% else %}
+                    Delivered
+                {% else %}
+                    Received
+                {% endif %}
+                </td>
+                <td>RM{{ order.get_cart_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have no orders yet.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty - Track Your Orders</title>
+    <link rel="stylesheet" href="{% static 'css/track_order.css' %}">
+</head>
+{% endblock %}  
