@@ -1,13 +1,32 @@
-{% extends 'store/basestore.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty - Cart</title>
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'store:homepage' %}">Home</a></li>
+                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
+                <li><a href="{% url 'store:cart' %}" class="active">Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
     <!-- Cart -->
     <section class="cart">
         <h1>Your Cart</h1>
         {% if cart_items > 0 %}
         <div class="cart-items">
-            <table class="cart-table">
+            <table>
                 <thead>
                     <tr>
                         <th>Product</th>
@@ -20,22 +39,19 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td class="product-details">
-                            <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="product-image">
-                            <span class="product-name">{{ item.product.name }}</span>
-                        </td>
-                        <td class="product-price">RM {{ item.product.price }}</td>
-                        <td class="product-quantity">{{ item.quantity }}</td>
-                        <td class="product-total">RM {{ item.get_total }}</td>
-                        <td class="remove-btn-cell"><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
+                        <td><img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="product-image">{{ item.product.name }}</td>
+                        <td>RM {{ item.product.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>RM {{ item.get_total }}</td>
+                        <td><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
             <div class="cart-summary">
-                <p><strong>Total Items:</strong> {{ cart_items }}</p>
-                <p><strong>Total:</strong> RM {{ total }}</p>
+                <p>Total Items: {{ cart_items }}</p>
+                <p>Total: RM {{ total }}</p>
                 <a href="{% url 'store:checkout' %}" class="cta-button">Proceed to Checkout</a>
             </div>
         </div>
@@ -44,9 +60,11 @@
         <a href="{% url 'store:catalog' %}" class="cta-button">Go to Catalog</a>
         {% endif %}
     </section>
-{% endblock %}
 
-<!-- Cart-specific styles -->
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
-{% endblock %}
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
+    </footer>
+</body>
+
+</html>

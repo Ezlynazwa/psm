@@ -56,22 +56,20 @@ def product_update(request, pk):
 
 @login_required
 def cart(request):
-    try:
-        # Try to get the user's order (uncompleted)
-        order = Order.objects.get(user=request.user, complete=False)
-    except Order.DoesNotExist:
-        # If no order exists, create a new order for the user
-        order = Order.objects.create(user=request.user, complete=False)
+    if request.user.is_authenticated:
+        # Fetch or create the order for the logged-in user
+        order, created = Order.objects.get_or_create(user=request.user, complete=False)
+        items = order.orderitem_set.all()  # Get all order items for the current cart
+        total = order.get_cart_total  # Get total price of items in the cart
+        cart_items = order.get_cart_items  # Get total number of items in the cart
+    else:
+        # Show an empty cart for unauthenticated users
+        items = []
+        total = 0
+        cart_items = 0
 
-    # Calculate total cart value and number of items
-    cart_total = order.get_cart_total
-    cart_items = order.get_cart_items
+    return render(request, 'store/cart.html', {'items': items, 'total': total, 'cart_items': cart_items})
 
-    return render(request, 'store/cart.html', {
-        'order': order,
-        'cart_total': cart_total,
-        'cart_items': cart_items
-    })
 
 @login_required
 def checkout(request):
