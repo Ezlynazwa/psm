@@ -56,7 +56,7 @@ class Product(models.Model):
     surface_tones = models.CharField(max_length=20, choices=SURFACE_TONES, blank=True, null=True)
     skin_texture = models.CharField(max_length=20, choices=SKIN_TEXTURE_CHOICES, blank=True, null=True)
     sensitivity_level = models.CharField(max_length=10, choices=SENSITIVITY_LEVELS, blank=True, null=True)
-    images = models.ImageField(upload_to='product_image/', blank=True, null=True)
+    images = models.ImageField(upload_to='media/product_image/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     category = models.CharField(max_length=20, null=True, blank=True)

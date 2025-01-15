@@ -39,7 +39,7 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td><img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="product-image">{{ item.product.name }}</td>
+                        <td><img src="{{ product.images.url }}" alt="{{ Images }}"></td>
                         <td>RM {{ item.product.price }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>RM {{ item.get_total }}</td>

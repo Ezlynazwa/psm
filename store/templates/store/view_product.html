@@ -1,31 +1,16 @@
+{% extends 'store/basestore.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Product - Brew Beauty{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brew Beauty - {{ product.name }}</title>
-    <link rel="stylesheet" href="{% static 'css/view_product.css' %}">
-</head>
+{% block content %}
 
 <body>
-    <!-- Header -->
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'store:homepage' %}">Home</a></li>
-                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
-                <li><a href="{% url 'store:cart' %}">Cart</a></li>
-            </ul>
-        </nav>
-    </header>
 
     <!-- Product Details -->
     <section class="product-details">
         <div class="product-container">
             <div class="product-image">
-                <img src="{{ product.imageURL }}" alt="{{ product.name }}">
+                <img src="{{ product.images.url }}" alt="{{ Images }}">
             </div>
             <div class="product-info">
                 <h1>{{ product.name }}</h1>
@@ -46,4 +31,13 @@
     </footer>
 </body>
 
-</html>
+{% endblock %}
+
+{% block extra_css %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty - {{ product.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/view_product.css' %}">
+</head>
+{% endblock %}

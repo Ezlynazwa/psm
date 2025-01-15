@@ -23,6 +23,8 @@ class ProductAdminForm(forms.ModelForm):
      return "No Photo"
     photo_display.allow_tags = True
     photo_display.short_description = 'Photo'
+    print(Product.images)  # Debugging path fail
+
 
 admin.site.register(Product, ProductAdmin)
 
