@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Brew Beauty</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .email-container {
+            background-color: white;
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .email-header h1 {
+            font-size: 36px;
+            color: #e60000; /* Red */
+        }
+
+        .order-summary {
+            margin-top: 30px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #e60000;
+        }
+
+        .shipping-address,
+        .item-list {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .item-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .cta {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-btn {
+            padding: 10px 20px;
+            background-color: #e60000;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .cta-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Thank You for Your Order!</h1>
+        </div>
+
+        <p>Hello {{ user.first_name }},</p>
+        <p>We are pleased to confirm that your order has been successfully placed. Below are the details:</p>
+
+        <div class="order-summary">
+            <h3>Order Number: <span class="order-id">{{ order.id }}</span></h3>
+            <p><strong>Shipping to:</strong></p>
+            <p class="shipping-address">{{ shipping_address.address }}, {{ shipping_address.city }}<br>{{ shipping_address.state }}, {{ shipping_address.zipcode }}</p>
+
+            <h3>Items Ordered:</h3>
+            <ul class="item-list">
+                {% for item in order.items.all %}
+                    <li>{{ item.product.name }} - x{{ item.quantity }} - RM{{ item.product.price }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Total: RM{{ order.get_cart_total }}</h3>
+        </div>
+
+        <div class="cta">
+            <p>You can check your order status at any time from your account. We will notify you when your order is ready for shipping!</p>
+            <a href="{% url 'home' %}" class="cta-btn">Continue Shopping</a>
+        </div>
+    </div>
+
+</body>
+</html>

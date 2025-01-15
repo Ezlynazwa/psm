@@ -1,20 +1,23 @@
-{% load static %}
+{% extends 'store/basestore.html' %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Catalog</title>
-</head>
-<body>
-    <h1>Catalog</h1>
-    <div>
-        {% for product in products %}
-            <div>
+{% block title %}Catalog - Brew Beauty{% endblock %}
+
+{% block content %}
+    
+
+<!-- Catalog Section -->
+    <section class="catalog">
+        <h1>Our Products</h1>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
                 <img src="{{ product.imageURL }}" alt="{{ product.name }}">
                 <h3><a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a></h3>
-                <p>Price: ${{ product.price }}</p>
+                <p>{{ product.description }}</p>
+                <p class="price">RM {{ product.price }}</p>
+                <a href="{% url 'store:add_to_cart' product.id %}" class="cta-button">Add to Cart</a>
             </div>
-        {% endfor %}
-    </div>
-</body>
-</html>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}

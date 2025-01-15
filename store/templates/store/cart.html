@@ -1,26 +1,52 @@
+{% extends 'store/basestore.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Your Cart</title>
-</head>
-<body>
-    <h1>Your Cart</h1>
-    {% if items %}
-        <ul>
-            {% for item in items %}
-                <li>
-                    {{ item.product.name }} - ${{ item.product.price }} x {{ item.quantity }} = ${{ item.get_total }}
-                </li>
-            {% endfor %}
-        </ul>
-        <p>Total: ${{ total }}</p>
-        <p>Total items: {{ cart_items }}</p>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
-    <a href="{% url 'store:catalog' %}">Continue Shopping</a>
-    <a href="{% url 'store:checkout' %}">Proceed to Checkout</a>
-</body>
-</html>
+{% block content %}
+    <!-- Cart -->
+    <section class="cart">
+        <h1>Your Cart</h1>
+        {% if cart_items > 0 %}
+        <div class="cart-items">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="product-details">
+                            <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="product-image">
+                            <span class="product-name">{{ item.product.name }}</span>
+                        </td>
+                        <td class="product-price">RM {{ item.product.price }}</td>
+                        <td class="product-quantity">{{ item.quantity }}</td>
+                        <td class="product-total">RM {{ item.get_total }}</td>
+                        <td class="remove-btn-cell"><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="cart-summary">
+                <p><strong>Total Items:</strong> {{ cart_items }}</p>
+                <p><strong>Total:</strong> RM {{ total }}</p>
+                <a href="{% url 'store:checkout' %}" class="cta-button">Proceed to Checkout</a>
+            </div>
+        </div>
+        {% else %}
+        <p>Your cart is empty. Start shopping!</p>
+        <a href="{% url 'store:catalog' %}" class="cta-button">Go to Catalog</a>
+        {% endif %}
+    </section>
+{% endblock %}
+
+<!-- Cart-specific styles -->
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}

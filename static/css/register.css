@@ -11,7 +11,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #fff;
+    background-color: #f9f9f9; /* Light grey background */
 }
 
 header nav ul {
@@ -26,7 +26,7 @@ header nav ul li {
 
 header nav ul li a {
     text-decoration: none;
-    color: #10182F;
+    color: #333; /* Dark grey for links */
     font-weight: 700;
     font-size: 16px;
 }
@@ -34,12 +34,13 @@ header nav ul li a {
 .shadow-wrap {
     border-radius: 5px;
     padding: 25px;
-    background-color: #F0F2FB;
+    background-color: #eaeaea; /* Grey background for shadow wrap */
 }
 
 .form-wrap {
     background-color: #fff;
     padding: 70px;
+    border: 1px solid #d1d1d1; /* Subtle border for contrast */
 }
 
 .form-wrap form * {
@@ -52,14 +53,15 @@ header nav ul li a {
     font-size: 14px;
     font-weight: 700;
     line-height: 26px;
+    color: #333; /* Dark grey text */
 }
 
 .form-wrap form input {
     padding: 12px 20px;
     border-radius: 5px;
-    border: 1px solid #DAE1F5;
-    background: #FFF;
-    color: #545D7A;
+    border: 1px solid #ccc; /* Neutral grey border */
+    background: #fff;
+    color: #333; /* Dark grey text */
 }
 
 #id_username {
@@ -68,8 +70,8 @@ header nav ul li a {
 
 .form-wrap button {
     border-radius: 5px;
-    background: #10182F;
-    color: #FFF;
+    background: #333; /* Black for primary button */
+    color: #fff;
     cursor: pointer;
     text-align: center;
     font-size: 16px;
@@ -81,7 +83,7 @@ header nav ul li a {
 }
 
 .signup-link {
-    color: #10182F;
+    color: #333; /* Dark grey for links */
     font-size: 15px;
     margin-top: 20px;
     text-align: center;
@@ -96,8 +98,8 @@ header nav ul li a {
 
 .form-wrap button:hover {
     background-color: #fff;
-    color: #10182F;
-    border-color: #10182F;
+    color: #e60000; /* Red for hover effect */
+    border-color: #e60000;
 }
 
 .product-list {
@@ -109,6 +111,10 @@ header nav ul li a {
 .product-item {
     width: 30%;
     text-align: center;
+    background-color: #f5f5f5; /* Light grey card background */
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #d1d1d1; /* Subtle border */
 }
 
 .product-item img {
@@ -120,18 +126,20 @@ header nav ul li a {
 .product-item h3 {
     font-size: 18px;
     margin-top: 10px;
+    color: #333; /* Dark grey */
 }
 
 .product-item p {
     font-size: 14px;
     margin-top: 5px;
+    color: #555; /* Slightly lighter grey */
 }
 
 .product-item a {
     display: inline-block;
     margin-top: 10px;
     font-weight: 700;
-    color: #10182F;
+    color: #e60000; /* Red for important links */
     text-decoration: none;
 }
 

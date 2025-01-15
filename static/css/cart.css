@@ -1,0 +1,174 @@
+/* General Cart Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Cart Section */
+.cart {
+    max-width: 950px;
+    margin: 40px auto;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cart h1 {
+    text-align: center;
+    color: #333;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+/* Table Styling */
+.cart-items table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    transition: all 0.3s ease-in-out;
+}
+
+.cart-items th, .cart-items td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cart-items th {
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.cart-items td {
+    color: #555;
+}
+
+.cart-items td img.product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+.cart-items td a.remove-btn {
+    color: #d9534f; /* Red color for remove button */
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.cart-items td a.remove-btn:hover {
+    color: #c9302c;
+    text-decoration: underline;
+}
+
+/* Hover effect on rows */
+.cart-items tr:hover {
+    background-color: #f9f9f9;
+    transform: translateY(-2px);
+}
+
+.cart-items tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Cart Summary */
+.cart-summary {
+    margin-top: 30px;
+    text-align: right;
+    font-size: 18px;
+}
+
+.cart-summary p {
+    margin: 10px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.cart-summary .cta-button {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #d9534f; /* Red color */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cart-summary .cta-button:hover {
+    background-color: #c9302c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Empty Cart */
+.cart p {
+    text-align: center;
+    font-size: 18px;
+    color: #999;
+}
+
+.cart a.cta-button {
+    background-color: #5bc0de; /* Blue for "Go to Catalog" */
+    margin-top: 20px;
+    display: inline-block;
+    padding: 12px 25px;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cart a.cta-button:hover {
+    background-color: #31b0d5;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Cart-Empty Styling */
+.cart .cta-button {
+    background-color: #d9534f;
+    color: white;
+}
+
+.cart .cta-button:hover {
+    background-color: #c9302c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cart {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    .cart h1 {
+        font-size: 28px;
+    }
+
+    .cart-items td img.product-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .cart-items th, .cart-items td {
+        padding: 10px;
+    }
+
+    .cart-summary p {
+        font-size: 16px;
+    }
+
+    .cart-summary .cta-button {
+        padding: 10px 20px;
+    }
+}

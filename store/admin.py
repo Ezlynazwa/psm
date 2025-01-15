@@ -2,6 +2,7 @@ from django.contrib import admin
 from users.models import User
 from .models import Product
 from django.utils.safestring import mark_safe
+from django import forms
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -11,11 +12,17 @@ class ProductAdmin(admin.ModelAdmin):
     ordering = ['name']
     list_per_page = 10
 
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+       model = Product
+       fields = '__all__'
+
     def photo_display(self, obj):
-     if obj.photo:
-        return mark_safe(f'<img src="{obj.photo.url}" width="50" height="50" />')
+     if obj.images:
+        return mark_safe(f'<img src="{obj.images.url}" width="50" height="50" />')
      return "No Photo"
     photo_display.allow_tags = True
     photo_display.short_description = 'Photo'
 
-admin.site.register(User)
+admin.site.register(Product, ProductAdmin)
+

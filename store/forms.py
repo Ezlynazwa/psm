@@ -10,3 +10,9 @@ class ProductForm(forms.ModelForm):
             'skin_condition', 'skin_tone', 
             'skin_texture', 'sensitivity_level','category','variation_code','surface_tones','images'
         ]
+
+class CheckoutForm(forms.Form):
+    address = forms.CharField(max_length=255, widget=forms.Textarea(attrs={'placeholder': 'Enter your address'}))
+    city = forms.CharField(max_length=100)
+    state = forms.CharField(max_length=100)
+    zipcode = forms.CharField(max_length=10)

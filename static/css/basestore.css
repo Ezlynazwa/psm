@@ -1,0 +1,78 @@
+/* Reset some default styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body */
+html, body {
+    height: 100%; /* Pastikan halaman mengisi keseluruhan viewport */
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5; /* Light grey background */
+    color: #333; /* Dark text */
+}
+
+/* Struktur Page */
+body {
+    display: flex;
+    flex-direction: column; /* Atur elemen dalam arah menegak */
+    min-height: 100%; /* Pastikan kandungan memenuhi viewport */
+}
+
+main {
+    flex: 1; /* Ruang fleksibel di antara header dan footer */
+    padding: 20px; /* Spasi untuk kandungan utama */
+}
+
+/* Header */
+header {
+    background-color: #333; /* Dark grey */
+    padding: 20px;
+    text-align: center;
+}
+
+header nav ul {
+    list-style: none;
+}
+
+header nav ul li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+}
+
+header nav ul li a:hover {
+    color: red; /* Red for hover effect */
+}
+
+/* Footer */
+footer {
+    background-color: #333; /* Dark grey background */
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto; /* Pastikan footer melekat di bawah */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Shadow untuk kelihatan menonjol */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 10px;
+    }
+
+    footer {
+        padding: 15px;
+    }
+}

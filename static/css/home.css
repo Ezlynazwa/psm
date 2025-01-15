@@ -192,6 +192,62 @@ footer {
     background-color: #333;
     color: white;
     text-align: center;
-    padding: 20px;
-    margin-top: 40px;
+    padding: 10px;
+    position:fixed;
+    bottom: 0%;
+    width:100%;
+}
+
+/* Logout button styling */
+.auth-buttons {
+    float: right;  /* Align the logout button to the right */
+    margin-top: 10px;  /* Add some space at the top */
+}
+
+.logout-btn {
+    background-color: #ff4d4d; /* Red color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px; /* Curved button */
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+}
+
+
+/* Login button styles */
+.login-btn {
+    background-color: white; /* Default white background */
+    color: #333; /* Dark text */
+    padding: 10px 20px; /* Add some padding */
+    border-radius: 30px; /* Curved button */
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+.login-btn:active, .login-btn:hover {
+    background-color: #ff4d4d; /* Red background when clicked/hovered */
+    color: white; /* White text on red background */
+}
+
+/* Signup button styles */
+.signup-btn {
+    background-color: white; /* Default white background */
+    color: #333; /* Dark text */
+    padding: 10px 20px; /* Add some padding */
+    border-radius: 30px; /* Curved button */
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+.signup-btn:active, .signup-btn:hover {
+    background-color: #ff4d4d; /* Red background when clicked/hovered */
+    color: white; /* White text on red background */
 }

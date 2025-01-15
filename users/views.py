@@ -8,7 +8,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import SignupForm
 
-def signup(request):
+
+
+def signup_view(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -38,4 +40,4 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('users:login')
+    return redirect('store:homepage')

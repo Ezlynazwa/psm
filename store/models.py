@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
+from django.contrib import admin
 
 
 class Product(models.Model):
@@ -47,7 +49,6 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField()
     min_stock = models.PositiveIntegerField(default=0)
     max_stock = models.PositiveIntegerField(default=100)
-    category = models.CharField(max_length=100, blank=True, null=True)
     variation_code = models.CharField(max_length=50, unique=True, blank=True, null=True)
     skin_type = models.CharField(max_length=20, choices=SKIN_TYPES, blank=True, null=True)
     skin_condition = models.CharField(max_length=20, choices=SKIN_CONDITIONS, blank=True, null=True)
@@ -58,7 +59,11 @@ class Product(models.Model):
     images = models.ImageField(upload_to='product_image/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    digital = models.BooleanField(default=False)
+    category = models.CharField(max_length=20, null=True, blank=True)
+    digital = models.BooleanField(default=False, null=True, blank=True)  # Allow null
+
+
+
 
     def __str__(self):
         return f'{self.name} ({self.variation_code})'
@@ -93,7 +98,7 @@ class Order(models.Model):
     @property
     def get_cart_total(self):
         orderitems = self.orderitem_set.all()
-        total = sum([item.get_total for item in orderitems])
+        total = sum([item.get_total for item in orderitems])  # Corrected to call get_total method of OrderItem
         return total
 
     @property
@@ -103,15 +108,20 @@ class Order(models.Model):
         return total
 
 
+
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
-    quantity = models.IntegerField(default=1)  # Ensure default is set to 1
+    quantity = models.IntegerField(default=1)
     date_added = models.DateTimeField(auto_now_add=True)
 
     @property
     def get_total(self):
-        return self.product.price * self.quantity
+        # Multiply the product's price by the quantity to get the total for this item
+        if self.product:  # Ensure the product is not None
+            return self.product.price * self.quantity
+        return 0  # Return 0 if no product exists
+
 
 
 class ShippingAddress(models.Model):
@@ -125,4 +135,17 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return self.address
+    
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price', 'quantity', 'category', 'created_at', 'updated_at']
+    search_fields = ['name', 'category__name']
+    list_filter = ['category', 'skin_type', 'skin_condition']
+    ordering = ['name']
+    list_per_page = 10
 
+    def photo_display(self, obj):
+        if obj.images:
+            return mark_safe(f'<img src="{obj.images.url}" width="50" height="50" />')
+        return "No Photo"
+    photo_display.allow_tags = True
+    photo_display.short_description = 'Photo'

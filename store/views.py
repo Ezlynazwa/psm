@@ -3,6 +3,15 @@ from .models import Product, Order, OrderItem, ShippingAddress
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from.forms import ProductForm
+from .forms import CheckoutForm
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator as token_generator
+
+
+
 
 
 # Homepage view
@@ -11,8 +20,9 @@ def homepage(request):
     return render(request, 'store/homepage.html', {'products': products})
 
 # Catalog page view
+
 def catalog(request):
-    products = Product.objects.all()  # Fetch all products for the catalog
+    products = Product.objects.all()
     return render(request, 'store/catalog.html', {'products': products})
 
 # View Product page view
@@ -44,13 +54,24 @@ def product_update(request, pk):
 
     return render(request, 'store/view_product.html', {'product': product})
 
-# Cart page view
+@login_required
 def cart(request):
-    order, created = Order.objects.get_or_create(user=request.user, complete=False)
-    items = order.orderitem_set.all()  # Get all order items for the current cart
-    total = order.get_cart_total  # Get total price of items in the cart
-    cart_items = order.get_cart_items  # Get total number of items in the cart
-    return render(request, 'store/cart.html', {'items': items, 'total': total, 'cart_items': cart_items})
+    try:
+        # Try to get the user's order (uncompleted)
+        order = Order.objects.get(user=request.user, complete=False)
+    except Order.DoesNotExist:
+        # If no order exists, create a new order for the user
+        order = Order.objects.create(user=request.user, complete=False)
+
+    # Calculate total cart value and number of items
+    cart_total = order.get_cart_total
+    cart_items = order.get_cart_items
+
+    return render(request, 'store/cart.html', {
+        'order': order,
+        'cart_total': cart_total,
+        'cart_items': cart_items
+    })
 
 @login_required
 def checkout(request):
@@ -58,44 +79,106 @@ def checkout(request):
     order = Order.objects.filter(user=request.user, complete=False).first()
     if not order:
         # Redirect if no order exists
-        return redirect('cart')
+        return redirect('store:cart')
+    else:
+        form = CheckoutForm()
 
-    # Handle shipping address form submission
     if request.method == 'POST':
-        address = request.POST['address']
-        city = request.POST['city']
-        state = request.POST['state']
-        zipcode = request.POST['zipcode']
-        
-        # Create and save the shipping address
-        shipping_address = ShippingAddress(
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            address = form.cleaned_data['address']
+            city = form.cleaned_data['city']
+            state = form.cleaned_data['state']
+            zipcode = form.cleaned_data['zipcode']
+            
+            # Create and save the shipping address
+            shipping_address = ShippingAddress(
             user=request.user,
             order=order,
             address=address,
             city=city,
             state=state,
             zipcode=zipcode
-        )
-        shipping_address.save()
+            )
+            shipping_address.save()
 
-        # Mark the order as complete
-        order.complete = True
-        order.save()
+            # Mark the order as complete
+            order.complete = True
+            order.save()
 
-        # Redirect to an order confirmation page (you can create this later)
-        return redirect('order_confirmation')
+            # Redirect to an order confirmation page (you can create this later)
+            return redirect('store:order_confirmation')
 
     # Calculate total cart value and number of items
-    cart_total = order.get_cart_total()
-    cart_items = order.get_cart_items()
+    cart_total = order.get_cart_total
+    cart_items = order.get_cart_items
 
     return render(request, 'store/checkout.html', {
         'order': order,
         'cart_total': cart_total,
-        'cart_items': cart_items
+        'cart_items': cart_items,
+        'form': form
     })
 
 def search(request):
     query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL
     results = Product.objects.filter(name__icontains=query) if query else []  # Cari produk berdasarkan nama
     return render(request, 'store/search.html', {'query': query, 'results': results})
+
+def view_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, 'store/view_product.html', {'product': product})
+
+def add_to_cart(request, product_id):
+    # Fetch the product by ID
+    product = get_object_or_404(Product, id=product_id)
+    
+    # If the user is logged in, get or create an order for the user
+    if request.user.is_authenticated:
+        order, created = Order.objects.get_or_create(user=request.user, complete=False)
+    else:
+        # If the user is not logged in, handle guest carts (optional)
+        # You can redirect to login page or handle it differently.
+        return redirect('users:login')  # Assuming you have a login URL
+    
+    # Try to get an existing OrderItem for the product
+    order_item, item_created = OrderItem.objects.get_or_create(order=order, product=product)
+    
+    if not item_created:
+        # If the item already exists in the cart, increment the quantity
+        order_item.quantity += 1
+        order_item.save()
+    else:
+        # Otherwise, set the quantity to 1 for the new item
+        order_item.quantity = 1
+        order_item.save()
+    
+    # Redirect back to the catalog page or product detail page
+    return redirect('store:catalog')  # Or redirect to the product detail page
+
+def remove_from_cart(request, item_id):
+    if request.user.is_authenticated:
+        item = get_object_or_404(OrderItem, id=item_id, order__user=request.user, order__complete=False)
+        item.delete()
+        return redirect('store:cart')  # Redirect back to the cart page
+    else:
+        return redirect('users:login')
+    
+@login_required
+def order_confirmation(request):
+    order = Order.objects.filter(user=request.user, complete=True).first()
+    shipping_address = ShippingAddress.objects.filter(order=order).first()
+
+    # Send email confirmation
+    subject = f'Order Confirmation - Brew Beauty'
+    message = render_to_string('store/order_confirmation_email.html', {
+        'order': order,
+        'shipping_address': shipping_address,
+        'user': request.user
+    })
+    send_mail(subject, message, 'no-reply@brewbeauty.com', [request.user.email])
+
+    return render(request, 'store/order_confirmation.html', {
+        'order': order,
+        'shipping_address': shipping_address,
+    })
