@@ -94,8 +94,8 @@ header nav ul li a.active {
 
 .cart-summary .cta-button {
     display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
+    margin-top: 50px;
+    padding: 10px, 20px;
     background-color: red;
     color: white;
     border-radius: 5px;

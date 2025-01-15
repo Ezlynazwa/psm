@@ -1,28 +1,11 @@
+{% extends 'store/basestore.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Product - Brew Beauty{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brew Beauty - Cart</title>
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
-</head>
+{% block content %}
 
 <body>
-    <!-- Header -->
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'store:homepage' %}">Home</a></li>
-                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
-                <li><a href="{% url 'store:cart' %}" class="active">Cart</a></li>
-                <li><a href="{% url 'store:track_order' %}">Track Order</a></li> <!-- Tambah link ini -->
-
-            </ul>
-        </nav>
-    </header>
-
+    
     <!-- Cart -->
     <section class="cart">
         <h1>Your Cart</h1>
@@ -68,5 +51,13 @@
         <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
     </footer>
 </body>
+{% endblock %}
 
-</html>
+{% block extra_css %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Beauty - Cart</title>
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+</head>
+{% endblock %}

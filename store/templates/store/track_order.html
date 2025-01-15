@@ -20,15 +20,17 @@
             <tr>
                 <td>{{ order.id }}</td>
                 <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
-                <td>{% if order.complete %}
-                    In Process
-                {% else %}
-                    Delivered
-                {% else %}
-                    Received
-                {% endif %}
+                <td>
+                    {% if order.complete %}
+                        In Process
+                    {% elif order.delivered %}
+                        Delivered
+                    {% else %}
+                        Received
+                    {% endif %}
+                </td>                
                 </td>
-                <td>RM{{ order.get_cart_total }}</td>
+                <td>{{ order.get_cart_total }}</td>
             </tr>
             {% endfor %}
         </tbody>

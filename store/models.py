@@ -129,7 +129,9 @@ class OrderItem(models.Model):
         if self.product:  # Ensure the product is not None
             return self.product.price * self.quantity
         return 0  # Return 0 if no product exists
-
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.quantity}"
 
 
 class ShippingAddress(models.Model):
