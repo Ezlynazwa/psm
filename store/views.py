@@ -18,6 +18,7 @@ from django.contrib.auth.tokens import default_token_generator as token_generato
 def homepage(request):
     products = Product.objects.all()  # Fetch all products for the homepage
     return render(request, 'store/homepage.html', {'products': products})
+    return HttpResponse("Hello, this is the homepage!")
 
 # Catalog page view
 
