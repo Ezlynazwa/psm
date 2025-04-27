@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import SignupForm
+from users.models import User
 
 
 
@@ -33,7 +34,11 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('store:homepage')
+
+                if user.is_staff or user.is_superuser:
+                    return redirect ('dashboard:homeadmin')
+                else:
+                  return redirect('store:homepage')
     else:
         form = AuthenticationForm()
     return render(request, 'register/login.html', {'form': form})

@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin | Brew Beauty{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/adminbase.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Brew Beauty Admin</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#">Overview</a></li>
+            <li><a href="{% url 'dashboard:managesusers'}">User Management</a></li>
+            <li><a href="{% url 'dashboard:manageproducts'}">Product Management</a></li>
+            <li><a href="{% url 'dashboard:generatereports'}">Reports</a></li>
+        </ul>
+
+        <div class="auth-buttons">
+           <li><a href="{% url 'users:logout' %}" class="cta-button">Logout</a></li>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </main>
+</body>
+</html>

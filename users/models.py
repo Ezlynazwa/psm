@@ -17,14 +17,20 @@ class Employee(models.Model):
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-    # Add related_name to resolve conflicts
+
     groups = models.ManyToManyField(
         Group,
-        related_name='loginsignup_user_set',  # Specify a unique reverse accessor name
-        blank=True
+        related_name='custom_user_set',  # Avoid conflict
+        blank=True,
+        help_text='The groups this user belongs to.',
+        verbose_name='groups',
     )
+
+    # Add related_name to resolve conflicts
     user_permissions = models.ManyToManyField(
         Permission,
         related_name='loginsignup_user_permissions_set',  # Specify a unique reverse accessor name
-        blank=True
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permisions',
     )
