@@ -1,4 +1,9 @@
-<h2>My Profile</h2>
+{% extends "store/basestore.html" %}
+{% load static %}
+{% block title %}Catalog | Brew Beuty {%endblock%}
+
+{% block content %}
+  <h2>My Profile</h2>
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
@@ -8,4 +13,8 @@
 
 {% if customer.profile_picture %}
     <img src="{{ customer.profile_picture.url }}" width="120" height="120" />
-{% endif %}
+{% endif %}  
+
+{%endblock%}
+
+<!--cantikkan dan tambah element dalam my profile ni-->

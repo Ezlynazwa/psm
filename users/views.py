@@ -57,4 +57,4 @@ def customer_profile(request):
     else:
         form = CustomerForm(instance=customer)
 
-    return render(request, 'users/customerprofile.html', {'form': form, 'customer': customer})
+    return render(request, 'customerprofile.html', {'form': form, 'customer': customer})

@@ -1,6 +1,10 @@
 {% extends "store/basestore.html" %}
 {% load static %}
 
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
 
 {% block content %}
 
