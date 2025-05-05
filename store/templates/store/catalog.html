@@ -1,11 +1,11 @@
-{% extends 'store/basestore.html' %}
-
-{% block title %}Catalog - Brew Beauty{% endblock %}
+{% extends "store/basestore.html" %}
+{% load static %}
+{% block title %}Catalog | Brew Beuty {%endblock%}
 
 {% block content %}
-    
 
-<!-- Catalog Section -->
+
+    <!-- Catalog Section -->
     <section class="catalog">
         <h1>Our Products</h1>
         <div class="product-grid">
@@ -20,4 +20,9 @@
             {% endfor %}
         </div>
     </section>
+
 {% endblock %}
+
+<!--nanti letak block extra css (boleh follow track_order.css)-->
+<!--tapi ada problem sikit dengan untuk apply css masing2 ke dalam page tu....takleh nak chatgpt sbb takde line-->
+

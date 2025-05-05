@@ -45,3 +45,16 @@ main {
     max-width: 1000px;
     margin: auto;
 }
+
+.auth-buttons a {
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    border-radius: 5px;
+}
+
+.auth-buttons a:hover {
+    background-color: darkred;
+}

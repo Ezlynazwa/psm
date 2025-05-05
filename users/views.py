@@ -1,13 +1,11 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import SignupForm
+
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import SignupForm
-from users.models import User
+from .forms import SignupForm, CustomerForm
+from users.models import User, Customer
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -46,3 +44,17 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('store:homepage')
+
+@login_required
+def customer_profile(request):
+    customer, created = Customer.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, request.FILES, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_profile')
+    else:
+        form = CustomerForm(instance=customer)
+
+    return render(request, 'users/customerprofile.html', {'form': form, 'customer': customer})

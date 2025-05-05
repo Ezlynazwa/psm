@@ -13,14 +13,14 @@
 
     <nav>
         <ul>
-            <li><a href="#">Overview</a></li>
-            <li><a href="{% url 'dashboard:managesusers'}">User Management</a></li>
-            <li><a href="{% url 'dashboard:manageproducts'}">Product Management</a></li>
-            <li><a href="{% url 'dashboard:generatereports'}">Reports</a></li>
+            <li><a href="{%url 'dashboard:homeadmin' %}">Overview</a></li>
+            <li><a href="{% url 'dashboard:manageusers'%}">User Management</a></li>
+            <li><a href="{% url 'dashboard:manageproducts'%}">Product Management</a></li>
+            <li><a href="{% url 'dashboard:generatereports'%}">Reports</a></li>
         </ul>
 
         <div class="auth-buttons">
-           <li><a href="{% url 'users:logout' %}" class="cta-button">Logout</a></li>
+           <a href="{% url 'users:logout' %}" class="cta-button">Logout</a>
         </div>
     </nav>
 

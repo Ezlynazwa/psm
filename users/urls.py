@@ -12,8 +12,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('signup/', views.signup_view, name='signup'),
     path('logout/', views.logout_view, name='logout'),
-    # You can add more URLs for other views in this app
+    path('profile/', views.customer_profile, name='customer_profile'),
 ]
 
+    # You can add more URLs for other views in this app
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

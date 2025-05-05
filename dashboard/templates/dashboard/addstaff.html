@@ -1,0 +1,45 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}Add Staff | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/addstaff.css' %}">
+
+<div class="form-container">
+    <h2>Add New Staff</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="first_name">First Name:</label>
+        <input type="text" name="first_name" id="first_name" required>
+
+        <label for="last_name">Last Name:</label>
+        <input type="text" name="last_name" id="last_name" required>
+
+        <label for="position">Position:</label>
+        <input type="text" name="position" id="position" required>
+
+        <label for="contact">Contact:</label>
+        <input type="text" name="contact" id="contact" required>
+
+        <label for="date_hired">Date Hired:</label>
+        <input type="date" name="date_hired" id="date_hired" required>
+
+        <label for="photo">Photo:</label>
+        <input type="file" name="photo" id="photo">
+
+        <button type="submit" class="submit-button">Add Staff</button>
+    </form>
+</div>
+{% endblock %}

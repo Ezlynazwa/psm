@@ -1,0 +1,79 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manageusers.css' %}">
+
+<section class="manage-users-section">
+    <h2>Manage Users</h2>
+
+    <div class="buttons">
+        <a href="{% url 'dashboard:addstaff' %}" class="btn">Add Staff</a>
+        <a href="{% url 'dashboard:addadmin' %}" class="btn">Add Admin</a>
+    </div>
+
+    <h3>Customers</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.username }}</td>
+                <td>{{ customer.email }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No customers found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Staff and Admin</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>
+                    {% if employee.photo %}
+                        <img src="{{ employee.photo.url }}" alt="Photo" class="profile-pic">
+                    {% else %}
+                        No photo
+                    {% endif %}
+                </td>
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.position }}</td>
+                <td>{{ employee.contact }}</td>
+                <td>{{ employee.email }}</td>
+                <td>
+                    {% if employee.user.is_superuser %}
+                        Admin
+                    {% elif employee.user.is_staff %}
+                        Staff
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No staff/admin found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

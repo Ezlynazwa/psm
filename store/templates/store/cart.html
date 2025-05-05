@@ -1,18 +1,16 @@
-{% extends 'store/basestore.html' %}
+{% extends "store/basestore.html" %}
 {% load static %}
-{% block title %}Product - Brew Beauty{% endblock %}
+
 
 {% block content %}
 
-<body>
-    
-    <!-- Cart -->
-    <section class="cart">
-        <h1>Your Cart</h1>
-        {% if cart_items > 0 %}
-        <div class="cart-items">
-            <table>
-                <thead>
+<!-- Cart -->
+<section class="cart">
+<h1>Your Cart</h1>
+{% if cart_items %}
+    <div class="cart-items">
+        <table>
+            <thead>
                     <tr>
                         <th>Product Name</th>
                         <th>Price</th>
@@ -20,44 +18,31 @@
                         <th>Total</th>
                         <th>Remove</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ item.product.name }}</td>
-                        <td>RM {{ item.product.price }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>RM {{ item.get_total }}</td>
-                        <td><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>RM {{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>RM {{ item.get_total }}</td>
+                    <td><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-            <div class="cart-summary">
-                <p>Total Items: {{ cart_items }}</p>
-                <p>Total: RM {{ total }}</p>
-                <a href="{% url 'store:checkout' %}" class="cta-button">Proceed to Checkout</a>
-            </div>
+        <div class="cart-summary">
+            <p>Total Items: {{ cart_items }}</p>
+            <p>Total: RM {{ total }}</p>
+            <a href="{% url 'store:checkout' %}" class="cta-button">Proceed to Checkout</a>
         </div>
-        {% else %}
-        <p>Your cart is empty. Start shopping!</p>
-        <a href="{% url 'store:catalog' %}" class="cta-button">Go to Catalog</a>
-        {% endif %}
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
-    </footer>
-</body>
+    </div>
+    {% else %}
+    <p>Your cart is empty. Start shopping!</p>
+    <a href="{% url 'store:catalog' %}" class="cta-button">Go to Catalog</a>
+    {% endif %}
+</section>
 {% endblock %}
-
-{% block extra_css %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brew Beauty - Cart</title>
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
-</head>
-{% endblock %}
+<!--nanti letak block extra css (boleh follow track_order.css)-->
+<!--tapi ada problem sikit dengan untuk apply css masing2 ke dalam page tu....takleh nak chatgpt sbb takde line-->
