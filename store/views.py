@@ -24,14 +24,33 @@ def homepage(request):
 
 def catalog(request):
     products = Product.objects.all()
-    return render(request, 'store/catalog.html', {'products': products})
+    product_data = []
+
+    for product in products:
+        images = product.product_images.all()
+        first_image = images[0] if images else None
+        product_data.append({
+            'product': product,
+            'image': first_image
+        })
+
+    return render(request, 'store/catalog.html', {
+        'product_data': product_data
+    })
+
 
 # View Product page view
 def view_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     
     if request.method == 'POST':
-        quantity = int(request.POST.get('quantity'))
+
+        if not request.user.is_authenticated:
+            # Redirect to login page and return here after login
+            login_url = f"{reverse('users/login')}?next={request.path}"
+            return redirect('login_url')
+        
+        quantity = int(request.POST.get('quantity', 1))
         
         # Get or create an order for the user
         order, created = Order.objects.get_or_create(user=request.user, complete=False)
@@ -39,7 +58,8 @@ def view_product(request, product_id):
         # Add the item to the cart
         order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
         order_item.quantity += quantity  # Increment the quantity
-        order_item.save() 
+        order_item.save()
+
         return redirect('store:cart')  # Redirect to the cart page after adding the item
 
 def product_update(request, pk):
@@ -51,8 +71,7 @@ def product_update(request, pk):
             return redirect('product_list')
     else:
         form = ProductForm(instance=product)
-    return render(request, 'inventori/product_form.html', {'form': form})
-
+    return render(request, 'dashboard/product_form.html', {'form': form})
     return render(request, 'store/view_product.html', {'product': product})
 
 @login_required
@@ -69,15 +88,40 @@ def cart(request):
         total = 0
         cart_items = 0
 
-    return render(request, 'store/cart.html', {'items': items, 'total': total, 'cart_items': cart_items})
-
+    return render(request, 'store/cart.html', {
+        'items': items, 
+        'total': total, 
+        'cart_items': cart_items})
 
 @login_required
-def checkout(request):
-    # Retrieve the current user's order
-    order = Order.objects.filter(user=request.user, complete=False).first()
-    if not order:
-        # Redirect if no order exists
+def checkout(request, order_id):
+    if request.method == 'POST':
+        selected_item_ids = request.POST.getlist('selected_items')  # list id order items dipilih
+
+        if not selected_item_ids:
+            messages.error(request, "Sila pilih sekurang-kurangnya satu item untuk checkout.")
+            return redirect('store:cart')
+
+        order = Order.objects.filter(user=request.user, complete=False).first()
+        if not order:
+            messages.error(request, "Tiada order aktif.")
+            return redirect('store:cart')
+
+        # Pilih order items yang user nak checkout
+        selected_items = order.orderitem_set.filter(id__in=selected_item_ids)
+
+        # Buat order baru atau proses checkout untuk selected items
+        # Contoh: buat order baru untuk selected items (simplified)
+        new_order = Order.objects.create(user=request.user, complete=False)
+        for item in selected_items:
+            item.pk = None  # duplicate orderitem
+            item.order = new_order
+            item.save()
+
+        # Redirect ke checkout page biasa untuk order baru
+        return redirect('store:checkout', order_id=new_order.id)
+
+    else:
         return redirect('store:cart')
     else:
         form = CheckoutForm()
@@ -184,7 +228,6 @@ def order_confirmation(request):
 
 def track_order(request):
     if request.user.is_authenticated:
-        # Ambil pesanan untuk pengguna yang log masuk
         orders = Order.objects.filter(user=request.user).order_by('-date_ordered')
     else:
         orders = None

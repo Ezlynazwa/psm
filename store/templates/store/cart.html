@@ -1,45 +1,33 @@
 {% extends "store/basestore.html" %}
 {% load static %}
-
-{% block extra_css %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
-{% endblock %}
+{% block title %}Cart | Brew Beuty{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
 
-<!-- Cart -->
-<section class="cart">
-<h1>Your Cart</h1>
-{% if cart_items %}
-    <div class="cart-items">
-        <table>
-            <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                        <th>Remove</th>
-                    </tr>
-            </thead>
-            <tbody>
+<h1>Beauty Cart</h1>
+
+<form method="post" action="{% url 'store:checkout_select' %}">
+    {% csrf_token %}
+    <div class="cart-container">
+        {% if items %}
                 {% for item in items %}
-                <tr>
-                    <td>{{ item.product.name }}</td>
-                    <td>RM {{ item.product.price }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>RM {{ item.get_total }}</td>
-                    <td><a href="{% url 'store:remove_from_cart' item.id %}" class="remove-btn">Remove</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <div class="cart-card">
+                <input type="checkbox" name="selected_items" value="{{ item.id }}" class="select-item">
 
-        <div class="cart-summary">
-            <p>Total Items: {{ cart_items }}</p>
-            <p>Total: RM {{ total }}</p>
-            <a href="{% url 'store:checkout' %}" class="cta-button">Proceed to Checkout</a>
+                {% with images=item.product.product_images.all %}
+                    {% if images %}
+                        <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}" width="100" height="100" style="object-fit: cover;">
+                    {% else %}
+                        <p>Tiada gambar</p>
+                    {% endif %}
+                {% endwith %}
+                <div class="cart-info">
+                    <h3>{{ item.product.name }}</h3>
+                    <p>{{ item.product.description|truncatewords:15 }}</p>
+                    <p>Quantity: {{ item.quantity }}</p>
+                    <p>Price: RM {{ item.product.price }}</p>
+                    <p>Subtotal: RM {{ item.get_total }}</p>
         </div>
     </div>
     {% else %}

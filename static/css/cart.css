@@ -7,39 +7,6 @@ body {
     color: #333;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-/* Header */
-header {
-    background-color: #333;
-    padding: 10px 0;
-}
-
-header nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-}
-
-header nav ul li {
-    margin: 0 15px;
-}
-
-header nav ul li a {
-    color: white;
-    font-weight: bold;
-}
-
-header nav ul li a.active {
-    color: red;
-    border-bottom: 2px solid red;
-}
-
 /* Cart Section */
 .cart {
     padding: 20px;
