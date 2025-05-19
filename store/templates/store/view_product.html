@@ -11,7 +11,7 @@
         <div class="product-container">
             <div class="product-image">
                 {% for image in images%}
-                    <img src="{{image.image.url}}" alt="Product Image" style="width: 200px;" />
+                    <img src="{{ image.image.url}}" alt="Product Image" style="width: 200px; height: auto;" />
                     {% empty %}
                         <p>No image available</p>
                     {% endfor %}

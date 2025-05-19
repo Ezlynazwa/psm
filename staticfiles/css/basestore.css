@@ -10,6 +10,8 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5; /* Light grey background */
     color: #333; /* Dark text */
+    justify-content: center;
+    align-items: center;
 }
 
 /* Header */
@@ -33,7 +35,11 @@ header nav ul li {
     display: inline-block;
     margin-right: 10px;
     border-right: 1px solid red;
-    float:unset;
+    padding-right: 10px;
+}
+
+header nav ul li:last-child {
+    border-right: none; /* No border on last item */
 }
 
 header nav ul li a {
@@ -41,11 +47,13 @@ header nav ul li a {
     text-decoration: none;
     font-size: 18px;
     text-align: center;
-    padding: 8px;
+    display: inline-block;
+    transition: transform 0.2s ease;
 }
 
 header nav ul li a:hover {
     color: red; /* Red for hover effect */
+    transform: scale(1.1); 
 }
 
 /* Search Bar */

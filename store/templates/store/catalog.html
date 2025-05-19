@@ -14,7 +14,7 @@
             {% if item.image %}
                 <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" style="width: 150px; height: 150px; object-fit: cover;">
             {% else %}
-                <p>Tiada gambar tersedia.</p>
+                <p>No image available.</p>
             {% endif %}
 
             <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>

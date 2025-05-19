@@ -7,7 +7,9 @@
 
 <h1>Beauty Cart</h1>
 
-<form method="post" action="{% url 'store:checkout'%}">
+
+
+<form method="post" action="{% url 'store:checkout' order.id %}">
     {% csrf_token %}
     <div class="cart-container">
         {% if items %}

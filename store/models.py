@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib import admin
+from django.utils import timezone
 
 
 class Product(models.Model):
@@ -64,16 +65,12 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
-    image = models.ImageField(upload_to='media/media/product_image/')
+    image = models.ImageField(upload_to='media/media/media/product_images/')
     
 class ProductVariation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
     variation_code = models.CharField(max_length=50)
     quantity = models.PositiveIntegerField()
-
-
-
-
 
     def __str__(self):
         return f'{self.name} ({self.variation_code})'
@@ -168,3 +165,6 @@ class ProductAdmin(admin.ModelAdmin):
         return "No Photo"
     photo_display.allow_tags = True
     photo_display.short_description = 'Photo'
+
+class Payment(models.Model):
+        receipt = models.FileField(upload_to='payment_receipts/', null=True, blank=True)

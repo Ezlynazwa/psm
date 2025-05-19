@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Order, OrderItem, ShippingAddress, ProductImage, ProductVariation
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from.forms import ProductForm
+from.forms import ProductForm, PaymentForm
 from .forms import CheckoutForm
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -12,6 +12,8 @@ from django.contrib.auth.tokens import default_token_generator as token_generato
 from django.urls import reverse
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.contrib import messages  
+
 
 
 
@@ -55,27 +57,33 @@ def catalog(request):
 # View Product page view
 def view_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    
-    if request.method == 'POST':
+    images = product.product_images.all()
 
-        if not request.user.is_authenticated:
-            # Redirect to login page and return here after login
-            login_url = f"{reverse('users/login')}?next={request.path}"
-            return redirect('login_url')
-        
-        quantity = int(request.POST.get('quantity', 1))
+    #if request.method == 'POST':
+
+    #    if not request.user.is_authenticated:
+    #        # Redirect to login page and return here after login
+    #        login_url = f"{reverse('users/login')}?next={request.path}"
+    #        return redirect('login_url')
+    #    
+    #    quantity = int(request.POST.get('quantity', 1))
         
         # Get or create an order for the user
-        order, created = Order.objects.get_or_create(user=request.user, complete=False)
+    #    order, created = Order.objects.get_or_create(user=request.user, complete=False)
         
         # Add the item to the cart
-        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
-        order_item.quantity += quantity  # Increment the quantity
-        order_item.save()
+     #   order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
+      #  order_item.quantity += quantity  # Increment the quantity
+       # order_item.save()
 
-        return redirect('store:cart')  # Redirect to the cart page after adding the item
+        #return redirect('store:cart')  # Redirect to the cart page after adding the item
     
-    images = product.product_images.all()
+    # Debug print - check in your console
+    print(f"Product: {product}")
+    print(f"Number of images: {images.count()}")
+    for img in images:
+        print(f"Image URL: {img.image.url}")
+    
 
     return render(request, 'store/view_product.html', {
         'product': product,
@@ -119,75 +127,69 @@ def cart(request):
     return render(request, 'store/cart.html', {
         'items': items,
         'total': total,
-        'cart_items': cart_items
+        'cart_items': cart_items,
+        'order':order,
     })
 
 
+from .forms import CheckoutForm
+
 @login_required
 def checkout(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
     if request.method == 'POST':
-        selected_item_ids = request.POST.getlist('selected_items')  # list id order items dipilih
+        form = CheckoutForm(request.POST, request.FILES)
 
-        if not selected_item_ids:
-            messages.error(request, "Sila pilih sekurang-kurangnya satu item untuk checkout.")
-            return redirect('store:cart')
+        if form.is_valid():
+            address = form.cleaned_data['address']
+            city = form.cleaned_data['city']
+            state = form.cleaned_data['state']
+            zipcode = form.cleaned_data['zipcode']
+            receipt = form.cleaned_data['receipt']
 
-        order = Order.objects.filter(user=request.user, complete=False).first()
-        if not order:
-            messages.error(request, "Tiada order aktif.")
-            return redirect('store:cart')
+            # Simpan ke dalam model Order (pastikan field wujud dalam model)
+            order.address = address
+            order.city = city
+            order.state = state
+            order.zipcode = zipcode
 
-        # Pilih order items yang user nak checkout
-        selected_items = order.orderitem_set.filter(id__in=selected_item_ids)
+            if receipt:
+                order.receipt = receipt  # pastikan Order model ada field receipt = FileField
 
-        # Buat order baru atau proses checkout untuk selected items
-        # Contoh: buat order baru untuk selected items (simplified)
-        new_order = Order.objects.create(user=request.user, complete=False)
-        for item in selected_items:
-            item.pk = None  # duplicate orderitem
-            item.order = new_order
-            item.save()
+            order.save()
 
-        # Redirect ke checkout page biasa untuk order baru
-        return redirect('store:checkout', order_id=new_order.id)
-
+            messages.success(request, "Maklumat checkout berjaya dihantar.")
+            return redirect('store:order_success')  # ubah ikut URL kamu
+        else:
+            messages.error(request, "Sila semak semula maklumat yang dimasukkan.")
     else:
-        return redirect('store:cart')
-    
-@login_required
-def checkout_select(request):
-    if request.method == 'POST':
-        selected_item_ids = request.POST.getlist('selected_items')
+        form = CheckoutForm()
 
-        if not selected_item_ids:
-            messages.error(request, "Sila pilih sekurang-kurangnya satu item untuk checkout.")
-            return redirect('store:cart')
+    items = order.orderitem_set.all()
+    total = order.get_cart_total
+    qr_path = '/media/qr_code/qrezlyn.jpg'
 
-        order = Order.objects.filter(user=request.user, complete=False).first()
-        if not order:
-            messages.error(request, "Tiada order aktif.")
-            return redirect('store:cart')
+    return render(request, 'store/checkout.html', {
+        'order': order,
+        'items': items,
+        'total': total,
+        'form': form,
+        'qr_code_url': qr_path,
+    })
 
-        selected_items = order.orderitem_set.filter(id__in=selected_item_ids)
 
-        new_order = Order.objects.create(user=request.user, complete=False)
-        for item in selected_items:
-            item.pk = None
-            item.order = new_order
-            item.save()
-
-        return redirect('store:checkout', order_id=new_order.id)
-
-    return redirect('store:cart')
+#def checkout_view(request, id):
+#    qr_path = '/media/qr_code/qrezlyn.jpg'
+#    return render(request, 'checkout.html',
+#        'qr_code_url': qr_path
+#  })
 
 def search(request):
     query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL
     results = Product.objects.filter(name__icontains=query) if query else []  # Cari produk berdasarkan nama
     return render(request, 'store/search.html', {'query': query, 'results': results})
 
-def view_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    return render(request, 'store/view_product.html', {'product': product})
 
 def add_to_cart(request, product_id):
     # Fetch the product by ID
@@ -254,3 +256,12 @@ def track_order(request):
     }
     return render(request, 'store/track_order.html', context)
 
+def upload_receipt(request):
+    if request.method == 'POST':
+        form = PaymentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('success-page')  # atau mana-mana URL
+    else:
+        form = PaymentForm()
+    return render(request, 'checkout.html', {'form': form})

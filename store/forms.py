@@ -1,6 +1,7 @@
 from django import forms
 from .models import Product
 from .models import ProductVariation
+from .models import Payment
 from django.forms import inlineformset_factory
 from .models import ProductImage
 
@@ -21,9 +22,18 @@ class CheckoutForm(forms.Form):
     city = forms.CharField(max_length=100)
     state = forms.CharField(max_length=100)
     zipcode = forms.CharField(max_length=10)
+    receipt = forms.FileField(required=True)
+
 
 class ProductImageForm(forms.ModelForm):
     class Meta:
         model = ProductImage
         fields = ['image']
+
+class PaymentForm(forms.ModelForm):
+    class meta:
+        model = Payment
+        fields = ['receipt']
+
+
         

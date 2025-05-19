@@ -1,95 +1,158 @@
 /* General styles */
 body {
-    font-family: 'Arial', sans-serif;
-   
-    background-color: #f5f5f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
     margin: 0;
-    padding: 0;}
-
-    
-/* Catalog Section */
-.catalog {
-    padding: 20px;
-    text-align: center;
-}
-
-.catalog h1 {
-    margin-bottom: 20px;
+    padding: 0;
     color: #333;
 }
 
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin: 0 auto;
-    padding: 0;
+/* Catalog Section */
+.catalog {
+    padding: 40px 20px;
+    text-align: center;
     max-width: 1200px;
+    margin: 0 auto;
 }
 
+.catalog h2 {
+    margin-bottom: 30px;
+    color: #1a202c;
+    font-weight: 700;
+    font-size: 2.8rem;
+    letter-spacing: 1.2px;
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);  /* Tetapkan 5 kolum pada desktop */
+    gap: 30px;
+    max-width: calc(5 * 300px + 4 * 30px); /* Hadkan lebar maksimum ikut 5 kolum */
+    margin: 0 auto;
+}
+/* Responsive: untuk skrin lebih kecil, minimum 2 kolum */
+@media (max-width: 900px) {
+.product-grid {
+    grid-template-columns: repeat(2, 1fr); /* Tukar ke 2 kolum */
+    max-width: calc(2 * 300px + 1 * 30px);
+    }
+}
+
+/* Product Card */
 .product-card {
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 12px 15px;
     text-align: center;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
 }
 
 .product-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-8px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.15);
 }
 
 .product-card img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 5px;
-    margin-bottom: 10px;
+    max-width: 200%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.product-card img:hover {
+    transform: scale(1.05);
 }
 
 .product-card h3 {
-    margin: 10px 0;
-    font-size: 18px;
-    color: #333;
+    margin: 12px 0 10px 0;
+    font-size: 1.4rem;
+    color: #2d3748;
+    font-weight: 700;
 }
 
 .product-card p {
-    font-size: 14px;
-    color: #666;
-    margin: 5px 0;
+    font-size: 1rem;
+    color: #4a5568;
+    margin: 8px 0;
+    min-height: 48px; /* keep card height consistent */
+    line-height: 1.4;
 }
 
 .product-card .price {
-    font-size: 16px;
-    color: red;
-    font-weight: bold;
+    font-size: 1.25rem;
+    color: #e53e3e; /* softer red */
+    font-weight: 700;
+    margin-top: 10px;
 }
 
+/* Call to Action Button */
 .cta-button {
     display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
+    margin-top: 15px;
+    padding: 12px 30px;
     background-color: red;
     color: white;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background-color 0.3s;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(229, 62, 62, 0.6);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    letter-spacing: 0.8px;
 }
 
 .cta-button:hover {
     background-color: darkred;
+    box-shadow: 0 8px 30px rgba(155, 44, 44, 0.8);
+    color: #fff;
 }
 
+/* Filter and Sort Section */
 .filter-sort {
-    margin: 20px 0;
+    margin: 30px 0 40px;
     text-align: center;
 }
 
 .filter-sort select {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    padding: 12px 18px;
+    margin: 0 10px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    background-color: #f7fafc;
+    color: #2d3748;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.filter-sort select:hover,
+.filter-sort select:focus {
+    border-color: red;
+    box-shadow: 0 0 6px darkred;
+    outline: none;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+    .product-card img {
+        height: 200px;
+    }
+
+    .catalog h1 {
+        font-size: 2rem;
+    }
+
+    .cta-button {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
 }
