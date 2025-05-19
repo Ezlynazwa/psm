@@ -27,7 +27,8 @@ urlpatterns = [
     path('', include('store.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
-    path('dashboard/', include('dashboard.urls'))
+    path('dashboard/', include('dashboard.urls')),
+    path('recommendation/', include('recommendation.urls'))
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

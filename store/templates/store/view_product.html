@@ -10,7 +10,11 @@
     <section class="product-details">
         <div class="product-container">
             <div class="product-image">
-                <img src="{{ product.images.url }}" alt="{{ Images }}">
+                {% for image in images%}
+                    <img src="{{image.image.url}}" alt="Product Image" style="width: 200px;" />
+                    {% empty %}
+                        <p>No image available</p>
+                    {% endfor %}
             </div>
             <div class="product-info">
                 <h1>{{ product.name }}</h1>

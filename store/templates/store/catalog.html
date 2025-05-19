@@ -1,27 +1,35 @@
 {% extends "store/basestore.html" %}
 {% load static %}
-{% block title %}Catalog | Brew Beuty {%endblock%}
+{% block title %}Catalog | Brew Beauty{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
 
+<section class="catalog">
+    <h2>Beauty Products</h2>
+    <div class="product-grid">
+        {% for item in product_data %}
+        <div class="product-card">
 
-    <!-- Catalog Section -->
-    <section class="catalog">
-        <h1>Our Products</h1>
-        <div class="product-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <img src="{{ product.images.url }}" alt="{{ Images }}">
-                <h3><a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a></h3>
-                <p>{{ product.description }}</p>
-                <p class="price">RM {{ product.price }}</p>
-                <a href="{% url 'store:add_to_cart' product.id %}" class="cta-button">Add to Cart</a>
-            </div>
-            {% endfor %}
+            {% if item.image %}
+                <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" style="width: 150px; height: 150px; object-fit: cover;">
+            {% else %}
+                <p>Tiada gambar tersedia.</p>
+            {% endif %}
+
+            <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>
+            <p>{{ item.product.category }}</p>
+            <p class="price">RM {{ item.product.price }}</p>
+
+            <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">Add to Cart</a>
         </div>
-    </section>
-
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
+
+
+
 
 <!--nanti letak block extra css (boleh follow track_order.css)-->
 <!--tapi ada problem sikit dengan untuk apply css masing2 ke dalam page tu....takleh nak chatgpt sbb takde line-->

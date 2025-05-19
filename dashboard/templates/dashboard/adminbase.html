@@ -1,14 +1,26 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Admin | Brew Beauty{% endblock %}</title>
+    
     <link rel="stylesheet" href="{% static 'css/adminbase.css' %}">
+    {% block extra_css %}
+    <!--katanya untuk letak extra css tapi tak jadi2 pun-->
+    {% endblock %}
+    
 </head>
+
 <body>
     <header>
         <h1>Brew Beauty Admin</h1>
+        
+        <div class="auth-buttons">
+            <a href="{% url 'users:logout' %}" class="cta-button">Logout</a>
+        </div>
+
     </header>
 
     <nav>
@@ -17,11 +29,12 @@
             <li><a href="{% url 'dashboard:manageusers'%}">User Management</a></li>
             <li><a href="{% url 'dashboard:manageproducts'%}">Product Management</a></li>
             <li><a href="{% url 'dashboard:generatereports'%}">Reports</a></li>
+            <li>
+                
+
         </ul>
 
-        <div class="auth-buttons">
-           <a href="{% url 'users:logout' %}" class="cta-button">Logout</a>
-        </div>
+        
     </nav>
 
     <main>

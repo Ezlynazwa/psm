@@ -7,11 +7,11 @@
 
 <h1>Beauty Cart</h1>
 
-<form method="post" action="{% url 'store:checkout_select' %}">
+<form method="post" action="{% url 'store:checkout'%}">
     {% csrf_token %}
     <div class="cart-container">
         {% if items %}
-                {% for item in items %}
+            {% for item in items %}
             <div class="cart-card">
                 <input type="checkbox" name="selected_items" value="{{ item.id }}" class="select-item">
 
@@ -28,13 +28,15 @@
                     <p>Quantity: {{ item.quantity }}</p>
                     <p>Price: RM {{ item.product.price }}</p>
                     <p>Subtotal: RM {{ item.get_total }}</p>
-        </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="checkout-button">Checkout</button>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
     </div>
-    {% else %}
-    <p>Your cart is empty. Start shopping!</p>
-    <a href="{% url 'store:catalog' %}" class="cta-button">Go to Catalog</a>
-    {% endif %}
-</section>
+</form>
+
 {% endblock %}
-<!--nanti letak block extra css (boleh follow track_order.css)-->
-<!--tapi ada problem sikit dengan untuk apply css masing2 ke dalam page tu....takleh nak chatgpt sbb takde line-->

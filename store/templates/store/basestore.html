@@ -6,25 +6,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Brew Beauty{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+    <link rel="stylesheet" href="{% static 'css/basestore.css' %}">
     {% block extra_css %}{% endblock %}  <!-- This block should be here -->
 
 </head>
+
+<script>
+    function handleCartClick() {
+        const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
+
+        if (!isAuthenticated) {
+            if (confirm("You need to log in to access the cart. Do you want to log in now?")) {
+                window.location.href = "{% url 'users:login' %}?next={% url 'store:cart' %}";
+            }
+        } else {
+            window.location.href = "{% url 'store:cart' %}";
+        }
+    }
+</script>
 
 <body>
     <!-- Header -->
     <header>
         <nav>
             <ul>
-                <li><a href="{% url 'store:homepage' %}">Home</a></li>
-                <li><a href="{% url 'store:catalog' %}">Catalog</a></li>
-                <li><a href="{% url 'store:cart' %}">Cart</a></li>
-                <li><a href="{% url 'store:track_order' %}">Track Order</a></li> <!-- Tambah link ini -->
+                <li><a href="{% url 'store:homepage' %}">Home </a></li>
+                <li><a href="{% url 'store:catalog' %}">Catalog </a></li>
+                <li><a href="{% url 'recommendation:recomhome'%}">Product Recommendation </a></li>
+                <li><a href="#" onclick="handleCartClick()">Cart</a></li>
+                <li><a href="{% url 'store:track_order' %}">Track Order </a></li> <!-- Tambah link ini -->
             </ul>
             <div class="auth-buttons">
                 {% if user.is_authenticated %}
                     <a href="{% url 'users:logout' %}" class="auth-btn logout-btn">Logout</a>
-                    <a href="{% url 'users:customer_profile' %}" class="auth-btn customer-profile-btn">My Profile</a>
+                    <a href="{% url 'users:customer_profile' %}" class="auth-btn custom-profile-btn">My Profile</a>
                 {% else %}
                     <a href="{% url 'users:login' %}" class="auth-btn login-btn">Login</a>
                     <a href="{% url 'users:signup' %}" class="auth-btn signup-btn">Signup</a>

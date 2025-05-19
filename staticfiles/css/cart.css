@@ -1,0 +1,77 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+
+}
+
+/* Cart Section */
+.cart {
+    padding: 20px;
+    text-align: center;
+}
+
+.cart h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.cart-items table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+
+.cart-items table th,
+.cart-items table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.cart-items table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.cart-items .product-image {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.remove-btn {
+    color: red;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.remove-btn:hover {
+    color: darkred;
+}
+
+/* Cart Summary */
+.cart-summary {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+.cart-summary .cta-button {
+    display: inline-block;
+    margin-top: 50px;
+    padding: 10px, 20px;
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cart-summary .cta-button:hover {
+    background-color: darkred;
+}
+
+

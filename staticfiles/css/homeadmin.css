@@ -1,0 +1,27 @@
+
+/* Reset some default styles */
+h2{
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+section h2 {
+    color: #e60000;
+    margin-bottom: 20px;
+}
+
+/* Cards */
+.card {
+    background-color: #f9f9f9;
+    border-left: 6px solid #e60000;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 18px;
+    font-weight: 500;
+}

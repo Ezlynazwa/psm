@@ -1,16 +1,18 @@
 from django import forms
 from store.models import Product
 from users.models import Employee
+from django.forms import modelformset_factory
+from store.models import ProductImage
+
+ProductImageFormSet = modelformset_factory(ProductImage, fields=('image',), extra=3)
+
 # handles add and edit product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'description', 'price', 'quantity', 'min_stock', 'max_stock',
-            'variation_code', 'skin_type', 'skin_condition', 'skin_tone',
-            'surface_tones', 'skin_texture', 'sensitivity_level', 'images',
-            'category', 'digital'
-        ]
+            'brand', 'name', 'category','description', 'price','quantity', 'min_stock', 'max_stock', 'skin_type', 'skin_condition', 'skin_tone',
+            'surface_tones', 'skin_texture', 'sensitivity_level'       ]
 
 # handles Add & Edit Employee
 class EmployeeForm(forms.ModelForm):

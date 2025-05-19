@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Order, OrderItem, ShippingAddress
+from .models import Product, Order, OrderItem, ShippingAddress, ProductImage, ProductVariation
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from.forms import ProductForm
@@ -9,6 +9,9 @@ from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator as token_generator
+from django.urls import reverse
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 
 
 
@@ -17,7 +20,17 @@ from django.contrib.auth.tokens import default_token_generator as token_generato
 # Homepage view
 def homepage(request):
     products = Product.objects.all()  # Fetch all products for the homepage
-    return render(request, 'store/homepage.html', {'products': products})
+    product_data = []
+
+    for product in products:
+        images = product.product_images.all()
+        first_image = images[0] if images else None
+        product_data.append({
+            'product': product,
+            'image': first_image
+        })
+
+    return render(request, 'store/homepage.html', {'product_data': product_data})
     return HttpResponse("Hello, this is the homepage!")
 
 # Catalog page view
@@ -61,6 +74,14 @@ def view_product(request, product_id):
         order_item.save()
 
         return redirect('store:cart')  # Redirect to the cart page after adding the item
+    
+    images = product.product_images.all()
+
+    return render(request, 'store/view_product.html', {
+        'product': product,
+        'images':images
+        })
+
 
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -74,24 +95,33 @@ def product_update(request, pk):
     return render(request, 'dashboard/product_form.html', {'form': form})
     return render(request, 'store/view_product.html', {'product': product})
 
+
 @login_required
 def cart(request):
     if request.user.is_authenticated:
-        # Fetch or create the order for the logged-in user
-        order, created = Order.objects.get_or_create(user=request.user, complete=False)
-        items = order.orderitem_set.all()  # Get all order items for the current cart
-        total = order.get_cart_total  # Get total price of items in the cart
-        cart_items = order.get_cart_items  # Get total number of items in the cart
+        # Ambil semua order yang belum lengkap untuk user ini
+        orders = Order.objects.filter(user=request.user, complete=False).order_by('-date_ordered')
+        
+        # Buang order yang lebih, simpan hanya satu (paling terkini)
+        if orders.count() > 1:
+            orders.exclude(id=orders.first().id).delete()
+
+        # Guna order yang kekal
+        order = orders.first()
+        items = order.orderitem_set.all()
+        total = order.get_cart_total
+        cart_items = order.get_cart_items
     else:
-        # Show an empty cart for unauthenticated users
         items = []
         total = 0
         cart_items = 0
 
     return render(request, 'store/cart.html', {
-        'items': items, 
-        'total': total, 
-        'cart_items': cart_items})
+        'items': items,
+        'total': total,
+        'cart_items': cart_items
+    })
+
 
 @login_required
 def checkout(request, order_id):
@@ -123,45 +153,32 @@ def checkout(request, order_id):
 
     else:
         return redirect('store:cart')
-    else:
-        form = CheckoutForm()
-
+    
+@login_required
+def checkout_select(request):
     if request.method == 'POST':
-        form = CheckoutForm(request.POST)
-        if form.is_valid():
-            address = form.cleaned_data['address']
-            city = form.cleaned_data['city']
-            state = form.cleaned_data['state']
-            zipcode = form.cleaned_data['zipcode']
-            
-            # Create and save the shipping address
-            shipping_address = ShippingAddress(
-            user=request.user,
-            order=order,
-            address=address,
-            city=city,
-            state=state,
-            zipcode=zipcode
-            )
-            shipping_address.save()
+        selected_item_ids = request.POST.getlist('selected_items')
 
-            # Mark the order as complete
-            order.complete = True
-            order.save()
+        if not selected_item_ids:
+            messages.error(request, "Sila pilih sekurang-kurangnya satu item untuk checkout.")
+            return redirect('store:cart')
 
-            # Redirect to an order confirmation page (you can create this later)
-            return redirect('store:order_confirmation')
+        order = Order.objects.filter(user=request.user, complete=False).first()
+        if not order:
+            messages.error(request, "Tiada order aktif.")
+            return redirect('store:cart')
 
-    # Calculate total cart value and number of items
-    cart_total = order.get_cart_total
-    cart_items = order.get_cart_items
+        selected_items = order.orderitem_set.filter(id__in=selected_item_ids)
 
-    return render(request, 'store/checkout.html', {
-        'order': order,
-        'cart_total': cart_total,
-        'cart_items': cart_items,
-        'form': form
-    })
+        new_order = Order.objects.create(user=request.user, complete=False)
+        for item in selected_items:
+            item.pk = None
+            item.order = new_order
+            item.save()
+
+        return redirect('store:checkout', order_id=new_order.id)
+
+    return redirect('store:cart')
 
 def search(request):
     query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL

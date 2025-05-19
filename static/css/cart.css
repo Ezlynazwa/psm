@@ -1,84 +1,155 @@
-/* General Reset */
+/* General styles */
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
     color: #333;
 }
 
 /* Cart Section */
-.cart {
-    padding: 20px;
-    text-align: center;
+.cart-container {
+    padding: 30px 20px;
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e8f0;
+    transition: box-shadow 0.3s ease;
 }
 
-.cart h1 {
+.cart-container:hover {
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.15);
+}
+
+.cart-container h1 {
+    margin-bottom: 25px;
+    margin-left: 10px;
+    color: #1a202c;
+    text-align:center;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 1.2px;
+}
+
+/* Product Card */
+.cart-card {
+    background-color: #fefefe;
+    border-radius: 12px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
     margin-bottom: 20px;
-    color: #333;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
 }
 
-.cart-items table {
+.cart-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+}
+
+.select-item {
+    transform: scale(1.5);
+    margin-right: 25px;
+    cursor: pointer;
+    accent-color: #e63946;
+    transition: accent-color 0.3s ease;
+}
+
+.select-item:hover {
+    accent-color: #d62828;
+}
+
+.cart-img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.cart-img:hover {
+    transform: scale(1.05);
+}
+
+.cart-info {
+    flex: 1;
+    text-align: left;
+}
+
+.cart-info h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.6rem;
+    color: #2d3748;
+    font-weight: 700;
+}
+
+.cart-info p {
+    margin: 0 0 8px 0;
+    color: #4a5568;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.price {
+    font-weight: 700;
+    color: #e63946; /* Shopee-like red */
+    margin-top: 8px;
+    font-size: 1.25rem;
+}
+
+.quantity {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #718096;
+}
+
+/* Checkout Button */
+.checkout-button {
+    display: block;
     width: 100%;
-    margin-bottom: 20px;
-    border-collapse: collapse;
-}
-
-.cart-items table th,
-.cart-items table td {
-    padding: 15px;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-
-.cart-items table th {
-    background-color: #f0f0f0;
-    font-weight: bold;
-}
-
-.cart-items .product-image {
-    width: 50px;
-    height: auto;
-    margin-right: 10px;
-}
-
-.remove-btn {
-    color: red;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.remove-btn:hover {
-    color: darkred;
-}
-
-/* Cart Summary */
-.cart-summary {
-    margin-top: 20px;
-    font-size: 18px;
-    color: #333;
-}
-
-.cart-summary .cta-button {
-    display: inline-block;
-    margin-top: 50px;
-    padding: 10px, 20px;
+    max-width: 300px;
+    margin: 30px auto 0;
+    padding: 15px 0;
     background-color: red;
     color: white;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-
-.cart-summary .cta-button:hover {
-    background-color: darkred;
-}
-
-/* Footer */
-footer {
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 15px darkred;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
-    padding: 10px 0;
-    background-color: #333;
-    color: white;
-    margin-top: 20px;
+    letter-spacing: 1px;
+}
+
+.checkout-button:hover {
+    background-color: #d62828;
+    box-shadow: 0 10px 25px rgba(214, 40, 40, 0.8);
+    color: #fff;
+}
+
+/* Responsive tweak for small devices */
+@media (max-width: 600px) {
+    .cart-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cart-img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .select-item {
+        margin-bottom: 10px;
+    }
 }

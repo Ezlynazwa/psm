@@ -1,0 +1,115 @@
+/* Base Styles */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.confirmation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #e5e5e5;
+}
+
+.confirmation-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    padding: 40px;
+    text-align: center;
+}
+
+.thank-you-message {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.order-success {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.order-details {
+    text-align: left;
+    margin-top: 30px;
+}
+
+.order-id {
+    color: #e60000; /* Red */
+    font-weight: bold;
+}
+
+.shipping-address {
+    color: #555;
+    font-size: 14px;
+    margin: 20px 0;
+}
+
+.order-summary {
+    margin-top: 30px;
+}
+
+.item-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.item-name {
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+}
+
+.item-quantity, .item-price {
+    color: #777;
+    font-size: 14px;
+}
+
+.total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 20px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.total-price {
+    color: #e60000; /* Red */
+}
+
+.cta {
+    margin-top: 30px;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #e60000; /* Red */
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.cta-btn:hover {
+    background-color: #cc0000;
+}

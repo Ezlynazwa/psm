@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'store',
     'users.apps.UserConfig',
     'dashboard',
+    'recommendation',
 ]
 
 MIDDLEWARE = [

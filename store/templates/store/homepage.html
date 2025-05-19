@@ -4,6 +4,9 @@
 {% block title %}Homepage | Brew Beuty {%endblock%}
 
 {% block content %}
+
+<link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+
     <!-- Main Banner -->
     <section class="hero">
         <div class="hero-text">
@@ -17,13 +20,19 @@
     <section class="featured-products">
         <h2>Featured Products</h2>
         <div class="product-grid">
-            {% for product in products %}
+            {% for item in product_data %}
             <div class="product-card">
-                <img src="{{ product.images.url }}" alt="{{ Images }}">
-                <h3><a href="{% url 'store:view_product' product.id %}">{{ product.name }}</a></h3>
-                <p>{{ product.description }}</p>
-                <p>Price: ${{ product.price }}</p>
-                <a href="{% url 'store:view_product' product.id %}" class="cta-button">View Product</a>
+
+                {% if item.image %}
+                    <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}">
+                {% else %}
+                    <p>Tiada gambar tersedia.</p>
+                {% endif %}
+
+                <h3><a href="{% url 'store:view_product' item.product.id %}">{{ product.name }}</a></h3>
+                <p>{{ item.product.category }}</p>
+                <p>Price: RM {{ item.product.price }}</p>
+                <a href="{% url 'store:view_product' item.product.id %}" class="cta-button">View Product</a>
             </div>
             {% endfor %}
         </div>

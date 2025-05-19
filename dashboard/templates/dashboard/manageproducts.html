@@ -1,0 +1,70 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manageproducts.css' %}">
+
+<h2>Manage Products</h2>
+
+<div class="controls">
+    <a class="btn-add" href="{% url 'dashboard:add_product' %}">+ Add New Product</a>
+    <form method="get" class="sort-form">
+        <h4>Sort By</h4>
+        <label for="category">Category:</label>
+        <select name="category" id="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ product.category }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="price">Price:</label>
+        <select name="price" id="price" onchange="this.form.submit()">
+            <option value="">All Price</option>
+            <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+        </select>
+
+        <br>
+        <label for="name">Name:</label>
+        <select name="name" id="name" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="name_asc" {% if request.GET.sort == 'name_asc' %}selected{% endif %}>Name: A–Z</option>
+            <option value="name_desc" {% if request.GET.sort == 'name_desc' %}selected{% endif %}>Name: Z–A</option>
+        </select>
+
+        <br>
+        <label for="date_added">Date Added:</label>
+        <select name="date_added" id="date_added" onchange="this.form.submit()">
+            <option value="date_added">All Time</option>
+            <option value="latest" {% if request.GET.sort == 'latest' %}selected{% endif %}>Newest</option>
+            <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+        </select>
+            
+    </form>
+</div>
+
+<div class="product-grid">
+    {% for product in products %}
+        <div class="product-card">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% endif %}
+            <div class="product-info">
+                <h4>{{ product.name }}</h4>
+                <p>RM{{ product.price }}</p>
+                <p class="category">Category: {{ product.category.name }}</p>
+                <div class="actions">
+                    <a class="btn-edit" href="{% url 'dashboard:edit_product' product.pk %}">Edit</a>
+                    <a class="btn-delete" href="{% url 'dashboard:delete_product' product.pk %}">Delete</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No products available.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

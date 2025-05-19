@@ -4,8 +4,10 @@ from django.conf import settings
 
 
 class Employee(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employees', blank=True, null=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employees', null=True, blank=True)
     name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, default='firstname')
+    last_name = models.CharField(max_length=100, default='lastname')
     password = models.CharField(max_length=128, default='defaultpassword')
     position = models.CharField(max_length=100)
     contact = models.CharField(max_length=15)
@@ -14,7 +16,7 @@ class Employee(models.Model):
     photo = models.ImageField(upload_to='media/employee_photo/', blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.user.get_full_name()
 
 from django.contrib.auth.models import AbstractUser
 
@@ -38,7 +40,7 @@ class User(AbstractUser):
     )
 
 class Customer(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     # Optional additional customer profile info
     phone_number = models.CharField(max_length=15, blank=True, null=True)

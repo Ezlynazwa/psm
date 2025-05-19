@@ -1,0 +1,168 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+{%block title %}Dashboard | Brew Beuty {%endblock%} 
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/product_form.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<body class="product-form-page">
+
+    <h2>{{ action }} Product</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        
+
+        <div id="image-container">
+            
+            {{ formset.management_form }}
+
+                    {% for form in formset %}
+                        <div class="image-box">
+                            {{ form.image }}
+                            <img class="preview" style="display:none; width:100px; height:100px; object-fit:cover;" />
+                        </div>
+                    {% endfor %}
+                    <div class="image-box add-image" onclick="addImageInput()">+</div>
+        </div>
+
+        {{ form.as_p }}
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('input[type="file"]');
+            inputs.forEach(function (input) {
+                input.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const previewImg = input.parentElement.querySelector('img.preview');
+                            previewImg.src = e.target.result;
+                            previewImg.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        });
+
+        function addImageInput() {
+            const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+            const formCount = parseInt(totalForms.value);
+            const imageContainer = document.getElementById('image-container');
+
+            const newInputDiv = document.createElement('div');
+            newInputDiv.className = 'image-box';
+
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = `form-${formCount}-image`;
+            newInput.accept = 'image/*';
+
+            const previewImage = document.createElement('img');
+            previewImage.className = 'preview';
+
+            newInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImage.src = e.target.result;
+                        previewImage.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            newInputDiv.appendChild(previewImage);
+            newInputDiv.appendChild(newInput);
+
+            imageContainer.insertBefore(newInputDiv, imageContainer.lastElementChild);
+            totalForms.value = formCount + 1;
+        }
+    </script>
+
+
+        {{ variation_formset.management_form }}
+        <div id="variation-container">
+            {% for form in variation_formset %}
+                <div class="variation-item">
+                    {{ form.variation_code.label_tag }} {{ form.variation_code }}
+                    {{ form.quantity.label_tag }} {{ form.quantity }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" onclick="addVariation()">+ Add Variation</button>
+
+
+        <button type="submit">{{ action }}</button>
+        <a href="{% url 'dashboard:manageproducts' %}">Cancel</a>
+    </form>    
+
+    <script>
+        function addImageInput() {
+            const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+            const formCount = parseInt(totalForms.value);
+            const imageContainer = document.getElementById('image-container');
+    
+            const newInputDiv = document.createElement('div');
+            newInputDiv.className = 'image-box';
+
+            // Buat input file
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = `form-${formCount}-image`;
+            newInput.accept = 'image/*';
+
+            // Buat tag <img> untuk preview
+            const previewImage = document.createElement('img');
+            previewImage.style.width = '100px';
+            previewImage.style.height = '100px';
+            previewImage.style.objectFit = 'cover';
+            previewImage.style.display = 'none'; // Mula-mula sembunyi
+
+            // Bila fail dipilih, tunjuk preview
+            newInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewImage.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+               }
+            });
+
+            newInputDiv.appendChild(previewImage);
+            newInputDiv.appendChild(newInput);
+            imageContainer.insertBefore(newInputDiv, imageContainer.lastElementChild);
+            totalForms.value = formCount + 1;
+        }
+
+        function addVariation() {
+            const totalForms = document.getElementById('id_variation_set-TOTAL_FORMS');
+            const formCount = parseInt(totalForms.value);
+            const variationContainer = document.getElementById('variation-container');
+ 
+            const newDiv = document.createElement('div');
+            newDiv.className = 'variation-item';
+            newDiv.innerHTML = `
+                <label for="id_variation_set-${formCount}-variation_code">Variation code:</label>
+                <input type="text" name="variation_set-${formCount}-variation_code" id="id_variation_set-${formCount}-variation_code">
+                <label for="id_variation_set-${formCount}-quantity">Quantity:</label>
+                <input type="number" name="variation_set-${formCount}-quantity" id="id_variation_set-${formCount}-quantity">
+            `;
+
+            variationContainer.appendChild(newDiv);
+            totalForms.value = formCount + 1;
+        }
+    </script>
+
+
+{%endblock%}
