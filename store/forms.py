@@ -7,9 +7,10 @@ from .models import ProductImage
 
 ProductVariationFormSet = inlineformset_factory(Product, ProductVariation, fields=('variation_code', 'quantity'), extra=1)
 ProductImageFormSet = inlineformset_factory(
-    Product, ProductImage,
-    fields=('image',), extra=3, can_delete=True
-)
+    Product, 
+    ProductImage,
+    fields=('image',), extra=3, can_delete=True)
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product

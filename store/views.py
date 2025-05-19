@@ -57,33 +57,27 @@ def catalog(request):
 # View Product page view
 def view_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    images = product.product_images.all()
+    
+    if request.method == 'POST':
 
-    #if request.method == 'POST':
-
-    #    if not request.user.is_authenticated:
-    #        # Redirect to login page and return here after login
-    #        login_url = f"{reverse('users/login')}?next={request.path}"
-    #        return redirect('login_url')
-    #    
-    #    quantity = int(request.POST.get('quantity', 1))
+        if not request.user.is_authenticated:
+            # Redirect to login page and return here after login
+            login_url = f"{reverse('users/login')}?next={request.path}"
+            return redirect('login_url')
+        
+        quantity = int(request.POST.get('quantity', 1))
         
         # Get or create an order for the user
-    #    order, created = Order.objects.get_or_create(user=request.user, complete=False)
+        order, created = Order.objects.get_or_create(user=request.user, complete=False)
         
         # Add the item to the cart
-     #   order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
-      #  order_item.quantity += quantity  # Increment the quantity
-       # order_item.save()
+        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
+        order_item.quantity += quantity  # Increment the quantity
+        order_item.save()
 
-        #return redirect('store:cart')  # Redirect to the cart page after adding the item
+        return redirect('store:cart')  # Redirect to the cart page after adding the item
     
-    # Debug print - check in your console
-    print(f"Product: {product}")
-    print(f"Number of images: {images.count()}")
-    for img in images:
-        print(f"Image URL: {img.image.url}")
-    
+    images = product.product_images.all()
 
     return render(request, 'store/view_product.html', {
         'product': product,
@@ -189,7 +183,6 @@ def search(request):
     query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL
     results = Product.objects.filter(name__icontains=query) if query else []  # Cari produk berdasarkan nama
     return render(request, 'store/search.html', {'query': query, 'results': results})
-
 
 def add_to_cart(request, product_id):
     # Fetch the product by ID
