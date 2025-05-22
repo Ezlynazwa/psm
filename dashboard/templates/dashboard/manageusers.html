@@ -1,79 +1,160 @@
 {% extends "dashboard/adminbase.html" %}
 {% load static %}
 
-{% block title %}Dashboard | Brew Beauty{% endblock %}
+{% block title %}User Management | Brew Beauty{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/manageusers.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<section class="manage-users-section">
-    <h2>Manage Users</h2>
-
-    <div class="buttons">
-        <a href="{% url 'dashboard:addstaff' %}" class="btn">Add Staff</a>
-        <a href="{% url 'dashboard:addadmin' %}" class="btn">Add Admin</a>
+<div class="user-management-container">
+    <div class="page-header">
+        <h1><i class="fas fa-users-cog"></i> User Management</h1>
+        <p>Manage all user accounts and permissions</p>
     </div>
 
-    <h3>Customers</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in customers %}
-            <tr>
-                <td>{{ customer.username }}</td>
-                <td>{{ customer.email }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">No customers found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="action-buttons">
+        <a href="{% url 'dashboard:addstaff' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add Staff Member
+        </a>
+        <a href="{% url 'dashboard:addadmin' %}" class="btn btn-secondary">
+            <i class="fas fa-user-shield"></i> Add Administrator
+        </a>
+    </div>
 
-    <h3>Staff and Admin</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Photo</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Contact</th>
-                <th>Email</th>
-                <th>Role</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for employee in employees %}
-            <tr>
-                <td>
-                    {% if employee.photo %}
-                        <img src="{{ employee.photo.url }}" alt="Photo" class="profile-pic">
-                    {% else %}
-                        No photo
-                    {% endif %}
-                </td>
-                <td>{{ employee.name }}</td>
-                <td>{{ employee.position }}</td>
-                <td>{{ employee.contact }}</td>
-                <td>{{ employee.email }}</td>
-                <td>
-                    {% if employee.user.is_superuser %}
-                        Admin
-                    {% elif employee.user.is_staff %}
-                        Staff
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6">No staff/admin found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
+    <div class="user-section">
+        <div class="section-header">
+            <h2><i class="fas fa-users"></i> Customers</h2>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search customers...">
+            </div>
+        </div>
+        
+        <div class="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Date Joined</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <span>{{ customer.username }}</span>
+                            </div>
+                        </td>
+                        <td>{{ customer.email }}</td>
+                        <td>{{ customer.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="status-badge active">Active</span>
+                        </td>
+                        <td>
+                            <div class="action-icons">
+                                <a href="#" class="action-btn view-btn" title="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="action-btn edit-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="action-btn delete-btn" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-message">
+                            <i class="fas fa-user-slash"></i> No customers found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="user-section">
+        <div class="section-header">
+            <h2><i class="fas fa-user-tie"></i> Staff & Administrators</h2>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search staff...">
+            </div>
+        </div>
+        
+        <div class="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Contact</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                {% if employee.photo %}
+                                <img src="{{ employee.photo.url }}" alt="Profile" class="profile-pic">
+                                {% else %}
+                                <div class="avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ employee.name }}</td>
+                        <td>{{ employee.position }}</td>
+                        <td>{{ employee.contact }}</td>
+                        <td>
+                            {% if employee.user.is_superuser %}
+                            <span class="role-badge admin">Administrator</span>
+                            {% elif employee.user.is_staff %}
+                            <span class="role-badge staff">Staff</span>
+                            {% else %}
+                            <span class="role-badge">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-icons">
+                                <a href="#" class="action-btn view-btn" title="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="action-btn edit-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="action-btn delete-btn" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-message">
+                            <i class="fas fa-user-slash"></i> No staff members found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
