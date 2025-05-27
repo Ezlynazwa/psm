@@ -3,8 +3,15 @@ from store.models import Product
 from users.models import Employee
 from django.forms import modelformset_factory
 from store.models import ProductImage
+from store.forms import ProductImageForm
 
-ProductImageFormSet = modelformset_factory(ProductImage, fields=('image',), extra=3)
+
+ProductImageFormSet = modelformset_factory(
+    ProductImage,
+    form=ProductImageForm,
+    extra=10,  
+    can_delete=True,
+)
 
 # handles add and edit product
 class ProductForm(forms.ModelForm):

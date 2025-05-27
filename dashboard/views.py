@@ -1,12 +1,13 @@
+from store.models import Product
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from users.models import User, Employee
-from store.models import Product,ProductVariation ,ProductImage
+from store.models import ProductVariation ,ProductImage
 from django.http import HttpResponse
 from django.contrib import messages
-from .forms import ProductForm
 from store.forms import ProductVariationFormSet, ProductImageFormSet 
 from django.forms import modelformset_factory
+from .forms import ProductForm 
 
 
 
@@ -29,9 +30,40 @@ def manageusers(request):
         'employees': employees,
     })
 
+
 @staff_member_required
 def manageproducts(request):
-    return render(request, 'dashboard/manageproducts.html')
+    products = Product.objects.all()
+    categories = Product.objects.values_list('category', flat=True).distinct()
+
+    category = request.GET.get('category')
+    sort_option = request.GET.get('sort')
+
+    if category:
+        products = products.filter(category=category)
+
+    if sort_option == 'price_asc':
+        products = products.order_by('price')
+    elif sort_option == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_option == 'name_asc':
+        products = products.order_by('name')
+    elif sort_option == 'name_desc':
+        products = products.order_by('-name')
+    elif sort_option == 'latest':
+        products = products.order_by('-created_at') 
+    elif sort_option == 'oldest':
+        products = products.order_by('created_at')
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'skin_tone_choices': Product._meta.get_field('skin_tone').choices,
+        'surface_tone_choices': Product._meta.get_field('surface_tones').choices,
+    }
+
+    return render(request, 'dashboard/manageproducts.html', context)
+
 
 @staff_member_required
 def generatereport(request):
@@ -69,6 +101,8 @@ def add_product(request):
         'formset': image_formset,
         'variation_formset': variation_formset,
         'action': 'Add',
+        'skin_tone_choices': Product._meta.get_field('skin_tone').choices,
+        'surface_tone_choices': Product._meta.get_field('surface_tones').choices,
     })
 
 
@@ -76,14 +110,30 @@ def add_product(request):
 @staff_member_required
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
+        image_formset = ProductImageFormSet(request.POST, request.FILES, queryset=ProductImage.objects.filter(product=product))
+
+        if form.is_valid() and image_formset.is_valid():
             form.save()
-            return redirect('dashboard:manage_products')
-        else:
-           form = ProductForm(instance=product)
-        return render(request, 'dashboard/product_form.html', {'form': form, 'action': 'Edit'})
+            images = image_formset.save(commit=False)
+            for image in images:
+                image.product = product
+                image.save()
+
+            for obj in image_formset.deleted_objects:
+                obj.delete()
+
+            return redirect('dashboard:manageproducts')
+    else:
+        form = ProductForm(instance=product)
+        image_formset = ProductImageFormSet(queryset=ProductImage.objects.filter(product=product))
+
+    return render(request, 'dashboard/product_form.html', {
+        'form': form,
+        'formset': image_formset,
+        'action': 'Edit'})
 
 # Delete a product
 @staff_member_required
@@ -197,3 +247,4 @@ def addadmin(request):
         return redirect('dashboard:manageusers')  # Redirect to another page as needed
     
     return render(request, 'dashboard/addadmin.html')
+
