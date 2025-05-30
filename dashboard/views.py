@@ -2,13 +2,17 @@ from store.models import Product
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from users.models import User, Employee
-from store.models import ProductVariation ,ProductImage
+from store.models import ProductVariation ,ProductImage, Order, OrderItem 
 from django.http import HttpResponse
 from django.contrib import messages
 from store.forms import ProductVariationFormSet, ProductImageFormSet 
+from .forms import ProductForm, ProductImageForm, ProductVariationForm, OrderStatusForm, TrackingNumberForm, ParcelImageForm
 from django.forms import modelformset_factory
-from .forms import ProductForm 
-
+from django.forms import inlineformset_factory
+from django.db.models import Sum, Count, F
+from datetime import datetime, timedelta
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
 
@@ -16,6 +20,18 @@ from .forms import ProductForm
 @staff_member_required
 def homeadmin(request):
     return render(request,'dashboard/homeadmin.html')
+
+@staff_member_required
+def homestaff(request):
+    return render(request,'dashboard/homestaff.html')
+
+@staff_member_required
+def staffproduct(request):
+    return render(request, 'dashboard/staffproduct.html' )
+
+@staff_member_required
+def manageorder(request):
+    return render(request, 'manageorder.html')
 
 @staff_member_required
 def manageusers(request):
@@ -29,7 +45,6 @@ def manageusers(request):
         'customers': customers,
         'employees': employees,
     })
-
 
 @staff_member_required
 def manageproducts(request):
@@ -58,8 +73,8 @@ def manageproducts(request):
     context = {
         'products': products,
         'categories': categories,
-        'skin_tone_choices': Product._meta.get_field('skin_tone').choices,
-        'surface_tone_choices': Product._meta.get_field('surface_tones').choices,
+        'skin_tone': ProductVariation.SKIN_TONES,
+        'surface_tone': ProductVariation.SURFACE_TONES,
     }
 
     return render(request, 'dashboard/manageproducts.html', context)
@@ -71,40 +86,72 @@ def generatereport(request):
 
 # Add a product
 @staff_member_required
-
 def add_product(request):
+    ProductImageFormSet = inlineformset_factory(
+        Product, 
+        ProductImage, 
+        form=ProductImageForm,
+        extra=3,
+        can_delete=True,
+        max_num=10
+    )
+    
+    ProductVariationFormSet = inlineformset_factory(
+        Product,
+        ProductVariation,
+        form=ProductVariationForm,
+        extra=1,
+        can_delete=True
+    )
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
-        image_formset = ProductImageFormSet(request.POST, request.FILES, queryset=ProductImage.objects.none())
-        variation_formset = ProductVariationFormSet(request.POST)
         
-        if form.is_valid() and image_formset.is_valid() and variation_formset.is_valid():
-            product = form.save()
-            images = image_formset.save(commit=False)
-            for image in images:
-                image.product = product
-                image.save()
+        # Define formsets using the form instance (after saving later)
+        image_formset = ProductImageFormSet(request.POST, request.FILES, prefix='images')
+        variation_formset = ProductVariationFormSet(request.POST, prefix='variations')
 
-            variations = variation_formset.save(commit=False)
-            for var in variations:
-                var.product = product
-                var.save()
+        if form.is_valid():
+            product = form.save(commit=False)
+            
+            # First save the product to get an ID
+            product.save()
+
+            # Now handle the formsets with the product instance
+            image_formset = ProductImageFormSet(
+                request.POST, request.FILES, 
+                instance=product, prefix='images'
+            )
+            variation_formset = ProductVariationFormSet(
+                request.POST, 
+                instance=product, prefix='variations'
+            )
+
+        
+            image_formset = ProductImageFormSet(request.POST, request.FILES, prefix='images', instance=product)
+            variation_formset = ProductVariationFormSet(request.POST, prefix='variations', instance=product)
+
+            if image_formset.is_valid() and variation_formset.is_valid():
+                image_formset.save()
+                variation_formset.save()
 
             return redirect('dashboard:manageproducts')
+
     else:
         form = ProductForm()
-        image_formset = ProductImageFormSet(queryset=ProductImage.objects.none())
-        variation_formset = ProductVariationFormSet()
+        image_formset = ProductImageFormSet(queryset=ProductImage.objects.none(), prefix='images')
+        variation_formset = ProductVariationFormSet(queryset=ProductVariation.objects.none(), prefix='variations')
 
     return render(request, 'dashboard/product_form.html', {
         'form': form,
         'formset': image_formset,
         'variation_formset': variation_formset,
         'action': 'Add',
-        'skin_tone_choices': Product._meta.get_field('skin_tone').choices,
-        'surface_tone_choices': Product._meta.get_field('surface_tones').choices,
+        'skin_tone_choices': ProductVariation.SKIN_TONES,
+        'surface_tone_choices': ProductVariation.SURFACE_TONES,
+        'empty_image_forms': range(1 - len(image_formset)),
+        'empty_variation_forms': range(1 - len(variation_formset)),
     })
-
 
 # Edit a product
 @staff_member_required
@@ -135,13 +182,19 @@ def edit_product(request, pk):
         'formset': image_formset,
         'action': 'Edit'})
 
-# Delete a product
 @staff_member_required
 def delete_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect('dashboard:manageproducts')
+
     if request.method == 'POST':
         product.delete()
-        return redirect('dashboard:manage_products')
+        messages.success(request, "Product deleted successfully.")
+        return redirect('dashboard:manageproducts')
+
     return render(request, 'dashboard/delete_confirm.html', {'product': product})
 
 
@@ -248,3 +301,132 @@ def addadmin(request):
     
     return render(request, 'dashboard/addadmin.html')
 
+
+def analytics_dashboard(request):
+    # Time range filter (default: 30 days)
+    days = int(request.GET.get('days', 30))
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days)
+
+    # Sales Metrics
+    orders = Order.objects.filter(
+        date_ordered__range=(start_date, end_date),
+        complete=True
+    )
+    total_revenue = orders.aggregate(total=Sum('orderitem__product__price'))['total'] or 0
+    total_orders = orders.count()
+    aov = total_revenue / total_orders if total_orders > 0 else 0
+
+    # Revenue growth calculation
+    prev_period = orders.filter(
+        date_ordered__range=(start_date - timedelta(days=days), start_date)
+    ).aggregate(total=Sum('orderitem__product__price'))['total'] or 0
+    revenue_growth = ((total_revenue - prev_period) / prev_period * 100) if prev_period > 0 else 0
+
+    # Customer Metrics
+    customers = Customer.objects.filter(order__date_ordered__range=(start_date, end_date)).distinct()
+    total_customers = customers.count()
+    new_customers = customers.filter(date_joined__range=(start_date, end_date)).count()
+    returning_customers = total_customers - new_customers
+
+    # Top Products
+    top_products = Product.objects.filter(
+        orderitem__order__date_ordered__range=(start_date, end_date)
+    ).annotate(
+        total_revenue=Sum(F('orderitem__quantity') * F('price'))
+    ).order_by('-total_revenue')[:5]
+
+    # Inventory Alerts
+    low_stock_count = Product.objects.filter(quantity__lt=F('min_stock')).count()
+    out_of_stock_count = Product.objects.filter(quantity=0).count()
+
+    # Dynamic Category Breakdown
+    category_data = (
+        OrderItem.objects
+        .filter(order__date_ordered__range=(start_date, end_date))
+        .values('product__category')  # Group by category
+        .annotate(total_sales=Sum(F('quantity') * F('product__price')))
+        .order_by('-total_sales')
+    )
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_orders': total_orders,
+        'aov': aov,
+        'revenue_growth': revenue_growth,
+        'total_customers': total_customers,
+        'new_customers': new_customers,
+        'returning_customers': returning_customers,
+        'top_product_names': [p.name for p in top_products],
+        'top_product_revenues': [float(p.total_revenue) for p in top_products],
+        'category_labels': ['Skincare', 'Makeup', 'Haircare', 'Fragrance'],
+        'category_values': [45, 30, 15, 10],  # Replace with real data
+        'low_stock_count': low_stock_count,
+        'out_of_stock_count': out_of_stock_count,
+        'category_labels': [item['product__category'] for item in category_data],
+        'category_values': [float(item['total_sales']) for item in category_data],
+    }
+    return render(request, 'dashboard/generatereports.html', context)
+
+@staff_member_required
+def manageorder(request):
+    # Get filter parameter
+    status_filter = request.GET.get('status', None)
+    
+    # Get all orders or filtered orders
+    if status_filter:
+        orders = Order.objects.filter(status=status_filter).order_by('-date_ordered')
+    else:
+        orders = Order.objects.all().order_by('-date_ordered')
+
+    # Pagination
+    paginator = Paginator(orders, 10)  # Show 10 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+    }
+    return render(request, 'dashboard/manageorder.html', context)
+
+@staff_member_required
+def orderdetail(request, id):
+    order = get_object_or_404(Order, id=id)
+    
+    if request.method == 'POST':
+        if 'update_status' in request.POST:
+            status_form = OrderStatusForm(request.POST, instance=order)
+            if status_form.is_valid():
+                status_form.save()
+                return redirect('dashboard:orderdetail', id=order.id)
+        elif 'update_tracking' in request.POST:
+            tracking_form = TrackingNumberForm(request.POST, instance=order)
+            if tracking_form.is_valid():
+                tracking_form.save()
+                return redirect('dashboard:orderdetail', id=order.id)
+        elif 'upload_parcel' in request.POST:
+            parcel_form = ParcelImageForm(request.POST, request.FILES, instance=order)
+            if parcel_form.is_valid():
+                parcel_form.save()
+                return redirect('dashboard:orderdetail', id=order.id)
+    else:
+        status_form = OrderStatusForm(instance=order)
+        tracking_form = TrackingNumberForm(instance=order)
+        parcel_form = ParcelImageForm(instance=order)
+
+    order_items = order.orderitem_set.all()
+
+    # ✅ Check if receipt exists and is PDF
+    payment = getattr(order, 'payment', None)
+    is_pdf = payment and payment.receipt and payment.receipt.name.lower().endswith('.pdf')
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'status_form': status_form,
+        'tracking_form': tracking_form,
+        'parcel_form': parcel_form,
+        'is_pdf': is_pdf,
+    }
+    return render(request, 'dashboard/orderdetail.html', context)

@@ -5,18 +5,31 @@ from .models import Payment
 from django.forms import inlineformset_factory
 from .models import ProductImage
 
-ProductVariationFormSet = inlineformset_factory(Product, ProductVariation, fields=('variation_code', 'quantity'), extra=1)
+ProductVariationFormSet = inlineformset_factory(
+    Product, ProductVariation, 
+    fields=(
+    'variation_code', 
+    'quantity',
+    'skin_tone',
+    'surface_tones'),
+    extra=10,
+    can_delete=True)
+
 ProductImageFormSet = inlineformset_factory(
     Product, 
     ProductImage,
-    fields=('image',), extra=3, can_delete=True)
+    fields=('image',), 
+    extra=10, 
+    can_delete=True)
 
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'brand', 'name', 'category','description', 'price','quantity', 'min_stock', 'max_stock', 'skin_type', 'skin_condition', 'skin_tone',
-            'surface_tones', 'skin_texture', 'sensitivity_level']
+            'brand', 'name', 'category','description', 
+            'price','quantity', 'min_stock', 'max_stock', 
+            'skin_type', 'skin_condition', 'skin_texture', 
+            'sensitivity_level']
 
 class CheckoutForm(forms.Form):
     address = forms.CharField(max_length=255, widget=forms.Textarea(attrs={'placeholder': 'Enter your address'}))
@@ -36,5 +49,12 @@ class PaymentForm(forms.ModelForm):
         model = Payment
         fields = ['receipt']
 
-
+class ProductVariationForm(forms.ModelForm):
+    class Meta:
+        model = ProductVariation
+        fields = [
+            'variation_code', 
+            'quantity', 
+            'skin_tone', 
+            'surface_tones']
         

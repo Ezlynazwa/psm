@@ -1,59 +1,79 @@
 {% extends 'store/basestore.html' %}
 {% load static %}
 
+{% block title %}Track Your Orders | Brew Beauty{% endblock %}
 
 {% block content %}
-<h1 style="text-align: center; margin-top: 20px;">Track Your Orders</h1>
+<div class="track-order-container">
+    <h1><i class="fas fa-truck"></i> Track Your Orders</h1>
 
-{% if orders %}
-    <div class="order-list">
-        {% for order in orders %}
-        <div class="order-card">
-            <div class="order-header">
-                <h2>Order #{{ order.id }}</h2>
-                <p><strong>Date:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}</p>
-                <p><strong>Status:</strong>
-                    {% if order.approved %}
-                        In Process
-                    {% elif order.packing %}
-                        Packing Order
-                    {% else %}
-                        Delivered
-                    {% endif %}
-                </p>
-            </div>
-
-            <div class="order-items">
-                {% for item in order.orderitem_set.all %}
-                <div class="product-card">
-                    {% with images=item.product.product_images.all %}
-                        {% if images %}
-                            <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
-                        {% else %}
-                            <img src="{% static 'images/no-image.png' %}" alt="No image">
-                        {% endif %}
-                    {% endwith %}
-                    <div class="product-info">
-                        <h3>{{ item.product.name }}</h3>
-                        <p><strong>Code:</strong> {{ item.product.code }}</p>
-                        <p><strong>Qty:</strong> {{ item.quantity }}</p>
-                        <p><strong>Total:</strong> RM {{ item.get_total }}</p>
+    {% if orders %}
+        <div class="order-list">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <h2>Order #{{ order.id }}</h2>
+                    <div class="order-meta">
+                        <p><strong>Date:</strong> {{ order.date_ordered|date:"F j, Y H:i" }}</p>
+                        <p class="status-badge {% if order.complete %}completed{% elif order.packing %}packing{% else %}processing{% endif %}">
+                            {% if order.complete %}
+                                <i class="fas fa-check-circle"></i> Pending
+                            {% elif order.packing %}
+                                <i class="fas fa-box-open"></i> Packing
+                            {% else %}
+                                <i class="fas fa-spinner"></i> Processing
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
 
-            <div class="order-footer">
-                <p><strong>Order Total:</strong> RM {{ order.get_cart_total }}</p>
+                <div class="order-items">
+                    {% for item in order.orderitem_set.all %}
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% with images=item.product.product_images.all %}
+                                {% if images %}
+                                    <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="{% static 'images/no-image.png' %}" alt="No image">
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ item.product.name }}</h3>
+                            <p><strong>Brand:</strong> {{ item.product.brand }}</p>
+                            <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                            <p><strong>Price:</strong> RM {{ item.product.price }}</p>
+                            <p><strong>Subtotal:</strong> RM {{ item.get_total }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="order-footer">
+                    <div class="order-total">
+                        <p><strong>Order Total:</strong> RM {{ order.get_cart_total }}</p>
+                    </div>
+                    <div class="order-actions">
+                        <a href="#" class="btn-details">View Details</a>
+                        <a href="#" class="btn-help">Need Help?</a>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <p style="text-align: center;">You have no orders yet.</p>
-{% endif %}
+    {% else %}
+        <div class="empty-orders">
+            <img src="{% static 'images/empty-orders.svg' %}" alt="No orders">
+            <h3>You have no orders yet</h3>
+            <p>Start shopping to see your orders here</p>
+            <a href="{% url 'store:catalog' %}" class="btn-shop">Shop Now</a>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/track_order.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

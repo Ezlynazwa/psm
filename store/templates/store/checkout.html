@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +26,7 @@
           </div>
           <div class="progress-step">
             <span>3</span>
-            <p>Confirmation</p>
+            <p>Summary</p>
           </div>
         </div>
       </div>
@@ -111,8 +112,6 @@
               </div>
             </div>
           </section>
-
-          <!-- Payment and Order Summary sections remain the same -->
           <section class="payment-section">
             <h2><i class="fas fa-qrcode"></i> Payment Method</h2>
             <div class="qr-payment">
@@ -124,10 +123,15 @@
               <div class="receipt-upload">
                 <label for="id_receipt" class="upload-label">
                   <i class="fas fa-cloud-upload-alt"></i>
-                  <span>Upload Payment Receipt</span>
+                  <span>Upload Payment Receipt (PDF or Image)</span>
                   {{ form.receipt }}
                 </label>
-                <p class="upload-note">Please upload a clear image of your payment receipt</p>
+                <div id="receipt-preview" style="display:none; margin-top:15px;">
+                  <embed id="pdf-preview" width="250" height="200" style="border:1px solid #ddd; display:none;">
+                  <img id="image-preview" width="250" style="border:1px solid #ddd; display:none;">
+                  <button type="button" id="remove-receipt" class="btn-small" style="display:none;">Remove</button>
+                </div>
+                <p class="upload-note">Please upload a clear PDF or image of your payment receipt</p>
               </div>
             </div>
           </section>
@@ -135,17 +139,52 @@
           <section class="order-summary-section">
             <h2><i class="fas fa-receipt"></i> Order Summary</h2>
             <div class="summary-card">
-              <div class="summary-row">
-                <span>Subtotal</span>
-                <span>RM {{ cart_total }}</span>
+              <div class="selected-items-header">
+                <h3>Selected Products</h3>
+                <span>{{ selected_items_count }} item{% if selected_items_count > 1 %}s{% endif %}</span>
               </div>
-              <div class="summary-row">
-                <span>Shipping</span>
-                <span>Free</span>
+              
+              <div class="selected-items-list">
+                {% for item in selected_items %}
+                <div class="selected-item">
+                  <div class="product-image">
+                    {% with images=item.product.product_images.all %}
+                      {% if images %}
+                        <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
+                      {% else %}
+                        <div class="no-image-placeholder">
+                          <i class="fas fa-image"></i>
+                        </div>
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+                  <div class="product-info">
+                    <h4>{{ item.product.name }}</h4>
+                    <p class="product-variant">Variant: {{ item.product.variation_code }}</p>
+                    <div class="quantity-price">
+                      <span class="quantity">Qty: {{ item.quantity }}</span>
+                      <span class="price">RM {{ item.get_total|floatformat:2 }}</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
               </div>
-              <div class="summary-row total">
-                <span>Total</span>
-                <span>RM {{ cart_total }}</span>
+              
+              <div class="summary-divider"></div>
+              
+              <div class="summary-calculation">
+                <div class="summary-row">
+                  <span>Subtotal</span>
+                  <span>RM {{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Shipping Fee</span>
+                  <span>RM 8.00</span>
+                </div>
+                <div class="summary-row total">
+                  <span>Total Amount</span>
+                  <span>RM {{ total|floatformat:2 }}</span>
+                </div>
               </div>
             </div>
           </section>
@@ -164,32 +203,78 @@
   </div>
 
   <script>
-    // Toggle new address form
-    document.getElementById('add-new-address').addEventListener('change', function() {
-      const newAddressForm = document.getElementById('new-address-form');
-      if (this.checked) {
-        newAddressForm.style.display = 'block';
-        // Uncheck all saved addresses
-        document.querySelectorAll('input[name="selected_address"]').forEach(radio => {
-          radio.checked = false;
-        });
-      } else {
-        newAddressForm.style.display = 'none';
-        // Check the first saved address if available
-        const firstSavedAddress = document.querySelector('input[name="selected_address"]');
-        if (firstSavedAddress) {
-          firstSavedAddress.checked = true;
-        }
+document.addEventListener('DOMContentLoaded', function () {
+  // === Receipt Upload Preview Logic ===
+  const receiptInput = document.getElementById('id_receipt');
+  const previewDiv = document.getElementById('receipt-preview');
+  const pdfPreview = document.getElementById('pdf-preview');
+  const imgPreview = document.getElementById('image-preview');
+  const removeBtn = document.getElementById('remove-receipt');
+
+  if (receiptInput) {
+    receiptInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) {
+        previewDiv.style.display = 'none';
+        return;
+      }
+
+      previewDiv.style.display = 'block';
+      removeBtn.style.display = 'inline-block';
+
+      if (file.type === 'application/pdf') {
+        pdfPreview.src = URL.createObjectURL(file);
+        pdfPreview.style.display = 'block';
+        imgPreview.style.display = 'none';
+      } else if (file.type.startsWith('image/')) {
+        imgPreview.src = URL.createObjectURL(file);
+        imgPreview.style.display = 'block';
+        pdfPreview.style.display = 'none';
       }
     });
+  }
 
-    // If no saved addresses, show new address form by default
-    {% if not saved_addresses %}
-    document.getElementById('add-new-address').checked = true;
-    document.getElementById('new-address-form').style.display = 'block';
-    {% else %}
-    document.getElementById('new-address-form').style.display = 'none';
-    {% endif %}
-  </script>
+  if (removeBtn) {
+    removeBtn.addEventListener('click', function () {
+      receiptInput.value = '';
+      previewDiv.style.display = 'none';
+      pdfPreview.style.display = 'none';
+      imgPreview.style.display = 'none';
+    });
+  }
+
+  // === Address Form Toggle Logic ===
+  const addNewAddressCheckbox = document.getElementById('add-new-address');
+  const newAddressForm = document.getElementById('new-address-form');
+  const savedAddressRadios = document.querySelectorAll('input[name="selected_address"]');
+
+  if (!addNewAddressCheckbox || !newAddressForm) return;
+
+  // Initial state on page load (rendered by Django)
+  {% if not saved_addresses %}
+    addNewAddressCheckbox.checked = true;
+    newAddressForm.style.display = 'block';
+  {% else %}
+    newAddressForm.style.display = 'none';
+  {% endif %}
+
+  // Toggle new address form on checkbox change
+  addNewAddressCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+      newAddressForm.style.display = 'block';
+      savedAddressRadios.forEach(radio => {
+        radio.checked = false;
+      });
+    } else {
+      newAddressForm.style.display = 'none';
+      const firstSavedAddress = savedAddressRadios[0];
+      if (firstSavedAddress) {
+        firstSavedAddress.checked = true;
+      }
+    }
+  });
+});
+</script>
+
 </body>
 </html>

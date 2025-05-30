@@ -33,8 +33,10 @@ def login_view(request):
             if user is not None:
                 login(request, user)
 
-                if user.is_staff or user.is_superuser:
+                if user.is_superuser:
                     return redirect ('dashboard:homeadmin')
+                elif user.is_staff:
+                    return redirect ('dashboard:homestaff')
                 else:
                   return redirect('store:homepage')
     else:

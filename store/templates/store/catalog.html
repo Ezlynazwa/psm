@@ -1,36 +1,84 @@
 {% extends "store/basestore.html" %}
 {% load static %}
-{% block title %}Catalog | Brew Beauty{% endblock %}
+{% block title %}Product Catalog | Brew Beauty{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<section class="catalog">
-    <h2>Beauty Products</h2>
+<section class="catalog-container">
+    <div class="catalog-header">
+        <h1><i class="fas fa-spa"></i> Our Beauty Collection</h1>
+        <p>Discover products that bring out your natural beauty</p>
+        
+        <div class="filter-controls">
+            
+            <div class="sort-filter">
+                <select class="form-select">
+                    <option value="">Sort by</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="newest">Newest Arrivals</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <div class="product-grid">
         {% for item in product_data %}
         <div class="product-card">
+            <div class="card-badge">New</div>
+            
+            <div class="product-image">
+                {% if item.image %}
+                <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                {% else %}
+                <div class="no-image">
+                    <i class="fas fa-camera"></i>
+                </div>
+                {% endif %}
+                
+                <div class="quick-actions">
+                    <button class="quick-btn wishlist-btn" title="Add to wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </div>
 
-            {% if item.image %}
-               <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" style="width: 150px; height: 150px; object-fit: cover;"> 
-            {% else %}
-                <p>No image available.</p>
-            {% endif %}
+            <div class="product-info">
+                <span class="category">{{ item.product.category }}</span>
+                <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>
+                
 
-            <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>
-            <p>{{ item.product.category }}</p>
-            <p class="price">RM {{ item.product.price }}</p>
-
-            <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">Add to Cart</a>
+                
+                <div class="price-container">
+                    <span class="price">RM {{ item.product.price }}</span>
+                    {% if item.product.old_price %}
+                    <span class="old-price">RM {{ item.product.old_price }}</span>
+                    {% endif %}
+                </div>
+                
+                <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-catalog">
+            <img src="{% static 'images/no-products.svg' %}" alt="No products">
+            <h3>No Products Available</h3>
+            <p>We're currently updating our collection. Please check back later!</p>
         </div>
         {% endfor %}
     </div>
+    
+    <div class="pagination">
+        <a href="#" class="page-btn disabled"><i class="fas fa-chevron-left"></i></a>
+        <a href="#" class="page-btn active">1</a>
+        <a href="#" class="page-btn">2</a>
+        <a href="#" class="page-btn">3</a>
+        <a href="#" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+    </div>
 </section>
 {% endblock %}
-
-
-
-
-<!--nanti letak block extra css (boleh follow track_order.css)-->
-<!--tapi ada problem sikit dengan untuk apply css masing2 ke dalam page tu....takleh nak chatgpt sbb takde line-->
-

@@ -1,0 +1,150 @@
+{% extends 'dashboard/staffbase.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Order Details: {{ order.id }}</h2>
+            <p><strong>Customer:</strong> {{ order.user.get_full_name|default:order.user.username }}</p>
+            <p><strong>Date Ordered:</strong> {{ order.date_ordered|date:"M d, Y H:i" }}</p>
+            <p><strong>Last Updated:</strong> {{ order.status_updated|date:"M d, Y H:i" }}</p>
+            <p><strong>Transaction ID:</strong> {{ order.transaction_id }}</p>
+
+            {% if order.payment and order.payment.receipt %}
+                <p><strong>Payment Proof:</strong></p>
+                {% if is_pdf %}
+                    <a href="{{ order.payment.receipt.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        View PDF Receipt
+                    </a>
+                {% else %}
+                    <img src="{{ order.payment.receipt.url }}" alt="Payment Proof" class="img-thumbnail" style="max-height: 200px;">
+                {% endif %}
+            {% else %}
+                <p><strong>Payment Proof:</strong> <span class="text-danger">Not uploaded</span></p>
+            {% endif %}
+
+
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Order Items ({{ order.get_cart_items }})</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Variation Code</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.product.variation_code }}</td>
+                                <td>RM{{ item.product.price|floatformat:2 }}</td>
+                                <td>RM{{ item.get_total|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-active">
+                                <td colspan="3"><strong>Total</strong></td>
+                                <td><strong>RM{{ order.get_cart_total|floatformat:2 }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5>Order Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ status_form.status.label_tag }}
+                            {{ status_form.status }}
+                        </div>
+                        <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h6>Status Flow:</h6>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-{% if order.status == 'pending' %}warning{% elif order.status == 'verified' %}info{% elif order.status == 'preparing' %}primary{% elif order.status == 'shipped' %}secondary{% elif order.status == 'delivered' %}success{% else %}danger{% endif %}" 
+                                role="progressbar" style="width: 
+                                {% if order.status == 'pending' %}20%
+                                {% elif order.status == 'verified' %}40%
+                                {% elif order.status == 'preparing' %}60%
+                                {% elif order.status == 'shipped' %}80%
+                                {% elif order.status == 'delivered' %}100%
+                                {% else %}0%{% endif %}" 
+                                aria-valuenow="{% if order.status == 'pending' %}20
+                                {% elif order.status == 'verified' %}40
+                                {% elif order.status == 'preparing' %}60
+                                {% elif order.status == 'shipped' %}80
+                                {% elif order.status == 'delivered' %}100
+                                {% else %}0{% endif %}" 
+                                aria-valuemin="0" aria-valuemax="100">
+                                {{ order.get_status_display }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if order.status == 'shipped' or order.status == 'delivered' %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5>Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ tracking_form.tracking_number.label_tag }}
+                            {{ tracking_form.tracking_number }}
+                        </div>
+                        <button type="submit" name="update_tracking" class="btn btn-info">Update Tracking</button>
+                    </form>
+                    
+                    <form method="post" enctype="multipart/form-data" class="mt-3">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ parcel_form.parcel_image.label_tag }}
+                            {{ parcel_form.parcel_image }}
+                        </div>
+                        <button type="submit" name="upload_parcel" class="btn btn-info">Upload Parcel Image</button>
+                    </form>
+                    
+                    {% if order.parcel_image %}
+                    <div class="mt-3">
+                        <h6>Parcel Image:</h6>
+                        <img src="{{ order.parcel_image.url }}" alt="Parcel Image" class="img-thumbnail" style="max-height: 150px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Order Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="btn btn-danger btn-block">Cancel Order</a>
+                    <a href="{% url 'dashboard:manageorder' %}" class="btn btn-secondary btn-block mt-2">Back to Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

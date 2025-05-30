@@ -1,40 +1,148 @@
-
 {% extends "store/basestore.html" %}
 {% load static %}
-{% block title %}Homepage | Brew Beuty {%endblock%}
+{% block title %}Home | Brew Beauty{% endblock %}
 
 {% block content %}
-
 <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Main Banner -->
-    <section class="hero">
+<!-- Hero Section -->
+<section class="hero-banner">
+    <div class="hero-content">
         <div class="hero-text">
-            <h1>Brew Beauty</h1>
-            <p>Your destination for personalized makeup</p>
-            <a href="{% url 'store:catalog' %}" class="cta-button">Shop Now</a>
+            <h1>Discover Your Perfect Beauty Match</h1>
+            <p class="hero-subtitle">Personalized cosmetics tailored to your unique skin needs</p>
+            <div class="hero-cta">
+                <a href="{% url 'store:catalog' %}" class="cta-button">
+                    <span>Shop Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="{% url 'recommendation:recomhome' %}" class="cta-button secondary">
+                    <span>Get Recommendations</span>
+                    <i class="fas fa-magic"></i>
+                </a>
+            </div>
         </div>
-    </section>
+        <div class="hero-image">
+            <img src="{% static 'images/hero-beauty.png' %}" alt="Brew Beauty Products">
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll to explore</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+</section>
 
-    <!-- Featured Products -->
-    <section class="featured-products">
-        <h2>Featured Products</h2>
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <h3>Clean Ingredients</h3>
+            <p>Formulated with natural, skin-loving components</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Personalized</h3>
+            <p>Customized for your skin type and tone</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <h3>Fast Shipping</h3>
+            <p>Delivered to your door in 2-3 days</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="featured-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Our Featured Collection</h2>
+            <p>Discover products loved by our community</p>
+            <a href="{% url 'store:catalog' %}" class="view-all">View All Products <i class="fas fa-arrow-right"></i></a>
+        </div>
+        
         <div class="product-grid">
             {% for item in product_data %}
             <div class="product-card">
-
-                {% if item.image %}
-                    <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}">
-                {% else %}
-                    <p>Tiada gambar tersedia.</p>
-                {% endif %}
-
-                <h3><a href="{% url 'store:view_product' item.product.id %}">{{ product.name }}</a></h3>
-                <p>{{ item.product.category }}</p>
-                <p>Price: RM {{ item.product.price }}</p>
-                <a href="{% url 'store:view_product' item.product.id %}" class="cta-button">View Product</a>
+                <div class="product-badge">Bestseller</div>
+                <div class="product-image">
+                    {% if item.image %}
+                        <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                    {% else %}
+                        <div class="no-image">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <span class="product-category">{{ item.product.category }}</span>
+                    <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>
+                    <div class="product-price">RM {{ item.product.price }}</div>
+                    <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">
+                        <i class="fas fa-shopping-cart"></i> Add to cart
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-products">
+                <img src="{% static 'images/no-products.svg' %}" alt="No products">
+                <h3>No Featured Products Available</h3>
+                <p>Check back later for our latest collection</p>
             </div>
             {% endfor %}
         </div>
-    </section>
-{%endblock%}
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section">
+    <div class="container">
+        <h2>What Our Customers Say</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <i class="fas fa-quote-left"></i>
+                    <p>Brew Beauty products transformed my skincare routine. My complexion has never looked better!</p>
+                </div>
+                <div class="testimonial-author">
+                    <img src="{% static 'images/testimonial1.jpg' %}" alt="Sarah J.">
+                    <div>
+                        <h4>Sarah J.</h4>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <i class="fas fa-quote-left"></i>
+                    <p>Finally found makeup that matches my skin tone perfectly. The formula feels so light and natural.</p>
+                </div>
+                <div class="testimonial-author">
+                    <img src="{% static 'images/testimonial2.jpg' %}" alt="Michael T.">
+                    <div>
+                        <h4>Michael T.</h4>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+    <div class="container">
+        <div class="newsletter-content">
+            <h2>Follow Us On Social Media</h2>
+        </div>
+    </div>
+</section>
+{% endblock %}

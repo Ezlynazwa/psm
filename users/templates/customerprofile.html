@@ -1,20 +1,139 @@
 {% extends "store/basestore.html" %}
 {% load static %}
-{% block title %}Catalog | Brew Beuty {%endblock%}
+
+{% block title %}My Profile | Brew Beauty {% endblock %}
 
 {% block content %}
-  <h2>My Profile</h2>
+<link rel="stylesheet" href="{% static 'css/customerprofile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-</form>
+<div class="profile-container">
+    <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+        <p class="profile-subtitle">Manage your personal information and preferences</p>
+    </div>
 
-{% if customer.profile_picture %}
-    <img src="{{ customer.profile_picture.url }}" width="120" height="120" />
-{% endif %}  
+    <div class="profile-content">
+        <div class="profile-sidebar">
+            <div class="profile-picture-container">
+                {% if customer.profile_picture %}
+                    <img src="{{ customer.profile_picture.url }}" class="profile-picture" id="profile-picture-preview" />
+                {% else %}
+                    <div class="profile-picture-default" id="profile-picture-preview">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                {% endif %}
+                <label for="id_profile_picture" class="picture-upload-btn">
+                    <i class="fas fa-camera"></i> Change Photo
+                </label>
+                {{ form.profile_picture }}
+            </div>
 
-{%endblock%}
+            <div class="profile-menu">
+                <a href="#" class="menu-item active">
+                    <i class="fas fa-user"></i> Personal Info
+                </a>
+                <a href="{% url 'store:track_order' %}" class="menu-item">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-address-book"></i> Saved Addresses
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-lock"></i> Change Password
+                </a>
+            </div>
+        </div>
 
-<!--cantikkan dan tambah element dalam my profile ni-->
+        <div class="profile-form-container">
+            <form method="POST" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-id-card"></i> Basic Information</h3>
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone_number">Phone Number</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_birth_date">Birth Date</label>
+                        {{ form.birth_date }}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-venus-mars"></i> Preferences</h3>
+                    <div class="form-group">
+                        <label for="id_gender">Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.receive_promotions }} 
+                            <span>Receive promotional emails</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="#" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Profile picture preview
+    const profilePictureInput = document.getElementById('id_profile_picture');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+    
+    if (profilePictureInput) {
+        profilePictureInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (profilePicturePreview.tagName === 'IMG') {
+                        profilePicturePreview.src = e.target.result;
+                    } else {
+                        // Replace the default icon with an image
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'profile-picture';
+                        profilePicturePreview.parentNode.replaceChild(newImg, profilePicturePreview);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

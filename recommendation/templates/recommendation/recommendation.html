@@ -1,0 +1,160 @@
+{% extends "store/basestore.html" %}
+{% load static %}
+{% block title %}Product Recommendation | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/recommendation.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="product-form-container">
+    <div class="form-header">
+        <h2><i class="fas fa-magic"></i> Makeup Recommendation System</h2>
+        <p class="subtitle">Discover products tailored to your unique skin profile</p>
+    </div>
+
+    <!-- Recommendation Filters -->
+    <div class="form-section">
+        <h3><i class="fas fa-user-circle"></i> Your Skin Profile</h3>
+        
+        <form id="recommendationForm" method="POST" class="product-form">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="skinType"><i class="fas fa-hand-sparkles"></i> Skin Type</label>
+                    <select class="form-control" id="skinType" name="skin_type" required>
+                        <option value="">Select Skin Type</option>
+                        {% for value, label in skin_types %}
+                        <option value="{{ value }}" {% if selected_skin_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skinCondition"><i class="fas fa-heartbeat"></i> Skin Condition</label>
+                    <select class="form-control" id="skinCondition" name="skin_condition">
+                        <option value="">Select Skin Condition</option>
+                        {% for value, label in skin_conditions %}
+                        <option value="{{ value }}" {% if selected_skin_condition == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skinTexture"><i class="fas fa-spa"></i> Skin Texture</label>
+                    <select class="form-control" id="skinTexture" name="skin_texture">
+                        <option value="">Select Skin Texture</option>
+                        {% for value, label in skin_textures %}
+                        <option value="{{ value }}" {% if selected_skin_texture == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sensitivityLevel"><i class="fas fa-allergies"></i> Sensitivity Level</label>
+                    <select class="form-control" id="sensitivityLevel" name="sensitivity_level">
+                        <option value="">Select Sensitivity Level</option>
+                        {% for value, label in sensitivity_levels %}
+                        <option value="{{ value }}" {% if selected_sensitivity_level == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="skinTone"><i class="fas fa-palette"></i> Skin Undertone</label>
+                    <select class="form-control" id="skinTone" name="skin_tone">
+                        <option value="">Select Skin Undertone</option>
+                        {% for value, label in skin_tones %}
+                        <option value="{{ value }}" {% if selected_skin_tone == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="surfaceTone"><i class="fas fa-tint"></i> Surface Tone</label>
+                    <select class="form-control" id="surfaceTone" name="surface_tone">
+                        <option value="">Select Surface Tone</option>
+                        {% for value, label in surface_tones %}
+                        <option value="{{ value }}" {% if selected_surface_tone == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-search"></i> Get Recommendations
+                </button>
+                {% if recommendations %}
+                <a href="#recommendation-results" class="scroll-btn">
+                    <i class="fas fa-arrow-down"></i> View Results
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Recommendation Results -->
+    {% if recommendations %}
+    <div class="form-section" id="recommendation-results">
+        <div class="results-header">
+            <h3><i class="fas fa-star"></i> Recommended For You</h3>
+            <p class="results-count">{{ recommendations|length }} products matched your profile</p>
+        </div>
+        
+        <div class="recommendation-grid">
+            {% for product in recommendations %}
+            <div class="recommendation-card">
+                <div class="recommendation-image">
+                    {% if product.product_images.first %}
+                    <img src="{{ product.product_images.first.image.url }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-camera"></i>
+                        <span>No Image</span>
+                    </div>
+                    {% endif %}
+                    <div class="card-overlay"></div>
+                </div>
+                
+                <div class="recommendation-details">
+                    <h4>{{ product.name }}</h4>
+                    <p class="brand">{{ product.brand }}</p>
+                    <p class="description">{{ product.description|truncatechars:100 }}</p>
+                    
+                    <div class="tags">
+                        {% if product.skin_type %}
+                        <span class="tag">{{ product.get_skin_type_display }}</span>
+                        {% endif %}
+                        {% if product.skin_condition %}
+                        <span class="tag">{{ product.get_skin_condition_display }}</span>
+                        {% endif %}
+                        {% if product.sensitivity_level %}
+                        <span class="tag">{{ product.get_sensitivity_level_display }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="recommendation-footer">
+                        <span class="price">RM{{ product.price }}</span>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.8</span>
+                        </div>
+                        <a href="{% url 'product_detail' product.id %}" class="view-btn">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-results">
+                <i class="fas fa-info-circle"></i>
+                <p>No products match your current skin profile. Please try different filters.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
