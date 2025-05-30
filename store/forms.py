@@ -22,15 +22,6 @@ ProductImageFormSet = inlineformset_factory(
     extra=10, 
     can_delete=True)
 
-class ProductForm(forms.ModelForm):
-    class Meta:
-        model = Product
-        fields = [
-            'brand', 'name', 'category','description', 
-            'price','quantity', 'min_stock', 'max_stock', 
-            'skin_type', 'skin_condition', 'skin_texture', 
-            'sensitivity_level']
-
 class CheckoutForm(forms.Form):
     address = forms.CharField(max_length=255, widget=forms.Textarea(attrs={'placeholder': 'Enter your address'}))
     city = forms.CharField(max_length=100)

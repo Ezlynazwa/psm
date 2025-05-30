@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Order, OrderItem, ShippingAddress, ProductImage, ProductVariation
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from.forms import ProductForm, PaymentForm
-from .forms import CheckoutForm
+from dashboard.forms import ProductForm
+from .forms import CheckoutForm, PaymentForm
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site

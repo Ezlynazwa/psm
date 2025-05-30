@@ -1,495 +1,287 @@
 {% extends "dashboard/adminbase.html" %}
 {% load static %}
-{% block title %}{{ action }} Product | Brew Beauty{% endblock %}
+{% block title %}Product | Brew Beauty{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/product_form.css' %}">
+<link rel="stylesheet" href="{% static 'css/addproduct.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="product-form-container">
-    <div class="form-header">
-        <h2><i class="fas fa-makeup-brush"></i> {{ action }} Makeup Product</h2>
-        <p>Fill in the makeup product details below</p>
+<div class="product-form-wrapper">
+    <div class="product-form-header">
+        <h2>{{ action }} Product</h2>
+        <div class="form-actions">
+            <a href="{% url 'dashboard:manageproducts' %}" class="btn btn-cancel">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <button type="submit" form="productForm" class="btn btn-save">
+                <i class="fas fa-save"></i> Save Product
+            </button>
+        </div>
     </div>
+    
+    {% if messages %}
+    <div class="alert-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-    <form method="post" enctype="multipart/form-data" class="product-form">
+    <form id="productForm" method="post" enctype="multipart/form-data" class="product-form">
         {% csrf_token %}
         
-        <!-- Section 1: Basic Product Info -->
+        <!-- Main Product Form -->
         <div class="form-section">
-            <h3><i class="fas fa-info-circle"></i> Product Information</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.brand.id_for_label }}">Brand*</label>
-                    {{ form.brand }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.name.id_for_label }}">Product Name*</label>
-                    {{ form.name }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.category.id_for_label }}">Category*</label>
-                    {{ form.category }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.price.id_for_label }}">Price (RM)*</label>
-                    {{ form.price }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.size.id_for_label }}">Size*</label>
-                    {{ form.size }}
-                </div>
+            <div class="section-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>Product Information</h3>
             </div>
-            
-            <div class="form-group full-width">
-                <label for="{{ form.description.id_for_label }}">Description</label>
-                {{ form.description }}
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="form-error">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
         </div>
 
-        <!-- Section 2: Makeup-Specific Attributes -->
+        <!-- Images Formset -->
         <div class="form-section">
-            <h3><i class="fas fa-palette"></i> Makeup Properties</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Texture*</label>
-                    {{ form.texture }}
-                </div>
-                <div class="form-group">
-                    <label>Finish</label>
-                    {{ form.finish }}
-                </div>
-                <div class="form-group">
-                    <label>Long Lasting</label>
-                    <div class="checkbox-container">
-                        {{ form.long_last }}
-                        <label for="{{ form.long_last.id_for_label }}" class="checkbox-label"></label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Waterproof</label>
-                    <div class="checkbox-container">
-                        {{ form.waterproof }}
-                        <label for="{{ form.waterproof.id_for_label }}" class="checkbox-label"></label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>SPF </label>
-                    {{ form.spf }}
-                    <label for="{{ form.spf.id_for_label }}"></label>
-                </div>
-                <div class="form-group">
-                    <label>Coverage </label>
-                    {{ form.coverage }}
-                    <label for="{{ form.coverage.id_for_label }}"></label>
-                </div>
-                <div class="form-group">
-                    <label>Vegan</label>
-                    <div class="checkbox-container">
-                        {{ form.is_vegan }}
-                        <label for="{{ form.is_vegan.id_for_label }}" class="checkbox-label"></label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Cruelty Free</label>
-                    <div class="checkbox-container">
-                        {{ form.is_cruelty_free }}
-                        <label for="{{ form.is_cruelty_free.id_for_label }}" class="checkbox-label"></label>
-                    </div>
-                </div>
+            <div class="section-header">
+                <i class="fas fa-images"></i>
+                <h3>Product Images</h3>
             </div>
-        </div>
-
-        <!-- Section 3: Product Images -->
-        <div class="form-section">
-            <h3><i class="fas fa-images"></i> Product Images</h3>
-            <div class="image-upload-container">
-                {{ formset.management_form }}
-                <div class="image-grid" id="image-container">
-                    {% for form in formset %}
-                    <div class="image-upload-box">
-                        {{ form.id }}
-                        <label class="image-upload-label">
-                            {{ form.image }}
-                            <div class="image-preview">
-                                {% if form.instance.image %}
-                                    <img src="{{ form.instance.image.url }}" class="preview-image">
-                                {% else %}
-                                    <i class="fas fa-camera"></i>
-                                    <span>Click to upload</span>
-                                {% endif %} 
+            {{ image_formset.management_form }}
+            <div class="image-grid" id="image-container">
+                {% for form in image_formset %}
+                <div class="image-upload-box {% if form.instance.pk %}existing-image{% endif %}">
+                    {{ form.id }}
+                    <div class="image-preview">
+                        {% if form.instance.image %}
+                            <img src="{{ form.instance.image.url }}" alt="Product image">
+                            <div class="image-overlay">
+                                <i class="fas fa-camera"></i>
                             </div>
-                            <button type="button" class="remove-image" onclick="removeImage(this)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </label>
-                        {{ form.DELETE }}
-                    </div>
-                    {% endfor %}
-                    
-                    <!-- Empty form for new images -->
-                    {% for i in empty_image_forms %}
-                    <div class="image-upload-box">
-                        <label class="image-upload-label">
-                            <input type="file" name="images-{{ forloop.counter|add:formset.forms|length }}-image" 
-                                   id="id_form-{{ forloop.counter|add:formset.forms|length }}-image" 
-                                   accept="image/*">
-                            <div class="image-preview">
+                        {% else %}
+                            <div class="placeholder">
                                 <i class="fas fa-camera"></i>
                                 <span>Click to upload</span>
                             </div>
-                            <button type="button" class="remove-image" onclick="removeImage(this)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </label>
-                        <input type="hidden" name="images-{{ forloop.counter|add:formset.forms|length }}-id" 
-                               id="id_form-{{ forloop.counter|add:formset.forms|length }}-id">
+                        {% endif %}
                     </div>
-                    {% endfor %}
+                    {{ form.image }}
+                    <button type="button" class="btn btn-remove remove-image" title="Remove image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
                 </div>
-                <button type="button" class="add-image-btn" onclick="addImageInput()">
-                    <i class="fas fa-plus"></i> Add Image
-                </button>
+                {% endfor %}
+                <div class="image-upload-box add-image-box" id="add-image">
+                    <div class="add-image-content">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Image</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Section 4: Color Variations -->
+        <!-- Variations Formset -->
         <div class="form-section">
-            <h3><i class="fas fa-swatchbook"></i> Color Variations</h3>
-            <div class="variation-container" id="variation-container">
-        <!-- For variation formset -->
-        {{ variation_formset.management_form }}    
-            {% for form in variation_formset %}
-                <div class="variation-item">
-                    <div class="variation-header">
-                        <h4>Variation #<span class="variation-number">{{ forloop.counter }}</span></h4>
-                        <button type="button" class="remove-variation" onclick="removeVariation(this)">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="{{ form.variation_code.id_for_label }}">Shade Code*</label>
-                            {{ form.variation_code }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.quantity.id_for_label }}">Quantity*</label>
-                            {{ form.quantity }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.skin_tone.id_for_label }}">Undertone</label>
-                            <select name="variations-{{ forloop.counter0 }}-skin_tone" 
-                                    id="id_variations-{{ forloop.counter0 }}-skin_tone" 
-                                    class="form-control">
-                                <option value="">Select Undertone</option>
-                                {% for value, label in variation_formset.form.skin_tone.field.choices %}
-                                    <option value="{{ value }}" {% if form.skin_tone.value == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.surface_tones.id_for_label }}">Surface Tone</label>
-                            <select name="variations-{{ forloop.counter0 }}-surface_tones" 
-                                    id="id_variations-{{ forloop.counter0 }}-surface_tones" 
-                                    class="form-control">
-                                <option value="">Select Surface Tone</option>
-                                {% for value, label in variation_formset.form.surface_tones.field.choices %}
-                                    <option value="{{ value }}" {% if form.surface_tones.value == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
+            <div class="section-header">
+                <i class="fas fa-palette"></i>
+                <h3>Color Variations</h3>
+            </div>
+            {{ variation_formset.management_form }}
+            <div class="variation-grid" id="variation-container">
+                {% for form in variation_formset %}
+                <div class="variation-item {% if form.instance.pk %}existing-variation{% endif %}">
                     {{ form.id }}
-                    {{ form.DELETE }}
+                    <div class="form-row">
+                        <label>Shade Code</label>
+                        {{ form.variation_code }}
+                    </div>
+                    <div class="form-row">
+                        <label>Quantity</label>
+                        {{ form.quantity }}
+                    </div>
+                    <div class="form-row">
+                        <label>Skin Tone</label>
+                        {{ form.skin_tone }}
+                    </div>
+                    <div class="form-row">
+                        <label>Surface Tone</label>
+                        {{ form.surface_tones }}
+                    </div>
+                    <button type="button" class="btn btn-remove remove-variation" title="Remove variation">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
                 </div>
                 {% endfor %}
-                <!-- Empty form for new variations -->
-                {% for i in empty_variation_forms %}
-                <div class="variation-item">
-                    <div class="variation-header">
-                        <h4>Variation #<span class="variation-number">{{ forloop.counter|add:variation_formset.forms|length }}</span></h4>
-                        <button type="button" class="remove-variation" onclick="removeVariation(this)">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
+                <div class="variation-item add-variation-box" id="add-variation">
+                    <div class="add-variation-content">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Variation</span>
                     </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Shade Code*</label>
-                            <input type="text" name="variations-{{ forloop.counter|add:variation_formset.forms|length }}-variation_code" 
-                                   class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantity*</label>
-                            <input type="number" name="variations-{{ forloop.counter|add:variation_formset.forms|length }}-quantity" 
-                                   class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Undertone</label>
-                            <select name="variation_set-{{ forloop.counter|add:variation_formset.forms|length }}-skin_tone" 
-                                    class="form-control">
-                                <option value="">Select Undertone</option>
-                                {% for value, label in form.fields.skin_tone.choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Surface Tone</label>
-                            <select name="variation_set-{{ forloop.counter|add:variation_formset.forms|length }}-surface_tones" 
-                                    class="form-control">
-                                <option value="">Select Surface Tone</option>
-                                {% for value, label in form.fields.surface_tones.choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <input type="hidden" name="variation_set-{{ forloop.counter|add:variation_formset.forms|length }}-id">
-                </div>
-                {% endfor %}
-            </div>
-            <button type="button" class="add-variation-btn" onclick="addVariation()">
-                <i class="fas fa-plus"></i> Add Color Variation
-            </button>
-        </div>
-
-        <!-- Section 5: Skin Compatibility -->
-        <div class="form-section">
-            <h3><i class="fas fa-user-circle"></i> Skin Compatibility</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.skin_type.id_for_label }}">Skin Type</label>
-                    {{ form.skin_type }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.skin_condition.id_for_label }}">Skin Condition</label>
-                    {{ form.skin_condition }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.skin_texture.id_for_label }}">Skin Texture</label>
-                    {{ form.skin_texture }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.sensitivity_level.id_for_label }}">Sensitivity Level</label>
-                    {{ form.sensitivity_level }}
                 </div>
             </div>
-        </div>
-
-        <!-- Section 6: Inventory Management -->
-        <div class="form-section">
-            <h3><i class="fas fa-box-open"></i> Inventory</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.quantity.id_for_label }}">Total Quantity*</label>
-                    {{ form.quantity }}
-                    <small class="form-text text-muted">Auto-calculated from variations</small>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.min_stock.id_for_label }}">Min Stock Alert</label>
-                    {{ form.min_stock }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.max_stock.id_for_label }}">Max Stock Capacity</label>
-                    {{ form.max_stock }}
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="submit-btn">
-                <i class="fas fa-save"></i> {{ action }} Product
-            </button>
-            <a href="{% url 'dashboard:manageproducts' %}" class="cancel-btn">
-                <i class="fas fa-times"></i> Cancel
-            </a>
         </div>
     </form>
 </div>
 
 <script>
-// Image Upload and Preview
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize image previews
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', function(e) {
-            const preview = this.closest('.image-upload-label').querySelector('.image-preview');
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
-                }
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    });
+    // Image upload functionality
+    const imageContainer = document.getElementById('image-container');
+    const addImageBtn = document.getElementById('add-image');
+    const totalImageForms = document.getElementById('id_images-TOTAL_FORMS');
+    let imageFormCount = parseInt(totalImageForms.value);
 
-    // Initialize finish selection
-    document.querySelectorAll('.finish-option input').forEach(radio => {
-        if (radio.checked) {
-            radio.closest('.finish-option').classList.add('selected');
-        }
-    });
-});
-
-// Add new image input
-function addImageInput() {
-    const totalForms = document.getElementById('id_images-TOTAL_FORMS');
-    const formCount = parseInt(totalForms.value);
-    const container = document.getElementById('image-container');
-    
-    const newInput = document.createElement('div');
-    newInput.className = 'image-upload-box';
-    newInput.innerHTML = `
-        <label class="image-upload-label">
-            <input type="file" name="form-${formCount}-image" id="id_form-${formCount}-image" accept="image/*">
-            <div class="image-preview">
-                <i class="fas fa-camera"></i>
-                <span>Click to upload</span>
-            </div>
-            <button type="button" class="remove-image" onclick="removeImage(this)">
-                <i class="fas fa-times"></i>
-            </button>
-        </label>
-        <input type="hidden" name="form-${formCount}-id" id="id_form-${formCount}-id">
-    `;
-    
-    container.appendChild(newInput);
-    totalForms.value = formCount + 1;
-    
-    // Add event listener for the new input
-    newInput.querySelector('input[type="file"]').addEventListener('change', function(e) {
-        const preview = this.closest('.image-upload-label').querySelector('.image-preview');
-        if (this.files && this.files[0]) {
+    // Function to handle image preview
+    function setupImagePreview(input) {
+        const preview = input.closest('.image-upload-box').querySelector('.image-preview');
+        if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                preview.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Uploaded image">
+                    <div class="image-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
             }
-            reader.readAsDataURL(this.files[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Add new image field
+    addImageBtn.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.className = 'image-upload-box';
+        newForm.innerHTML = `
+            <div class="image-preview">
+                <div class="placeholder">
+                    <i class="fas fa-camera"></i>
+                    <span>Click to upload</span>
+                </div>
+            </div>
+            <input type="file" name="images-${imageFormCount}-image" id="id_images-${imageFormCount}-image" accept="image/*">
+            <button type="button" class="btn btn-remove remove-image" title="Remove image">
+                <i class="fas fa-times"></i>
+            </button>
+            <input type="hidden" name="images-${imageFormCount}-id" id="id_images-${imageFormCount}-id">
+        `;
+        imageContainer.insertBefore(newForm, addImageBtn);
+        
+        // Setup event listener for the new input
+        const newInput = newForm.querySelector('input[type="file"]');
+        newInput.addEventListener('change', function() {
+            setupImagePreview(this);
+        });
+        
+        imageFormCount++;
+        totalImageForms.value = imageFormCount;
+    });
+
+    // Remove image field
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-image')) {
+            const imageBox = e.target.closest('.image-upload-box');
+            const deleteInput = imageBox.querySelector('input[name$="-DELETE"]');
+            
+            if (deleteInput) {
+                // For existing images
+                deleteInput.value = 'on';
+                imageBox.style.display = 'none';
+            } else {
+                // For new images
+                imageBox.remove();
+                imageFormCount--;
+                totalImageForms.value = imageFormCount;
+            }
         }
     });
-}
 
-// Remove image input
-function removeImage(button) {
-    const box = button.closest('.image-upload-box');
-    const deleteInput = box.querySelector('input[type="checkbox"][name$="-DELETE"]');
-    
-    if (deleteInput) {
-        // Mark for deletion if it's part of the formset
-        deleteInput.checked = true;
-        box.style.display = 'none';
-    } else {
-        // If dynamically added and not saved yet, just remove from DOM
-        box.remove();
-
-        // Update TOTAL_FORMS count
-        const totalForms = document.getElementById('id_images-TOTAL_FORMS');
-        const currentCount = parseInt(totalForms.value);
-        totalForms.value = currentCount - 1;
-    }
-}
-
-
-// Add new variation
-function addVariation() {
-    const totalForms = document.getElementById('id_variations-TOTAL_FORMS');
-    const formCount = parseInt(totalForms.value);
-    const container = document.getElementById('variation-container');
-    
-    const newVariation = document.createElement('div');
-    newVariation.className = 'variation-item';
-    newVariation.innerHTML = `
-        <div class="variation-header">
-            <h4>Variation #<span class="variation-number">${formCount + 1}</span></h4>
-            <button type="button" class="remove-variation" onclick="removeVariation(this)">
-                <i class="fas fa-trash"></i> Remove
-            </button>
-        </div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Shade Code*</label>
-                <input type="text" name="variation_set-${formCount}-variation_code" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Quantity*</label>
-                <input type="number" name="variation_set-${formCount}-quantity" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="{{ form.skin_tone.id_for_label }}">Undertone</label>
-                <select name="variations-{{ forloop.counter0 }}-skin_tone" 
-                        id="id_variations-{{ forloop.counter0 }}-skin_tone" 
-                        class="form-control">
-                    <option value="">Select Undertone</option>
-                    {% for value, label in variation_formset.form.skin_tone.field.choices %}
-                        <option value="{{ value }}" {% if form.skin_tone.value == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="{{ form.surface_tones.id_for_label }}">Surface Tone</label>
-                <select name="variations-{{ forloop.counter0 }}-surface_tones" 
-                        id="id_variations-{{ forloop.counter0 }}-surface_tones" 
-                        class="form-control">
-                    <option value="">Select Surface Tone</option>
-                    {% for value, label in variation_formset.form.surface_tones.field.choices %}
-                        <option value="{{ value }}" {% if form.surface_tones.value == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <input type="hidden" name="variation_set-${formCount}-id" id="id_variation_set-${formCount}-id">
-    `;
-    
-    container.appendChild(newVariation);
-    totalForms.value = formCount + 1;
-    updateVariationNumbers();
-}
-
-// Remove variation
-function removeVariation(button) {
-    const variationItem = button.closest('.variation-item');
-    const deleteInput = variationItem.querySelector('input[name$="-DELETE"]');
-    
-    if (deleteInput) {
-        // Mark for deletion
-        deleteInput.value = 'on';
-        variationItem.style.display = 'none';
-    } else {
-        // Just remove if it's new
-        variationItem.remove();
-        const totalForms = document.getElementById('id_variation_set-TOTAL_FORMS');
-        totalForms.value = parseInt(totalForms.value) - 1;
-    }
-    
-    updateVariationNumbers();
-}
-
-// Update variation numbers
-function updateVariationNumbers() {
-    const variations = document.querySelectorAll('.variation-item:not([style*="display: none"])');
-    variations.forEach((variation, index) => {
-        variation.querySelector('.variation-number').textContent = index + 1;
-    });
-}
-
-// Highlight selected finish option
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.finish-option')) {
-        document.querySelectorAll('.finish-option').forEach(opt => {
-            opt.classList.remove('selected');
+    // Initialize image previews for existing forms
+    document.querySelectorAll('.image-upload-box:not(.add-image-box) input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            setupImagePreview(this);
         });
-        e.target.closest('.finish-option').classList.add('selected');
-    }
+    });
+
+    // Variation functionality
+    const variationContainer = document.getElementById('variation-container');
+    const addVariationBtn = document.getElementById('add-variation');
+    const totalVariationForms = document.getElementById('id_variations-TOTAL_FORMS');
+    let variationFormCount = parseInt(totalVariationForms.value);
+    
+    addVariationBtn.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.className = 'variation-item';
+        newForm.innerHTML = `
+            <div class="form-row">
+                <label>Shade Code</label>
+                <input type="text" name="variations-${variationFormCount}-variation_code" required>
+            </div>
+            <div class="form-row">
+                <label>Quantity</label>
+                <input type="number" name="variations-${variationFormCount}-quantity" required>
+            </div>
+            <div class="form-row">
+                <label>Skin Tone</label>
+                <select name="variations-${variationFormCount}-skin_tone">
+                    {% for value, label in variation_formset.form.skin_tone.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Surface Tone</label>
+                <select name="variations-${variationFormCount}-surface_tones">
+                    {% for value, label in variation_formset.form.surface_tones.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn btn-remove remove-variation" title="Remove variation">
+                <i class="fas fa-times"></i>
+            </button>
+            <input type="hidden" name="variations-${variationFormCount}-id" id="id_variations-${variationFormCount}-id">
+        `;
+        variationContainer.insertBefore(newForm, addVariationBtn);
+        variationFormCount++;
+        totalVariationForms.value = variationFormCount;
+    });
+
+    // Remove variation
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-variation')) {
+            const variationItem = e.target.closest('.variation-item');
+            const deleteInput = variationItem.querySelector('input[name$="-DELETE"]');
+            
+            if (deleteInput) {
+                deleteInput.value = 'on';
+                variationItem.style.display = 'none';
+            } else {
+                variationItem.remove();
+                variationFormCount--;
+                totalVariationForms.value = variationFormCount;
+            }
+        }
+    });
 });
 </script>
+
 {% endblock %}

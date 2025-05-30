@@ -1,12 +1,12 @@
-from store.models import Product
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from users.models import User, Employee
-from store.models import ProductVariation ,ProductImage, Order, OrderItem 
+from store.models import Product, ProductVariation ,ProductImage, Order, OrderItem 
 from django.http import HttpResponse
 from django.contrib import messages
-from store.forms import ProductVariationFormSet, ProductImageFormSet 
-from .forms import ProductForm, ProductImageForm, ProductVariationForm, OrderStatusForm, TrackingNumberForm, ParcelImageForm
+from store.forms import ProductImageFormSet 
+from .forms import ProductForm, OrderStatusForm, TrackingNumberForm, ParcelImageForm
+from store.forms import  ProductImageForm, ProductVariationForm
 from django.forms import modelformset_factory
 from django.forms import inlineformset_factory
 from django.db.models import Sum, Count, F
@@ -84,19 +84,18 @@ def manageproducts(request):
 def generatereport(request):
     return render(request, 'dashboard/generatereports.html')
 
-# Add a product
 @staff_member_required
 def add_product(request):
-    ProductImageFormSet = inlineformset_factory(
+    ImageFormSet = inlineformset_factory(
         Product, 
         ProductImage, 
         form=ProductImageForm,
-        extra=3,
-        can_delete=True,
-        max_num=10
+        extra=1,  # Start with 1 empty form
+        max_num=10,
+        can_delete=True
     )
     
-    ProductVariationFormSet = inlineformset_factory(
+    VariationFormSet = inlineformset_factory(
         Product,
         ProductVariation,
         form=ProductVariationForm,
@@ -106,51 +105,29 @@ def add_product(request):
 
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
-        
-        # Define formsets using the form instance (after saving later)
-        image_formset = ProductImageFormSet(request.POST, request.FILES, prefix='images')
-        variation_formset = ProductVariationFormSet(request.POST, prefix='variations')
+        image_formset = ImageFormSet(request.POST, request.FILES, prefix='images')
+        variation_formset = VariationFormSet(request.POST, prefix='variations')
 
-        if form.is_valid():
-            product = form.save(commit=False)
-            
-            # First save the product to get an ID
-            product.save()
-
-            # Now handle the formsets with the product instance
-            image_formset = ProductImageFormSet(
-                request.POST, request.FILES, 
-                instance=product, prefix='images'
-            )
-            variation_formset = ProductVariationFormSet(
-                request.POST, 
-                instance=product, prefix='variations'
-            )
-
-        
-            image_formset = ProductImageFormSet(request.POST, request.FILES, prefix='images', instance=product)
-            variation_formset = ProductVariationFormSet(request.POST, prefix='variations', instance=product)
-
-            if image_formset.is_valid() and variation_formset.is_valid():
-                image_formset.save()
-                variation_formset.save()
-
+        if form.is_valid() and image_formset.is_valid() and variation_formset.is_valid():
+            product = form.save()
+            image_formset.instance = product
+            variation_formset.instance = product
+            image_formset.save()
+            variation_formset.save()
+            messages.success(request, 'Product added successfully!')
             return redirect('dashboard:manageproducts')
-
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ProductForm()
-        image_formset = ProductImageFormSet(queryset=ProductImage.objects.none(), prefix='images')
-        variation_formset = ProductVariationFormSet(queryset=ProductVariation.objects.none(), prefix='variations')
+        image_formset = ImageFormSet(queryset=ProductImage.objects.none(), prefix='images')
+        variation_formset = VariationFormSet(queryset=ProductVariation.objects.none(), prefix='variations')
 
     return render(request, 'dashboard/product_form.html', {
         'form': form,
-        'formset': image_formset,
+        'image_formset': image_formset,
         'variation_formset': variation_formset,
         'action': 'Add',
-        'skin_tone_choices': ProductVariation.SKIN_TONES,
-        'surface_tone_choices': ProductVariation.SURFACE_TONES,
-        'empty_image_forms': range(1 - len(image_formset)),
-        'empty_variation_forms': range(1 - len(variation_formset)),
     })
 
 # Edit a product
