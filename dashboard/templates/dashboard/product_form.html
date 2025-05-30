@@ -1,14 +1,15 @@
 {% extends "dashboard/adminbase.html" %}
-{% load static %}
+{%load static%}
 {% block title %}Product | Brew Beauty{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/addproduct.css' %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="product-form-wrapper">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="product-form-container">
     <div class="product-form-header">
         <h2>{{ action }} Product</h2>
         <div class="form-actions">

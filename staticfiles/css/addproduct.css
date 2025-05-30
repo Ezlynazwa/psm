@@ -19,7 +19,7 @@
 }
 
 /* Base Styles */
-.product-form-wrapper {
+.product-form-container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
@@ -27,6 +27,10 @@
     color: var(--dark-gray);
     background: var(--off-white);
     min-height: 100vh;
+}
+
+.product-form {
+    margin-top: 2rem;
 }
 
 .product-form-header {
@@ -190,7 +194,6 @@
     object-fit: cover;
 
 }
-
 
 .image-overlay {
     position: absolute;
@@ -524,3 +527,4 @@
         padding: 0.85rem;
     }
 }
+

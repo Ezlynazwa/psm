@@ -32,8 +32,8 @@ body {
     min-height: 100vh;
 }
 
-/* Admin Sidebar */
-.admin-sidebar {
+/* staff Sidebar */
+.staff-sidebar {
     width: var(--sidebar-width);
     background: linear-gradient(135deg, #2c3e50, #1a252f);
     color: white;
@@ -43,7 +43,7 @@ body {
     z-index: 1000;
 }
 
-.admin-sidebar.collapsed {
+.staff-sidebar.collapsed {
     width: var(--sidebar-collapsed);
 }
 
@@ -53,31 +53,31 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.admin-logo {
+.staff-logo {
     max-width: 120px;
     margin-bottom: 1rem;
     transition: var(--transition);
 }
 
-.admin-sidebar.collapsed .admin-logo {
+.staff-sidebar.collapsed .admin-logo {
     max-width: 50px;
     margin-bottom: 0;
 }
 
-.admin-sidebar h2 {
+.staff-sidebar h2 {
     font-size: 1.2rem;
     font-weight: 600;
     transition: var(--transition);
 }
 
-.admin-sidebar.collapsed h2 {
+.staff-sidebar.collapsed h2 {
     opacity: 0;
     height: 0;
     overflow: hidden;
 }
 
-/* Admin Navigation */
-.admin-nav {
+/* staff Navigation */
+.staff-nav {
     padding: 1.5rem 0;
 }
 
@@ -118,7 +118,7 @@ body {
     transition: var(--transition);
 }
 
-.admin-sidebar.collapsed .nav-link i {
+.staff-sidebar.collapsed .nav-link i {
     margin-right: 0;
     font-size: 1.3rem;
 }
@@ -127,7 +127,7 @@ body {
     transition: var(--transition);
 }
 
-.admin-sidebar.collapsed .nav-link span {
+.staff-sidebar.collapsed .nav-link span {
     opacity: 0;
     width: 0;
     height: 0;
@@ -151,8 +151,8 @@ body {
     opacity: 1;
 }
 
-/* Admin Main Content */
-.admin-main {
+/* staff Main Content */
+.staff-main {
     flex: 1;
     margin-left: var(--sidebar-width);
     transition: var(--transition);
@@ -161,12 +161,12 @@ body {
     flex-direction: column;
 }
 
-.admin-main.expanded {
+.staff-main.expanded {
     margin-left: var(--sidebar-collapsed);
 }
 
-/* Admin Header */
-.admin-header {
+/* staff Header */
+.staff-header {
     height: var(--header-height);
     background-color: white;
     box-shadow: var(--box-shadow);
@@ -202,7 +202,7 @@ body {
     color: var(--dark);
 }
 
-.admin-header h1 {
+.staff-header h1 {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--dark);
@@ -214,12 +214,12 @@ body {
     gap: 1.5rem;
 }
 
-/* Admin Search */
-.admin-search {
+/* staff Search */
+.staff-search {
     position: relative;
 }
 
-.admin-search i {
+.staff-search i {
     position: absolute;
     left: 1rem;
     top: 50%;
@@ -227,7 +227,7 @@ body {
     color: var(--secondary);
 }
 
-.admin-search input {
+.staff-search input {
     padding: 0.6rem 1rem 0.6rem 2.5rem;
     border: 1px solid var(--light-gray);
     border-radius: var(--border-radius);
@@ -236,14 +236,14 @@ body {
     min-width: 250px;
 }
 
-.admin-search input:focus {
+.staff-search input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* Admin Profile */
-.admin-profile {
+/* staff Profile */
+.staff-profile {
     position: relative;
 }
 
@@ -320,15 +320,15 @@ body {
     text-align: center;
 }
 
-/* Admin Content */
-.admin-content {
+/* staff Content */
+.staff-content {
     flex: 1;
     padding: 1.5rem;
     background-color: #f5f7fa;
 }
 
-/* Admin Footer */
-.admin-footer {
+/* staff Footer */
+.staff-footer {
     background-color: white;
     padding: 1rem 1.5rem;
     display: flex;
@@ -337,7 +337,7 @@ body {
     border-top: 1px solid var(--light-gray);
 }
 
-.admin-footer p {
+.staff-footer p {
     color: var(--secondary);
     font-size: 0.9rem;
 }
@@ -360,20 +360,20 @@ body {
 
 /* Responsive Design */
 @media (max-width: 992px) {
-    .admin-sidebar {
+    .staff-sidebar {
         transform: translateX(-100%);
     }
     
-    .admin-sidebar.collapsed {
+    .staff-sidebar.collapsed {
         transform: translateX(0);
         width: var(--sidebar-collapsed);
     }
     
-    .admin-main {
+    .staff-main {
         margin-left: 0;
     }
     
-    .admin-main.expanded {
+    .staff-main.expanded {
         margin-left: var(--sidebar-collapsed);
     }
     
@@ -383,7 +383,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .admin-search input {
+    .staff-search input {
         min-width: 180px;
     }
     
@@ -391,25 +391,25 @@ body {
         display: none;
     }
     
-    .admin-sidebar.collapsed .nav-link i {
+    .staff-sidebar.collapsed .nav-link i {
         font-size: 1.1rem;
     }
 }
 
 @media (max-width: 576px) {
-    .admin-search {
+    .staff-search {
         display: none;
     }
     
-    .admin-header {
+    .staff-header {
         padding: 0 1rem;
     }
     
-    .admin-content {
+    .staff-content {
         padding: 1rem;
     }
     
-    .admin-footer {
+    .staff-footer {
         flex-direction: column;
         gap: 0.5rem;
         text-align: center;
