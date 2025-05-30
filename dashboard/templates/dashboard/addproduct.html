@@ -3,15 +3,16 @@
 {% block title %}Product | Brew Beauty{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/addproduct.css' %}">
+
+<link rel="stylesheet" href="{% static ' css/add_product.css ' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 <div class="product-form-container">
     <div class="product-form-header">
-        <h2>{{ action }} Product</h2>
+        <h2> Add Product</h2>
         <div class="form-actions">
             <a href="{% url 'dashboard:manageproducts' %}" class="btn btn-cancel">
                 <i class="fas fa-arrow-left"></i> Cancel

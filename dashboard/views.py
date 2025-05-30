@@ -123,7 +123,7 @@ def add_product(request):
         image_formset = ImageFormSet(queryset=ProductImage.objects.none(), prefix='images')
         variation_formset = VariationFormSet(queryset=ProductVariation.objects.none(), prefix='variations')
 
-    return render(request, 'dashboard/product_form.html', {
+    return render(request, 'dashboard/addproduct.html', {
         'form': form,
         'image_formset': image_formset,
         'variation_formset': variation_formset,
@@ -154,7 +154,7 @@ def edit_product(request, pk):
         form = ProductForm(instance=product)
         image_formset = ProductImageFormSet(queryset=ProductImage.objects.filter(product=product))
 
-    return render(request, 'dashboard/product_form.html', {
+    return render(request, 'dashboard/addproduct.html', {
         'form': form,
         'formset': image_formset,
         'action': 'Edit'})
