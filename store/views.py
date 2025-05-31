@@ -17,6 +17,9 @@ from django.db.models import Sum, Count, F, ExpressionWrapper, FloatField
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 
@@ -139,57 +142,87 @@ def checkout(request, order_id):
             form = CheckoutForm(request.POST, request.FILES)
             
             if form.is_valid():
-                # Create a NEW order for the checked out items
-                new_order = Order.objects.create(
-                    user=request.user,
-                    complete=True,
-                    total=total,
-                    status='pending'
-                )
+                print("Form is valid")  # Debug
+                
+                # Create new order
                 try:
-                    new_order.save()
-                    print("New order saved successfully:", new_order.id)  # Debug
-                except Exception as e:
-                    print("ORDER SAVE ERROR:", e)  # Debug
-                    messages.error(request, f"Order could not be saved: {str(e)}")
-                    return redirect('store:cart')  # This might be triggering
-                                
-                # Copy selected items to new order
-                for item in selected_items:
-                    OrderItem.objects.create(
-                        product=item.product,
-                        order=new_order,
-                        quantity=item.quantity
+                    new_order = Order.objects.create(
+                        user=request.user,
+                        complete=True,
+                        total=total,
+                        status='pending'
                     )
+                    print(f"New order created: {new_order.id}")  # Debug
+                except Exception as e:
+                    print(f"Error creating order: {str(e)}")  # Debug
+                    messages.error(request, "Failed to create order")
+                    return redirect('store:cart')
+                
+                # Copy items
+                try:
+                    for item in selected_items:
+                        OrderItem.objects.create(
+                            product=item.product,
+                            order=new_order,
+                            quantity=item.quantity,
+                            variation=item.variation
+                        )
+                    print("Items copied successfully")  # Debug
+                except Exception as e:
+                    print(f"Error copying items: {str(e)}")  # Debug
+                    new_order.delete()  # Clean up
+                    messages.error(request, "Failed to process order items")
+                    return redirect('store:cart')
                 
                 # Process address
-                if request.POST.get('add_new_address') == 'on':
-                    shipping_address = ShippingAddress.objects.create(
-                        user=request.user,
-                        address=form.cleaned_data['address'],
-                        city=form.cleaned_data['city'],
-                        state=form.cleaned_data['state'],
-                        zipcode=form.cleaned_data['zipcode']
-                    )
-                else:
-                    shipping_address_id = request.POST.get('selected_address')
-                    if shipping_address_id:
-                        shipping_address = get_object_or_404(ShippingAddress, id=shipping_address_id, user=request.user)
+                shipping_address = None
+                try:
+                    if request.POST.get('add_new_address') == 'on':
+                        print("Creating new address")  # Debug
+                        shipping_address = ShippingAddress.objects.create(
+                            user=request.user,
+                            address=form.cleaned_data['address'],
+                            city=form.cleaned_data['city'],
+                            state=form.cleaned_data['state'],
+                            zipcode=form.cleaned_data['zipcode']
+                        )
+                    else:
+                        shipping_address_id = request.POST.get('selected_address')
+                        if shipping_address_id:
+                            print(f"Using existing address: {shipping_address_id}")  # Debug
+                            shipping_address = get_object_or_404(ShippingAddress, id=shipping_address_id, user=request.user)
+                    
+                    if shipping_address:
+                        new_order.shipping_address = shipping_address
+                        print(f"Address set: {shipping_address.id}")  # Debug
+                except Exception as e:
+                    print(f"Error processing address: {str(e)}")  # Debug
+                    messages.error(request, "Error processing shipping address")
                 
-                # Update order with address and receipt
-                new_order.shipping_address = shipping_address
-                if 'receipt' in request.FILES:
-                    new_order.receipt = request.FILES['receipt']
-                new_order.save()
+                # Process receipt
+                try:
+                    if 'receipt' in request.FILES:
+                        new_order.receipt = request.FILES['receipt']
+                        print("Receipt uploaded")  # Debug
+                    new_order.save()
+                    print("Order saved successfully")  # Debug
+                except Exception as e:
+                    print(f"Error saving receipt: {str(e)}")  # Debug
+                    messages.error(request, "Error processing payment receipt")
                 
                 # Clear session
-                if 'checkout_items' in request.session:
-                    del request.session['checkout_items']
+                try:
+                    if 'checkout_items' in request.session:
+                        del request.session['checkout_items']
+                        request.session.modified = True
+                        print("Session cleared")  # Debug
+                except Exception as e:
+                    print(f"Error clearing session: {str(e)}")  # Debug
                 
-                # Redirect to confirmation with new order
-                print(f"Redirecting to order_confirmation with order_id: {new_order.id}")  # Debug
                 return redirect('store:order_confirmation', order_id=new_order.id)
-        
+            else:
+                print("Form errors:", form.errors)  # Debug
+                messages.error(request, "Please correct the errors below")
         else:
             form = CheckoutForm()
         
@@ -206,7 +239,8 @@ def checkout(request, order_id):
         })
         
     except Exception as e:
-        messages.error(request, f"Checkout error: {str(e)}")
+        print(f"Checkout error: {str(e)}", exc_info=True)  # Debug
+        messages.error(request, f"An error occurred during checkout: {str(e)}")
         return redirect('store:cart')
 
 @login_required
@@ -233,6 +267,10 @@ def checkout_selected(request):
             
             request.session['checkout_items'] = selected_item_ids
             return redirect('store:checkout', order_id=order.id)
+        
+            # Di view checkout_selected:
+            request.session['checkout_items'] = selected_item_ids
+            request.session.modified = True  # Pastikan session disimpan
             
         except Exception as e:
             messages.error(request, f"Error processing selection: {str(e)}")
