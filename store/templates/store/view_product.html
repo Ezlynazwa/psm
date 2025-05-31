@@ -4,44 +4,160 @@
 
 {% block content %}
 
-<body>
-
     <!-- Product Details -->
     <section class="product-details">
         <div class="product-container">
-            <div class="product-image">
-                {% for image in images%}
-                    <img src="{{ image.image.url}}" alt="Product Image" style="width: 200px; height: auto;" />
-                    {% empty %}
-                        <p>No image available</p>
-                    {% endfor %}
-            </div>
-            <div class="product-info">
-                <h1>{{ product.name }}</h1>
-                <p class="price">RM {{ product.price }}</p>
-                <p class="description">{{ product.description }}</p>
-                <p class="category">Category: {{ product.category }}</p>
-                <p class="variation_code">Code: {{ product.variation_code }}</p>
-                <div class="product-actions">
-                    <a href="{% url 'store:add_to_cart' product.id %}" class="cta-button">Add to Cart</a>
+            <div class="product-image-container">
+                <div class="main-image">
+                    {% if images %}
+                        <img src="{{ images.0.image.url }}" alt="{{ product.name }}" id="main-product-image" />
+                    {% else %}
+                        <div class="no-image">No image available</div>
+                    {% endif %}
                 </div>
+                {% if images|length > 1 %}
+                <div class="thumbnail-container">
+                    {% for image in images %}
+                        <img src="{{ image.image.url }}" 
+                             alt="Thumbnail {{ forloop.counter }}" 
+                             class="thumbnail {% if forloop.first %}active{% endif %}" 
+                             data-full-image="{{ image.image.url }}"
+                             onclick="changeMainImage(this)" />
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="product-info">
+                <h1 class="product-title">{{ product.name }}</h1>
+                <div class="price-section">
+                    <span class="price">RM {{ product.price }}</span>
+                    {% if product.old_price %}
+                    <span class="old-price">RM {{ product.old_price }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="product-meta">
+                    <span class="category">Category: {{ product.category }}</span>
+                    <span class="stock-status">In Stock</span>
+                </div>
+                
+                <p class="description">{{ product.description }}</p>
+                
+                {% if product.variations.all %}
+                <div class="product-variations">
+                    <h4>Available Variations Code: <span id="selected-variation-text" class="selected-variation-text">(Please select one)</span></h4>
+                    <div class="variation-cards">
+                        {% for variation in product.variations.all %}
+                            <div class="variation-card" 
+                                 data-variation-id="{{ variation.id }}"
+                                 onclick="selectVariation(this)">
+                                <p class="variation-code"><strong>{{ variation.variation_code }}</strong></p>
+                                <input type="radio" name="product-variation" value="{{ variation.id }}" style="display: none;">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div id="variation-error" class="error-message" style="display: none; color: red; margin-top: 10px;">
+                        Please select a variation before adding to cart
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="product-actions">
+                    <div class="quantity-selector">
+                        <button class="qty-btn minus" onclick="adjustQuantity(-1)">-</button>
+                        <input type="number" value="1" min="1" class="qty-input" id="product-quantity">
+                        <button class="qty-btn plus" onclick="adjustQuantity(1)">+</button>
+                    </div>
+                    <button class="cta-button add-to-cart" onclick="addToCart()">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="wishlist-btn">
+                        <i class="far fa-heart"></i> Wishlist
+                    </button>
+                </div>
+                
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
-    </footer>
-</body>
+    <!-- Hidden form for actual submission -->
+    <form id="add-to-cart-form" action="{% url 'store:add_to_cart' product.id %}" method="POST" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="variation_id" id="form-variation-id">
+        <input type="hidden" name="quantity" id="form-quantity" value="1">
+    </form>
+
+    <!-- JavaScript -->
+    <script>
+        // Change main image when thumbnail is clicked
+        function changeMainImage(thumbnail) {
+            const mainImage = document.getElementById('main-product-image');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            // Update main image source
+            mainImage.src = thumbnail.dataset.fullImage;
+            
+            // Update active thumbnail
+            thumbnails.forEach(t => t.classList.remove('active'));
+            thumbnail.classList.add('active');
+        }
+        
+        // Select variation card
+        let selectedVariationId = null;
+        
+        function selectVariation(card) {
+            const variationCards = document.querySelectorAll('.variation-card');
+            const selectedText = document.getElementById('selected-variation-text');
+            const variationError = document.getElementById('variation-error');
+            
+            // Update UI
+            variationCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            // Store selected variation
+            selectedVariationId = card.dataset.variationId;
+            
+            // Update selected text
+            const variationName = card.querySelector('p').textContent;
+            selectedText.textContent = variationName;
+            selectedText.style.color = 'green';
+            
+            // Hide error if it was showing
+            variationError.style.display = 'none';
+        }
+        
+        // Quantity adjustment
+        function adjustQuantity(change) {
+            const quantityInput = document.getElementById('product-quantity');
+            let newValue = parseInt(quantityInput.value) + change;
+            
+            if (newValue < 1) newValue = 1;
+            
+            quantityInput.value = newValue;
+            document.getElementById('form-quantity').value = newValue;
+        }
+        
+        // Add to cart function
+        function addToCart() {
+            const variationError = document.getElementById('variation-error');
+            
+            if (!selectedVariationId) {
+                variationError.style.display = 'block';
+                return;
+            }
+            
+            // Set the variation ID in the form
+            document.getElementById('form-variation-id').value = selectedVariationId;
+            
+            // Submit the form
+            document.getElementById('add-to-cart-form').submit();
+        }
+    </script>
 
 {% endblock %}
 
 {% block extra_css %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brew Beauty - {{ product.name }}</title>
-    <link rel="stylesheet" href="{% static 'css/view_product.css' %}">
-</head>
+<link rel="stylesheet" href="{% static 'css/view_product.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}

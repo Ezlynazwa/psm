@@ -54,8 +54,14 @@
                     <div class="product-details">
                         <h3>{{ item.product.name }}</h3>
                         <p class="product-brand">{{ item.product.brand }}</p>
+                        
                         {% if item.variation %}
-                            <p class="product-variant">Variant: {{ item.variation.variation_code }}</p>
+                        <div class="selected-variation">
+                            <p>
+                                <span class="variation-label">Selected:</span>
+                                <span class="variation-code">{{ item.variation.variation_code }}</span>
+                            </p>
+                        </div>
                         {% endif %}
                         
                         <div class="price-container">

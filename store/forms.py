@@ -23,11 +23,31 @@ ProductImageFormSet = inlineformset_factory(
     can_delete=True)
 
 class CheckoutForm(forms.Form):
-    address = forms.CharField(max_length=255, widget=forms.Textarea(attrs={'placeholder': 'Enter your address'}))
-    city = forms.CharField(max_length=100)
-    state = forms.CharField(max_length=100)
-    zipcode = forms.CharField(max_length=10)
+    address = forms.CharField(
+        max_length=255, 
+        widget=forms.Textarea(attrs={'placeholder': 'Enter your address'}),
+        required=False  # Tidak required jika memilih address yang sudah ada
+    )
+    city = forms.CharField(max_length=100, required=False)
+    state = forms.CharField(max_length=100, required=False)
+    zipcode = forms.CharField(max_length=10, required=False)
     receipt = forms.FileField(required=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        add_new_address = self.data.get('add_new_address') == 'on'
+        
+        if add_new_address:
+            if not cleaned_data.get('address'):
+                self.add_error('address', 'This field is required when adding new address')
+            if not cleaned_data.get('city'):
+                self.add_error('city', 'This field is required when adding new address')
+            if not cleaned_data.get('state'):
+                self.add_error('state', 'This field is required when adding new address')
+            if not cleaned_data.get('zipcode'):
+                self.add_error('zipcode', 'This field is required when adding new address')
+        
+        return cleaned_data
 
 
 class ProductImageForm(forms.ModelForm):

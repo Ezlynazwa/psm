@@ -1,280 +1,267 @@
+{% extends "store/basestore.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Checkout | Brew Beauty</title>
-  <link rel="stylesheet" href="{% static 'css/checkout.css' %}" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-  <div class="checkout-wrapper">
-    <div class="checkout-container">
-      <div class="checkout-header">
-        <h1><i class="fas fa-shopping-bag"></i> Checkout</h1>
-        <div class="checkout-progress">
-          <div class="progress-step active">
-            <span>1</span>
-            <p>Shipping</p>
-          </div>
-          <div class="progress-step">
-            <span>2</span>
-            <p>Payment</p>
-          </div>
-          <div class="progress-step">
-            <span>3</span>
-            <p>Summary</p>
-          </div>
-        </div>
-      </div>
+{% block title %}Checkout | Brew Beauty{% endblock %}
 
-      <div class="checkout-content">
-        <form method="post" enctype="multipart/form-data" class="checkout-form">
-          {% csrf_token %}
-          
-          <section class="shipping-section">
-            <h2><i class="fas fa-truck"></i> Shipping Information</h2>
-            
-            <div class="address-selection">
-              <div class="saved-addresses">
-                <h3>Select Saved Address</h3>
-                {% if saved_addresses %}
-                <div class="address-options">
-                  {% for address in saved_addresses %}
-                  <div class="address-option">
-                    <input type="radio" id="address-{{ address.id }}" name="selected_address" value="{{ address.id }}" 
-                           {% if forloop.first %}checked{% endif %}>
-                    <label for="address-{{ address.id }}">
-                      <div class="address-details">
-                        <p><strong>{{ address.address }}</strong></p>
-                        <p>{{ address.city }}, {{ address.state }} {{ address.zipcode }}</p>
-                        <p class="address-date">Saved on {{ address.date_added|date:"M d, Y" }}</p>
-                      </div>
-                    </label>
-                  </div>
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1><i class="fas fa-shopping-bag"></i> Checkout</h1>
+        <p class="checkout-subtitle">Complete your purchase</p>
+    </div>
+
+    <div class="checkout-content">
+      {% if form.errors %}
+      <div class="form-errors">
+          <div class="alert alert-error">
+              <i class="fas fa-exclamation-circle"></i>
+              Please correct the errors below:
+              <ul>
+                  {% for field in form %}
+                      {% for error in field.errors %}
+                          <li>{{ field.label }}: {{ error }}</li>
+                      {% endfor %}
                   {% endfor %}
-                </div>
-                {% else %}
-                <p class="no-addresses">You don't have any saved addresses yet.</p>
-                {% endif %}
-              </div>
-              
-              <div class="add-new-address-toggle">
-                <input type="checkbox" id="add-new-address" name="add_new_address">
-                <label for="add-new-address">
-                  <i class="fas fa-plus"></i> Add New Address
-                </label>
-              </div>
-              
-              <div class="new-address-form" id="new-address-form">
-                <h3>New Shipping Address</h3>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="address">Address</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-home"></i>
-                      <input type="text" id="address" name="address" placeholder="Enter your full address" required />
+                  {% for error in form.non_field_errors %}
+                      <li>{{ error }}</li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+      {% endif %}
+
+      {% if messages %}
+      <div class="messages">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ message }}
+          </div>
+          {% endfor %}
+      </div>
+      {% endif %}
+        <form method="post" enctype="multipart/form-data" class="checkout-form">
+            {% csrf_token %}
+            
+            <div class="checkout-sections">
+                <!-- Shipping Address Section -->
+                <div class="checkout-section">
+                    <h2><i class="fas fa-map-marker-alt"></i> Shipping Address</h2>
+                    
+                    <div class="address-options">
+                        <div class="saved-addresses">
+                            <h3>Select Saved Address</h3>
+                            {% if saved_addresses %}
+                                {% for address in saved_addresses %}
+                                    <div class="address-card">
+                                        <input type="radio" name="selected_address" id="address-{{ address.id }}" 
+                                               value="{{ address.id }}" {% if forloop.first %}checked{% endif %}>
+                                        <label for="address-{{ address.id }}">
+                                            <p>{{ address.address }}</p>
+                                            <p>{{ address.city }}, {{ address.state }} {{ address.zipcode }}</p>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>No saved addresses found.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="new-address-toggle">
+                            <input type="checkbox" id="add_new_address" name="add_new_address">
+                            <label for="add_new_address">Add new address</label>
+                        </div>
+                        
+                        <div class="new-address-form" id="new-address-form">
+                            <h3>New Address Details</h3>
+                            <div class="form-group">
+                                <label for="id_address">Address</label>
+                                {{ form.address }}
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_city">City</label>
+                                    {{ form.city }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_state">State</label>
+                                    {{ form.state }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_zipcode">Zip Code</label>
+                                {{ form.zipcode }}
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="city">City</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-city"></i>
-                      <input type="text" id="city" name="city" placeholder="Enter your city" required />
-                    </div>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="state">State</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-map-marked-alt"></i>
-                      <input type="text" id="state" name="state" placeholder="Enter your state" required />
-                    </div>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="zipcode">Zip Code</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-mail-bulk"></i>
-                      <input type="text" id="zipcode" name="zipcode" placeholder="Enter your zip code" required />
-                    </div>
-                  </div>
                 </div>
                 
-                <div class="save-address-option">
-                  <input type="checkbox" id="save-address" name="save_address">
-                  <label for="save-address">Save this address for future orders</label>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section class="payment-section">
-            <h2><i class="fas fa-qrcode"></i> Payment Method</h2>
-            <div class="qr-payment">
-              <div class="qr-code-container">
-                <img src="{{ qr_code_url }}" alt="QR Code" class="qr-code-image" />
-                <p class="qr-instruction">Scan this QR code to make payment</p>
-              </div>
-              
-              <div class="receipt-upload">
-                <label for="id_receipt" class="upload-label">
-                  <i class="fas fa-cloud-upload-alt"></i>
-                  <span>Upload Payment Receipt (PDF or Image)</span>
-                  {{ form.receipt }}
-                </label>
-                <div id="receipt-preview" style="display:none; margin-top:15px;">
-                  <embed id="pdf-preview" width="250" height="200" style="border:1px solid #ddd; display:none;">
-                  <img id="image-preview" width="250" style="border:1px solid #ddd; display:none;">
-                  <button type="button" id="remove-receipt" class="btn-small" style="display:none;">Remove</button>
-                </div>
-                <p class="upload-note">Please upload a clear PDF or image of your payment receipt</p>
-              </div>
-            </div>
-          </section>
-
-          <section class="order-summary-section">
-            <h2><i class="fas fa-receipt"></i> Order Summary</h2>
-            <div class="summary-card">
-              <div class="selected-items-header">
-                <h3>Selected Products</h3>
-                <span>{{ selected_items_count }} item{% if selected_items_count > 1 %}s{% endif %}</span>
-              </div>
-              
-              <div class="selected-items-list">
-                {% for item in selected_items %}
-                <div class="selected-item">
-                  <div class="product-image">
-                    {% with images=item.product.product_images.all %}
-                      {% if images %}
-                        <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
-                      {% else %}
-                        <div class="no-image-placeholder">
-                          <i class="fas fa-image"></i>
+                <!-- Payment Method Section -->
+                <div class="checkout-section">
+                    <h2><i class="fas fa-credit-card"></i> Payment Method</h2>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-option active" data-method="qr">
+                            <input type="radio" name="payment_method" value="qr" checked>
+                            <div class="payment-content">
+                                <i class="fas fa-qrcode"></i>
+                                <span>QR Code Payment</span>
+                            </div>
                         </div>
-                      {% endif %}
-                    {% endwith %}
-                  </div>
-                  <div class="product-info">
-                    <h4>{{ item.product.name }}</h4>
-                    <p class="product-variant">Variant: {{ item.product.variation_code }}</p>
-                    <div class="quantity-price">
-                      <span class="quantity">Qty: {{ item.quantity }}</span>
-                      <span class="price">RM {{ item.get_total|floatformat:2 }}</span>
+                        
+                        <div class="payment-option" data-method="gateway">
+                            <input type="radio" name="payment_method" value="gateway">
+                            <div class="payment-content">
+                                <i class="fas fa-globe"></i>
+                                <span>Payment Gateway</span>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                    
+                    <div class="payment-details" id="qr-payment">
+                        <h3>Scan QR Code to Pay</h3>
+                        <div class="qr-code-container">
+                            <img src="{{ qr_code_url }}" alt="QR Code for Payment">
+                            <p>Scan this QR code using your banking app to make payment</p>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-details" id="gateway-payment" style="display: none;">
+                        <h3>Payment Gateway</h3>
+                        <p>You will be redirected to our secure payment gateway to complete your transaction.</p>
+                    </div>
+                    
+                    <div class="receipt-upload">
+                        <h3>Upload Payment Receipt</h3>
+                        <div class="upload-container">
+                            <label for="id_receipt" class="upload-btn">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Choose File</span>
+                                {{ form.receipt }}
+                            </label>
+                            <span class="file-name" id="file-name">No file chosen</span>
+                        </div>
+                        <p class="help-text">Please upload your payment receipt for verification</p>
+                    </div>
                 </div>
-                {% endfor %}
-              </div>
-              
-              <div class="summary-divider"></div>
-              
-              <div class="summary-calculation">
-                <div class="summary-row">
-                  <span>Subtotal</span>
-                  <span>RM {{ subtotal|floatformat:2 }}</span>
-                </div>
-                <div class="summary-row">
-                  <span>Shipping Fee</span>
-                  <span>RM 8.00</span>
-                </div>
-                <div class="summary-row total">
-                  <span>Total Amount</span>
-                  <span>RM {{ total|floatformat:2 }}</span>
-                </div>
-              </div>
             </div>
-          </section>
-
-          <div class="checkout-actions">
-            <a href="{% url 'store:cart' %}" class="btn btn-secondary">
-              <i class="fas fa-arrow-left"></i> Back to Cart
-            </a>
-            <button type="submit" class="btn btn-primary">
-              Complete Order <i class="fas fa-check"></i>
-            </button>
-          </div>
+            
+            <!-- Order Summary Section -->
+            <div class="order-summary-section">
+                <h2><i class="fas fa-receipt"></i> Order Summary</h2>
+                
+                <div class="order-items">
+                    {% for item in selected_items %}
+                    <div class="order-item">
+                        <div class="item-image">
+                            {% with images=item.product.product_images.all %}
+                                {% if images %}
+                                    <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="no-image-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="item-details">
+                            <h4>{{ item.product.name }}</h4>
+                            <p class="brand">{{ item.product.brand }}</p>
+                            <div class="price-quantity">
+                                <span class="price">RM {{ item.product.price|floatformat:2 }}</span>
+                                <span class="quantity">x {{ item.quantity }}</span>
+                                <span class="subtotal">RM {{ item.get_total|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="summary-totals">
+                    <div class="summary-row">
+                        <span>Subtotal ({{ selected_items_count }} items)</span>
+                        <span>RM {{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping Fee</span>
+                        <span>RM {{ shipping_fee|floatformat:2 }}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount</span>
+                        <span>RM {{ total|floatformat:2 }}</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="complete-order-btn">
+                    Complete Order
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <p class="secure-checkout">
+                    <i class="fas fa-lock"></i> Secure Checkout
+                </p>
+            </div>
         </form>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
-document.addEventListener('DOMContentLoaded', function () {
-  // === Receipt Upload Preview Logic ===
-  const receiptInput = document.getElementById('id_receipt');
-  const previewDiv = document.getElementById('receipt-preview');
-  const pdfPreview = document.getElementById('pdf-preview');
-  const imgPreview = document.getElementById('image-preview');
-  const removeBtn = document.getElementById('remove-receipt');
-
-  if (receiptInput) {
-    receiptInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) {
-        previewDiv.style.display = 'none';
-        return;
-      }
-
-      previewDiv.style.display = 'block';
-      removeBtn.style.display = 'inline-block';
-
-      if (file.type === 'application/pdf') {
-        pdfPreview.src = URL.createObjectURL(file);
-        pdfPreview.style.display = 'block';
-        imgPreview.style.display = 'none';
-      } else if (file.type.startsWith('image/')) {
-        imgPreview.src = URL.createObjectURL(file);
-        imgPreview.style.display = 'block';
-        pdfPreview.style.display = 'none';
-      }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle new address form
+    const newAddressToggle = document.getElementById('add_new_address');
+    const newAddressForm = document.getElementById('new-address-form');
+    
+    newAddressToggle.addEventListener('change', function() {
+        newAddressForm.style.display = this.checked ? 'block' : 'none';
     });
-  }
-
-  if (removeBtn) {
-    removeBtn.addEventListener('click', function () {
-      receiptInput.value = '';
-      previewDiv.style.display = 'none';
-      pdfPreview.style.display = 'none';
-      imgPreview.style.display = 'none';
+    
+    // Initially hide if not checked
+    newAddressForm.style.display = newAddressToggle.checked ? 'block' : 'none';
+    
+    // Payment method toggle
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const qrPayment = document.getElementById('qr-payment');
+    const gatewayPayment = document.getElementById('gateway-payment');
+    
+    paymentOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Update active class
+            paymentOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show corresponding payment details
+            const method = this.dataset.method;
+            qrPayment.style.display = method === 'qr' ? 'block' : 'none';
+            gatewayPayment.style.display = method === 'gateway' ? 'block' : 'none';
+        });
     });
-  }
-
-  // === Address Form Toggle Logic ===
-  const addNewAddressCheckbox = document.getElementById('add-new-address');
-  const newAddressForm = document.getElementById('new-address-form');
-  const savedAddressRadios = document.querySelectorAll('input[name="selected_address"]');
-
-  if (!addNewAddressCheckbox || !newAddressForm) return;
-
-  // Initial state on page load (rendered by Django)
-  {% if not saved_addresses %}
-    addNewAddressCheckbox.checked = true;
-    newAddressForm.style.display = 'block';
-  {% else %}
-    newAddressForm.style.display = 'none';
-  {% endif %}
-
-  // Toggle new address form on checkbox change
-  addNewAddressCheckbox.addEventListener('change', function () {
-    if (this.checked) {
-      newAddressForm.style.display = 'block';
-      savedAddressRadios.forEach(radio => {
-        radio.checked = false;
-      });
-    } else {
-      newAddressForm.style.display = 'none';
-      const firstSavedAddress = savedAddressRadios[0];
-      if (firstSavedAddress) {
-        firstSavedAddress.checked = true;
-      }
-    }
-  });
+    
+    // File upload display
+    const fileInput = document.getElementById('id_receipt');
+    const fileNameDisplay = document.getElementById('file-name');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileNameDisplay.textContent = this.files[0].name;
+        } else {
+            fileNameDisplay.textContent = 'No file chosen';
+        }
+    });
+    
+    // Form validation
+    const form = document.querySelector('.checkout-form');
+    form.addEventListener('submit', function(e) {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please upload your payment receipt');
+            return false;
+        }
+        return true;
+    });
 });
 </script>
 
-</body>
-</html>
+{% endblock %}
