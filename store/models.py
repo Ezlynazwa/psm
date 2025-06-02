@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.utils import timezone
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Product(models.Model):
@@ -26,9 +27,12 @@ class Product(models.Model):
     ]
     
     SKIN_CONDITIONS = [
-        ('Acne-Prone', 'Acne-Prone'),
-        ('Sensitive', 'Sensitive'),
-        ('Dehydrated', 'Dehydrated'),
+        ('acne', 'Acne-Prone'),
+        ('sensitive', 'Sensitive'),
+        ('dehydrated', 'Dehydrated'),
+        ('aging', 'Aging'),
+        ('redness', 'Redness'),
+        ('pigmentation', 'Pigmentation'),
     ]
     SENSITIVITY_LEVELS = [
         ('low', 'Low'),
@@ -36,11 +40,11 @@ class Product(models.Model):
         ('high', 'High'),
     ]
     SKIN_TEXTURE = [
-        ('Licin', 'Licin'),
-        ('Kasar', 'Kasar'),
-        ('Pori Besar', 'Pori Besar'),
-        ('Berparut', 'Berparut'),
-        ('Berkedut', 'Berkedut'),
+        ('smooth', 'Smooth'),
+        ('rough', 'Rough'),
+        ('large_pores', 'Large Pores'),
+        ('scarred', 'Scarred'),
+        ('wrinkled', 'Wrinkled'),
     ]
 
     FINISHING = [
@@ -56,23 +60,28 @@ class Product(models.Model):
             ('full', 'Full'),
             ('buildable', 'Buildable')
         ]
+    
     name = models.CharField(max_length=100)
     brand = models.CharField(max_length=100, default='Brand')
     size = models.CharField(max_length=20, help_text="e.g., 30ml, 50g", default='Size')
     description = models.TextField(blank=True, null=True)
+    detailed_description = models.TextField(blank=True, null=True, help_text="Detailed product benefits and features")
+
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     min_stock = models.PositiveIntegerField(default=0)
     max_stock = models.PositiveIntegerField(default=100)
+
     skin_type = models.CharField(max_length=20, choices=SKIN_TYPES, blank=True, null=True)
     suitable_for = models.CharField(max_length=20, choices=SKIN_TYPES, default='all')
     finish = models.CharField(max_length=20, choices=FINISHING, blank=True)
     texture = models.CharField(max_length=20, choices=TEXTURE, blank=True, null=True)
-    skin_condition = models.CharField(max_length=20, choices=SKIN_CONDITIONS, blank=True, null=True)
+    skin_condition = models.CharField(max_length=100, blank=True, null=True,help_text="Comma-separated list of conditions this product addresses")   
     skin_texture = models.CharField(max_length=20, choices=SKIN_TEXTURE, blank=True, null=True)
     sensitivity_level = models.CharField(max_length=10, choices=SENSITIVITY_LEVELS, blank=True, null=True)
     is_vegan = models.BooleanField(default=False, blank=True, null=True)
     is_cruelty_free = models.BooleanField(default=False, blank=True, null=True)
+    is_hypoallergenic = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     category = models.CharField(max_length=20, null=True, blank=True)
@@ -81,7 +90,30 @@ class Product(models.Model):
     waterproof = models.BooleanField(default=False, blank=True, null=True)
     spf = models.IntegerField( null=True, blank=True)
     coverage = models.CharField(max_length=20, choices=COVERAGE_LEVEL, blank=True, null=True)
+    subcategory = models.CharField(max_length=50, blank=True, null=True)
+    tags = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated tags for search")
+    popularity_score = models.FloatField(default=0.0, help_text="Product popularity based on views/purchases")
+    recommended_for = models.ManyToManyField(
+        'CustomerProfile', 
+        through='ProductRecommendation',
+        blank=True,
+        help_text="Customers this product is recommended for"
+    )
 
+    class Meta:
+        ordering = ['-popularity_score', 'name']
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
+    
+    def __str__(self):
+        return f"{self.brand} - {self.name}"
+    
+    def get_skin_conditions_list(self):
+        return [cond.strip() for cond in self.skin_conditions.split(',')] if self.skin_conditions else []
+    
+    @property
+    def is_in_stock(self):
+        return self.quantity > 0
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
@@ -90,26 +122,30 @@ class ProductImage(models.Model):
 class ProductVariation(models.Model):
 
     SKIN_TONES = [
-        ('Cool Undertone', 'Cool Undertone'),
-        ('Warm Undertone', 'Warm Undertone'),
-        ('Neutral Undertone', 'Neutral Undertone'),
+        ('cool', 'Cool Undertone'),
+        ('warm', 'Warm Undertone'),
+        ('neutral', 'Neutral Undertone'),
+        ('olive', 'Olive Undertone'),
     ]
     SURFACE_TONES = [
-        ('Sangat Cerah', 'Sangat Cerah'),
-        ('Cerah', 'Cerah'),
-        ('Terang', 'Terang'),
-        ('Sederhana', 'Sederhana'),
-        ('Sawo Matang', 'Sawo Matang'),
-        ('Gelap', 'Gelap'),
-        ('Sangat Gelap', 'Sangat Gelap'),
+        ('very_fair', 'Very Fair'),
+        ('fair', 'Fair'),
+        ('light', 'Light'),
+        ('medium', 'Medium'),
+        ('tan', 'Tan'),
+        ('dark', 'Dark'),
+        ('very_dark', 'Very Dark'),
         ]
     
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
     variation_code = models.CharField(max_length=50)
     quantity = models.PositiveIntegerField()
     skin_tone = models.CharField(max_length=20, choices=SKIN_TONES, blank=True, null=True)
-    surface_tones = models.CharField(max_length=20, choices=SURFACE_TONES, blank=True, null=True)
-
+    surface_tone = models.CharField(max_length=20, choices=SURFACE_TONES, blank=True, null=True)
+    hex_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color code for display")
+    
+    class Meta:
+        unique_together = ('product', 'variation_code')
     
     def __str__(self):
         return f'{self.product.name} ({self.variation_code})'
@@ -130,6 +166,20 @@ def update_product_quantity(sender, instance, **kwargs):
     )['total'] or 0
     product.quantity = total_quantity
     product.save()
+
+class ProductRecommendation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    customer = models.ForeignKey('users.CustomerProfile', on_delete=models.CASCADE)
+    match_score = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
+        help_text="How well this product matches the customer's profile (0-1)"
+    )
+    reason = models.CharField(max_length=255, blank=True, help_text="Why this product was recommended")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('product', 'customer')
+        ordering = ['-match_score']
 
 
 class Order(models.Model): 
