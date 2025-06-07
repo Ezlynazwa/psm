@@ -1,12 +1,13 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.utils.safestring import mark_safe
 from django.contrib import admin
 from django.utils import timezone
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from users.models import User, CustomerProfile
 
 class Product(models.Model):
     SKIN_TYPES = [
@@ -25,7 +26,7 @@ class Product(models.Model):
         ('stick', 'Stick'),
         ('gel', 'Gel'),
     ]
-    
+
     SKIN_CONDITIONS = [
         ('acne', 'Acne-Prone'),
         ('sensitive', 'Sensitive'),
@@ -54,73 +55,104 @@ class Product(models.Model):
         ('glitter', 'Glitter'),
     ]
 
-    COVERAGE_LEVEL=[
-            ('light', 'Light'),
-            ('medium', 'Medium'),
-            ('full', 'Full'),
-            ('buildable', 'Buildable')
-        ]
-    
+    COVERAGE_LEVEL = [
+        ('light', 'Light'),
+        ('medium', 'Medium'),
+        ('full', 'Full'),
+        ('buildable', 'Buildable'),
+    ]
+
+    # Basic Info
     name = models.CharField(max_length=100)
     brand = models.CharField(max_length=100, default='Brand')
     size = models.CharField(max_length=20, help_text="e.g., 30ml, 50g", default='Size')
     description = models.TextField(blank=True, null=True)
-    detailed_description = models.TextField(blank=True, null=True, help_text="Detailed product benefits and features")
+    detailed_description = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Detailed product benefits and features"
+    )
 
+    # Pricing & Stock
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     min_stock = models.PositiveIntegerField(default=0)
     max_stock = models.PositiveIntegerField(default=100)
 
+    # Skin‐Related Fields
     skin_type = models.CharField(max_length=20, choices=SKIN_TYPES, blank=True, null=True)
     suitable_for = models.CharField(max_length=20, choices=SKIN_TYPES, default='all')
-    finish = models.CharField(max_length=20, choices=FINISHING, blank=True)
+    finish = models.CharField(max_length=20, choices=FINISHING, blank=True, null=True)
     texture = models.CharField(max_length=20, choices=TEXTURE, blank=True, null=True)
-    skin_condition = models.CharField(max_length=100, blank=True, null=True,help_text="Comma-separated list of conditions this product addresses")   
+    skin_condition = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Comma-separated list of conditions this product addresses"
+    )
     skin_texture = models.CharField(max_length=20, choices=SKIN_TEXTURE, blank=True, null=True)
     sensitivity_level = models.CharField(max_length=10, choices=SENSITIVITY_LEVELS, blank=True, null=True)
     is_vegan = models.BooleanField(default=False, blank=True, null=True)
     is_cruelty_free = models.BooleanField(default=False, blank=True, null=True)
     is_hypoallergenic = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    # Additional Attributes
     category = models.CharField(max_length=20, null=True, blank=True)
+    subcategory = models.CharField(max_length=50, blank=True, null=True)
     digital = models.BooleanField(default=False, null=True, blank=True)
     long_last = models.BooleanField(default=False, verbose_name="Tahan Lama?", blank=True, null=True)
     waterproof = models.BooleanField(default=False, blank=True, null=True)
-    spf = models.IntegerField( null=True, blank=True)
+    spf = models.IntegerField(null=True, blank=True)
     coverage = models.CharField(max_length=20, choices=COVERAGE_LEVEL, blank=True, null=True)
-    subcategory = models.CharField(max_length=50, blank=True, null=True)
-    tags = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated tags for search")
-    popularity_score = models.FloatField(default=0.0, help_text="Product popularity based on views/purchases")
-    recommended_for = models.ManyToManyField(
-        'CustomerProfile', 
-        through='ProductRecommendation',
+
+    # Text‐search & Popularity
+    tags = models.CharField(
+        max_length=255,
         blank=True,
-        help_text="Customers this product is recommended for"
+        null=True,
+        help_text="Comma-separated tags for search (e.g. 'hydrating,non_comedogenic')"
     )
+    popularity_score = models.FloatField(
+        default=0.0,
+        help_text="Product popularity normalized over all in-stock items"
+    )
+
+    # -------- Change here: reference CustomerProfile directly --------
+    from users.models import CustomerProfile
+    recommended_for = models.ManyToManyField(
+        CustomerProfile,
+        through='ProductRecommendation',
+        related_name='recommended_products'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     class Meta:
         ordering = ['-popularity_score', 'name']
         verbose_name = "Product"
         verbose_name_plural = "Products"
-    
+
     def __str__(self):
         return f"{self.brand} - {self.name}"
-    
+
     def get_skin_conditions_list(self):
-        return [cond.strip() for cond in self.skin_conditions.split(',')] if self.skin_conditions else []
-    
+        """
+        Returns a list of individual skin conditions, e.g. ['acne', 'redness'].
+        """
+        return [c.strip() for c in self.skin_condition.split(',')] if self.skin_condition else []
+
     @property
     def is_in_stock(self):
         return self.quantity > 0
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
     image = models.ImageField(upload_to='product_image/')
     
-class ProductVariation(models.Model):
 
+class ProductVariation(models.Model):
     SKIN_TONES = [
         ('cool', 'Cool Undertone'),
         ('warm', 'Warm Undertone'),
@@ -135,51 +167,69 @@ class ProductVariation(models.Model):
         ('tan', 'Tan'),
         ('dark', 'Dark'),
         ('very_dark', 'Very Dark'),
-        ]
-    
+    ]
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
     variation_code = models.CharField(max_length=50)
     quantity = models.PositiveIntegerField()
     skin_tone = models.CharField(max_length=20, choices=SKIN_TONES, blank=True, null=True)
-    surface_tone = models.CharField(max_length=20, choices=SURFACE_TONES, blank=True, null=True)
-    hex_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color code for display")
-    
+    surface_tones = models.CharField(max_length=20, choices=SURFACE_TONES, blank=True, null=True)
+    hex_color = models.CharField(
+        max_length=7,
+        blank=True,
+        null=True,
+        help_text="Hex color code for display (e.g. '#F2C4A1')"
+    )
+
     class Meta:
         unique_together = ('product', 'variation_code')
-    
+        verbose_name = "Product Variation"
+        verbose_name_plural = "Product Variations"
+
     def __str__(self):
         return f'{self.product.name} ({self.variation_code})'
 
     @property
     def imageURL(self):
         try:
-            url = self.image.url
+            return self.image.url
         except:
-            url = ''
-        return url
-    
+            return ''
+
+
+# Keep product.quantity in sync with sum of variation quantities
 @receiver([post_save, post_delete], sender=ProductVariation)
 def update_product_quantity(sender, instance, **kwargs):
     product = instance.product
-    total_quantity = product.variations.aggregate(
-        total=models.Sum('quantity')
-    )['total'] or 0
+    total_quantity = product.variations.aggregate(total=models.Sum('quantity'))['total'] or 0
     product.quantity = total_quantity
     product.save()
 
+
+
 class ProductRecommendation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    customer = models.ForeignKey('users.CustomerProfile', on_delete=models.CASCADE)
-    match_score = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(1)],
-        help_text="How well this product matches the customer's profile (0-1)"
-    )
-    reason = models.CharField(max_length=255, blank=True, help_text="Why this product was recommended")
-    created_at = models.DateTimeField(auto_now_add=True)
     
+    product = models.ForeignKey("store.Product", on_delete=models.CASCADE)
+    customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE)
+    match_score = models.FloatField(
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+        help_text="How well this product matches the customer's profile (0–1)",
+    )
+    reason = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Short explanation (e.g., 'Content:0.8 | Rule:0.5 | Shade:Yes')",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
-        unique_together = ('product', 'customer')
-        ordering = ['-match_score']
+        unique_together = ("product", "customer")
+        ordering = ["-match_score"]
+        verbose_name = "Product Recommendation"
+        verbose_name_plural = "Product Recommendations"
+
+    def __str__(self):
+        return f"Reco: {self.customer.user.username} → {self.product.name} ({self.match_score:.2f})"
 
 
 class Order(models.Model): 
@@ -192,7 +242,7 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=100, null=True)
@@ -201,16 +251,8 @@ class Order(models.Model):
     parcel_image = models.ImageField(upload_to='parcel_images/', blank=True, null=True)
     status_updated = models.DateTimeField(auto_now=True)
     receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
-    shipping_address = models.ForeignKey('ShippingAddress', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders'
-)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            # Generate order ID if not set
-            self.id = f"ORD-{str(self.id).zfill(6)}"
-        if self.transaction_id is None:
-            self.transaction_id = f"TRANS-{self.id or ''}"
-        super().save(*args, **kwargs)
+    shipping_address = models.ForeignKey('ShippingAddress', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)    
 
     def __str__(self):
         return self.order_id or str(self.id)
@@ -242,6 +284,8 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField(default=1)
     date_added = models.DateTimeField(auto_now_add=True)
+    variation = models.ForeignKey(ProductVariation, on_delete=models.SET_NULL, null=True, blank=True)
+
 
     @property
     def get_total(self):
@@ -259,8 +303,17 @@ class InventoryLog(models.Model):
     stock_out = models.PositiveIntegerField()
     date_logged = models.DateField(auto_now_add=True)
 
-class ShippingAddress(models.Model):
+class CustomerAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    address = models.CharField(max_length=200, null=False)
+    city = models.CharField(max_length=200, null=False)
+    state = models.CharField(max_length=200, null=False)
+    zipcode = models.CharField(max_length=200, null=False)
+
+    def __str__(self):
+        return f"{self.address}, {self.city}, {self.state}, {self.zipcode}"
+
+class ShippingAddress(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, related_name='shipping_addresses')
     address = models.CharField(max_length=200, null=False)
     city = models.CharField(max_length=200, null=False)
@@ -269,7 +322,7 @@ class ShippingAddress(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.address
+        return f"Order #{self.order.id} - {self.address}, {self.city}, {self.state}, {self.zipcode}"
     
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'quantity', 'category', 'created_at', 'updated_at']
@@ -291,3 +344,5 @@ class Payment(models.Model):
         
         def __str__(self):
             return f"Payment for {self.order.order_id}"
+
+

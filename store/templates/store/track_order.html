@@ -6,7 +6,13 @@
 {% block content %}
 <div class="track-order-container">
     <h1><i class="fas fa-truck"></i> Track Your Orders</h1>
-
+    <div class="order-status-tabs">
+        {% for s in status_tabs %}
+            <a href="?status={{ s }}" class="{% if selected_status == s %}active{% endif %}">{{ s|capfirst }}</a>
+        {% endfor %}
+        <a href="{% url 'store:track_order' %}" class="{% if not selected_status %}active{% endif %}">All</a>
+    </div>
+        
     {% if orders %}
         <div class="order-list">
             {% for order in orders %}
@@ -14,16 +20,20 @@
                 <div class="order-header">
                     <h2>Order #{{ order.id }}</h2>
                     <div class="order-meta">
-                        <p><strong>Date:</strong> {{ order.date_ordered|date:"F j, Y H:i" }}</p>
-                        <p class="status-badge {% if order.complete %}completed{% elif order.packing %}packing{% else %}processing{% endif %}">
-                            {% if order.complete %}
-                                <i class="fas fa-check-circle"></i> Pending
-                            {% elif order.packing %}
-                                <i class="fas fa-box-open"></i> Packing
+                        <p class="status-badge {{ order.status }}">
+                            {% if order.status == "pending" %}
+                                <i class="fas fa-hourglass-start"></i> Pending
+                            {% elif order.status == "verified" %}
+                                <i class="fas fa-check-circle"></i> Verified
+                            {% elif order.status == "preparing" %}
+                                <i class="fas fa-box-open"></i> Preparing
+                            {% elif order.status == "shipped" %}
+                                <i class="fas fa-shipping-fast"></i> Shipped
                             {% else %}
-                                <i class="fas fa-spinner"></i> Processing
+                                <i class="fas fa-question-circle"></i> Unknown
                             {% endif %}
                         </p>
+
                     </div>
                 </div>
 
@@ -42,6 +52,7 @@
                         <div class="product-info">
                             <h3>{{ item.product.name }}</h3>
                             <p><strong>Brand:</strong> {{ item.product.brand }}</p>
+                            <p><strong>Variation Code:</strong> {{ item.variation.variation_code }}</p>
                             <p><strong>Quantity:</strong> {{ item.quantity }}</p>
                             <p><strong>Price:</strong> RM {{ item.product.price }}</p>
                             <p><strong>Subtotal:</strong> RM {{ item.get_total }}</p>
@@ -52,11 +63,10 @@
 
                 <div class="order-footer">
                     <div class="order-total">
-                        <p><strong>Order Total:</strong> RM {{ order.get_cart_total }}</p>
+                        <p>Total with shipping: RM {{ order.get_cart_total|add:8.00|floatformat:2 }}</p>
                     </div>
                     <div class="order-actions">
-                        <a href="#" class="btn-details">View Details</a>
-                        <a href="#" class="btn-help">Need Help?</a>
+                        <a href="{% url 'store:order_detail' order.id %}" class="btn-details">View Details</a>
                     </div>
                 </div>
             </div>

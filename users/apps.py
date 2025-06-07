@@ -6,4 +6,4 @@ class UserConfig(AppConfig):
     name = 'users'
 
     def ready(self):
-        import users.signals  # Replace with your actual app name if different
+        import users.signals 

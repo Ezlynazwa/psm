@@ -1,0 +1,327 @@
+/* Base Styles */
+.recommendation-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header Section */
+.recommendation-header {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.header-content h1 {
+  color: #d10000;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.header-content .subtitle {
+  color: #555;
+  font-size: 1rem;
+}
+
+/* Filter and Sort Tools */
+.recommendation-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.filter-group, .sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label, .sort-group label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sort {
+  padding: 0.5rem 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-sort:hover, .btn-sort.active {
+  background-color: #d10000;
+  color: white;
+  border-color: #d10000;
+}
+
+/* Recommendations Grid */
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.recommendation-card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.recommendation-card:hover .product-img {
+  transform: scale(1.05);
+}
+
+.score-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(209, 0, 0, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.product-info {
+  padding: 1.5rem;
+}
+
+.product-info h3 {
+  color: #222;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  color: #d10000;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* Shade Matching */
+.shade-matches {
+  margin-bottom: 1rem;
+}
+
+.shade-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.shade-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.shade-chip {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+/* Recommendation Reason */
+.recommendation-reason {
+  background-color: #f8f8f8;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.recommendation-reason i {
+  color: #d10000;
+  margin-right: 0.5rem;
+}
+
+/* Action Buttons */
+.product-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-details, .btn-add-to-cart {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-details {
+  background-color: #fff;
+  color: #d10000;
+  border: 1px solid #d10000;
+}
+
+.btn-details:hover {
+  background-color: #f8f8f8;
+}
+
+.btn-add-to-cart {
+  background-color: #d10000;
+  color: white;
+}
+
+.btn-add-to-cart:hover {
+  background-color: #b00000;
+}
+
+/* Empty State */
+.no-recommendations {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: #d10000;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: #222;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* Assessment Summary */
+.assessment-summary {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.assessment-summary h3 {
+  color: #222;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.assessment-summary h3 i {
+  color: #d10000;
+}
+
+.profile-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #222;
+}
+
+.btn-edit-profile {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #fff;
+  color: #d10000;
+  border: 1px solid #d10000;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-edit-profile:hover {
+  background-color: #d10000;
+  color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .recommendation-tools {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-details {
+    grid-template-columns: 1fr;
+  }
+}

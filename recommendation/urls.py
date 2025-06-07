@@ -1,10 +1,12 @@
 # recommendation/urls.py
+
 from django.urls import path
 from . import views
-from .views import skin_assessment
 
 app_name = 'recommendation'
+
 urlpatterns = [
-    path('recomhome', views.index, name='recomhome'),
-    path('skin-assessment/', skin_assessment, name='skin_assessment'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('assessment/', views.take_assessment, name='take_assessment'),
+    path('api/recs/', views.api_recommendations, name='api_recs'),
 ]

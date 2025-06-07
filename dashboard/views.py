@@ -352,9 +352,9 @@ def manageorder(request):
     
     # Get all orders or filtered orders
     if status_filter:
-        orders = Order.objects.filter(status=status_filter).order_by('-date_ordered')
+        orders = Order.objects.filter(status=status_filter, complete=True).order_by('-date_ordered')
     else:
-        orders = Order.objects.all().order_by('-date_ordered')
+        orders = Order.objects.filter(complete=True).order_by('-date_ordered')
 
     # Pagination
     paginator = Paginator(orders, 10)  # Show 10 orders per page

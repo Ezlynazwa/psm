@@ -1,7 +1,7 @@
 {% extends "store/basestore.html" %}
 {% load static %}
 
-{% block title %}My Profile | Brew Beauty {% endblock %}
+{% block title %}My Profile | Brew Beauty{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/customerprofile.css' %}">
@@ -30,28 +30,19 @@
             </div>
 
             <div class="profile-menu">
-                <a href="#" class="menu-item active">
-                    <i class="fas fa-user"></i> Personal Info
-                </a>
-                <a href="{% url 'store:track_order' %}" class="menu-item">
-                    <i class="fas fa-history"></i> Order History
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-address-book"></i> Saved Addresses
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-heart"></i> Wishlist
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-lock"></i> Change Password
-                </a>
+                <a href="#" class="menu-item active"><i class="fas fa-user"></i> Personal Info</a>
+                <a href="{% url 'store:track_order' %}" class="menu-item"><i class="fas fa-history"></i> Order History</a>
+                <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Saved Addresses</a>
+                <a href="#" class="menu-item"><i class="fas fa-heart"></i> Wishlist</a>
+                <a href="#" class="menu-item"><i class="fas fa-lock"></i> Change Password</a>
             </div>
         </div>
 
         <div class="profile-form-container">
             <form method="POST" enctype="multipart/form-data" class="profile-form">
                 {% csrf_token %}
-                
+
+                <!-- Basic Info -->
                 <div class="form-section">
                     <h3><i class="fas fa-id-card"></i> Basic Information</h3>
                     <div class="form-group">
@@ -67,33 +58,79 @@
                         {{ form.phone_number }}
                     </div>
                     <div class="form-group">
-                        <label for="id_birth_date">Birth Date</label>
-                        {{ form.birth_date }}
+                        <label for="id_date_of_birth">Date of Birth</label>
+                        {{ form.date_of_birth }}
                     </div>
-                </div>
-
-                <div class="form-section">
-                    <h3><i class="fas fa-envelope"></i> Contact Information</h3>
-                    <div class="form-group">
-                        <label for="id_email">Email Address</label>
-                        {{ form.email }}
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3><i class="fas fa-venus-mars"></i> Preferences</h3>
                     <div class="form-group">
                         <label for="id_gender">Gender</label>
                         {{ form.gender }}
                     </div>
-                    <div class="form-group checkbox-group">
-                        <label class="checkbox-label">
-                            {{ form.receive_promotions }} 
-                            <span>Receive promotional emails</span>
-                        </label>
+                </div>
+
+                <!-- Contact Preferences -->
+                <div class="form-section">
+                    <h3><i class="fas fa-envelope"></i> Contact Preferences</h3>
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_preferred_contact_method">Preferred Contact Method</label>
+                        {{ form.preferred_contact_method }}
                     </div>
                 </div>
 
+                <!-- Skin Profile -->
+                <div class="form-section">
+                    <h3><i class="fas fa-sun"></i> Skin Profile</h3>
+                    <div class="form-group">
+                        <label for="id_skin_type">Skin Type</label>
+                        {{ form.skin_type }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_undertone">Undertone</label>
+                        {{ form.undertone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_surface_tone">Surface Tone</label>
+                        {{ form.surface_tone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_concerns">Skin Concerns</label>
+                        {{ form.concerns }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_sensitivity_level">Sensitivity Level</label>
+                        {{ form.sensitivity_level }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_known_allergies">Known Allergies</label>
+                        {{ form.known_allergies }}
+                    </div>
+                </div>
+
+                <!-- Product Preferences -->
+                <div class="form-section">
+                    <h3><i class="fas fa-magic"></i> Product Preferences</h3>
+                    <div class="form-group">
+                        <label for="id_preferred_finish">Preferred Finish</label>
+                        {{ form.preferred_finish }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_preferred_coverage">Preferred Coverage</label>
+                        {{ form.preferred_coverage }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_preferred_texture">Preferred Texture</label>
+                        {{ form.preferred_texture }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_ethical_preferences">Ethical Preferences</label>
+                        {{ form.ethical_preferences }}
+                    </div>
+                </div>
+
+                <!-- Actions -->
                 <div class="form-actions">
                     <button type="submit" class="btn btn-save">
                         <i class="fas fa-save"></i> Save Changes
@@ -109,10 +146,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Profile picture preview
     const profilePictureInput = document.getElementById('id_profile_picture');
     const profilePicturePreview = document.getElementById('profile-picture-preview');
-    
+
     if (profilePictureInput) {
         profilePictureInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
@@ -122,13 +158,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (profilePicturePreview.tagName === 'IMG') {
                         profilePicturePreview.src = e.target.result;
                     } else {
-                        // Replace the default icon with an image
                         const newImg = document.createElement('img');
                         newImg.src = e.target.result;
                         newImg.className = 'profile-picture';
                         profilePicturePreview.parentNode.replaceChild(newImg, profilePicturePreview);
                     }
-                }
+                };
                 reader.readAsDataURL(file);
             }
         });

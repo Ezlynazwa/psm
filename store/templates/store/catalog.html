@@ -12,16 +12,24 @@
         <p>Discover products that bring out your natural beauty</p>
         
         <div class="filter-controls">
-            
-            <div class="sort-filter">
-                <select class="form-select">
-                    <option value="">Sort by</option>
-                    <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
-                    <option value="popular">Most Popular</option>
-                    <option value="newest">Newest Arrivals</option>
+            <form method="get" class="d-flex flex-wrap gap-2">
+                <select id="category-filter" class="form-select" onchange="filterByCategory(this.value)">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
                 </select>
-            </div>
+
+                <select name="sort" class="form-select">
+                    <option value="">Sort by</option>
+                    <option value="price_asc" {% if selected_sort == "price_asc" %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if selected_sort == "price_desc" %}selected{% endif %}>Price: High to Low</option>
+                    <option value="popular" {% if selected_sort == "popular" %}selected{% endif %}>Most Popular</option>
+                    <option value="newest" {% if selected_sort == "newest" %}selected{% endif %}>Newest Arrivals</option>
+                </select>
+
+                <button type="submit" class="btn btn-outline-primary">Apply</button>
+            </form>
         </div>
     </div>
 

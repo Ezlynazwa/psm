@@ -4,180 +4,215 @@
 {% block title %}Cart | Brew Beauty{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/cart.css' %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  >
 
-<div class="cart-container">
+  <div class="cart-container">
     <div class="cart-header">
-        <h1><i class="fas fa-shopping-bag"></i> Your Beauty Cart</h1>
-        <p class="cart-subtitle">Select items to checkout</p>
+      <h1><i class="fas fa-shopping-bag"></i> Your Beauty Cart</h1>
+      <p class="cart-subtitle">Select items to checkout</p>
     </div>
 
-    <form id="checkout-form" method="post" action="{% url 'store:checkout_selected' %}">
-        {% csrf_token %}
-        <div class="cart-content">
-            {% if items %}
-                <div class="cart-summary-bar">
-                    <span class="item-count">{{ items|length }} item{% if items|length > 1 %}s{% endif %} in cart</span>
-                    <span class="select-all">
-                        <input type="checkbox" id="select-all">
-                        <label for="select-all">Select all</label>
-                    </span>
+    <form
+      id="checkout-form"
+      method="post"
+      action="{% url 'store:checkout_selected' %}"
+    >
+      {% csrf_token %}
+      <div class="cart-content">
+        {% if items %}
+          <div class="cart-summary-bar">
+            <span class="item-count">{{ items|length }} item{% if items|length > 1 %}s{% endif %} in cart</span>
+            <span class="select-all">
+              <input type="checkbox" id="select-all">
+              <label for="select-all">Select all</label>
+            </span>
+          </div>
+
+          {% for item in items %}
+            {% if item.product and item.product.id %}
+              <div class="cart-card">
+                <!-- 1) Checkbox to pick this OrderItem.id for checkout -->
+                <div class="product-select">
+                  <input
+                    type="checkbox"
+                    name="selected_items"
+                    value="{{ item.id }}"
+                    class="select-item"
+                    data-price="{{ item.get_total }}"
+                    checked
+                  >
                 </div>
-                
-                {% for item in items %}
-                {% if item.product and item.product.id %}
-                <div class="cart-card">
-                    <div class="product-select">
-                        <input 
-                            type="checkbox" 
-                            name="selected_items" 
-                            value="{{ item.id }}" 
-                            class="select-item"
-                            data-price="{{ item.get_total }}"
-                            checked
-                        >
-                    </div>
 
-                    <div class="product-image">
-                        {% with images=item.product.product_images.all %}
-                            {% if images %}
-                                <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
-                            {% else %}
-                                <div class="no-image-placeholder">
-                                    <i class="fas fa-image"></i>
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                    </div>
-
-                    <div class="product-details">
-                        <h3>{{ item.product.name }}</h3>
-                        <p class="product-brand">{{ item.product.brand }}</p>
-                        
-                        {% if item.variation %}
-                        <div class="selected-variation">
-                            <p>
-                                <span class="variation-label">Selected:</span>
-                                <span class="variation-code">{{ item.variation.variation_code }}</span>
-                            </p>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="price-container">
-                            <span class="price">RM {{ item.product.price|floatformat:2 }}</span>
-                            <span class="quantity">x {{ item.quantity }}</span>
-                            <span class="subtotal">RM {{ item.get_total|floatformat:2 }}</span>
-                        </div>
-                    </div>
-
-                    <div class="product-controls">
-                        <div class="quantity-controls">
-                            <a href="{% url 'store:decrease_quantity' item.product.id %}" class="quantity-btn minus">-</a>
-                            <span class="quantity">{{ item.quantity }}</span>
-                            <a href="{% url 'store:increase_quantity' item.product.id %}" class="quantity-btn plus">+</a>
-                        </div>
-                        
-                        <a href="{% url 'store:remove_from_cart' item.product.id %}" class="remove-btn" title="Remove item">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </div>
+                <!-- 2) Product Image (first image or placeholder) -->
+                <div class="product-image">
+                  {% with images=item.product.product_images.all %}
+                    {% if images %}
+                      <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                      <div class="no-image-placeholder">
+                        <i class="fas fa-image"></i>
+                      </div>
+                    {% endif %}
+                  {% endwith %}
                 </div>
-                {% endif %}
-                {% endfor %}
 
-                <div class="checkout-section">
-                    <div class="order-summary">
-                        <h3>Selected Items Summary</h3>
-                        <div class="summary-row">
-                            <span>Subtotal (<span id="selected-count">0</span> items)</span>
-                            <span id="subtotal">RM 0.00</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Shipping</span>
-                            <span>RM 8.00</span>
-                        </div>
-                        <div class="summary-row total">
-                            <span>Total</span>
-                            <span id="total">RM 8.00</span>
-                        </div>
+                <!-- 3) Product Details -->
+                <div class="product-details">
+                  <h3>{{ item.product.name }}</h3>
+                  <p class="product-brand">{{ item.product.brand }}</p>
+
+                  {% if item.variation %}
+                    <div class="selected-variation">
+                      <p>
+                        <span class="variation-label">Selected:</span>
+                        <span class="variation-code">{{ item.variation.variation_code }}</span>
+                      </p>
                     </div>
+                  {% endif %}
 
-                    <button type="submit" class="checkout-button" id="checkout-btn">
-                        Checkout Selected Items
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+                  <div class="price-container">
+                    <span class="price">RM {{ item.product.price|floatformat:2 }}</span>
+                    <span class="quantity">x {{ item.quantity }}</span>
+                    <span class="subtotal">RM {{ item.get_total|floatformat:2 }}</span>
+                  </div>
                 </div>
-            {% else %}
-                <div class="empty-cart">
-                    <i class="fas fa-shopping-bag"></i>
-                    <h3>Your Beauty Bag is Empty</h3>
-                    <p>Discover our collection and treat yourself</p>
-                    <a href="{% url 'store:product_list' %}" class="shop-button">Shop Now</a>
+
+                <!-- 4) Quantity Controls & Remove Button -->
+                <div class="product-controls">
+                  <div class="quantity-controls">
+                    <!--
+                      Rather than passing item.product.id,
+                      pass item.id so your view can do:
+                        order_item = get_object_or_404(OrderItem, id=item_id, order=order)
+                    -->
+                    <a
+                      href="{% url 'store:decrease_quantity' item.id %}"
+                      class="quantity-btn minus"
+                      title="Decrease quantity"
+                    >−</a>
+                    <span class="quantity">{{ item.quantity }}</span>
+                    <a
+                      href="{% url 'store:increase_quantity' item.id %}"
+                      class="quantity-btn plus"
+                      title="Increase quantity"
+                    >+</a>
+                  </div>
+
+                  <!--
+                    Use item.id here (not order_item.id), so it matches your
+                    remove_from_cart(request, item_id) view exactly
+                  -->
+                  <a
+                    href="{% url 'store:remove_from_cart' item.id %}"
+                    class="remove-btn"
+                    title="Remove item"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
                 </div>
+              </div>
             {% endif %}
-        </div>
+          {% endfor %}
+
+          <!-- 5) Checkout Summary & Button -->
+          <div class="checkout-section">
+            <div class="order-summary">
+              <h3>Selected Items Summary</h3>
+              <div class="summary-row">
+                <span>Subtotal (<span id="selected-count">0</span> items)</span>
+                <span id="subtotal">RM 0.00</span>
+              </div>
+              <div class="summary-row">
+                <span>Shipping</span>
+                <span>RM 8.00</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span id="total">RM 8.00</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="checkout-button"
+              id="checkout-btn"
+            >
+              Checkout Selected Items
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        {% else %}
+          <div class="empty-cart">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>Your Beauty Bag is Empty</h3>
+            <p>Discover our collection and treat yourself</p>
+            <a href="{% url 'store:catalog' %}" class="shop-button">Shop Now</a>
+          </div>
+        {% endif %}
+      </div>
     </form>
-</div>
+  </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectAllCheckbox = document.getElementById('select-all');
-    const itemCheckboxes = document.querySelectorAll('.select-item');
-    const subtotalEl = document.getElementById('subtotal');
-    const totalEl = document.getElementById('total');
-    const selectedCountEl = document.getElementById('selected-count');
-    const checkoutBtn = document.getElementById('checkout-btn');
-    const shippingFee = 8.00;
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectAllCheckbox = document.getElementById('select-all');
+      const itemCheckboxes = document.querySelectorAll('.select-item');
+      const subtotalEl = document.getElementById('subtotal');
+      const totalEl = document.getElementById('total');
+      const selectedCountEl = document.getElementById('selected-count');
+      const checkoutBtn = document.getElementById('checkout-btn');
+      const shippingFee = 8.00;
 
-    // Update totals function
-    function updateTotals() {
+      function updateTotals() {
         let subtotal = 0;
         let selectedCount = 0;
-        
+
         itemCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                subtotal += parseFloat(checkbox.dataset.price);
-                selectedCount++;
-            }
+          if (checkbox.checked) {
+            subtotal += parseFloat(checkbox.dataset.price);
+            selectedCount++;
+          }
         });
 
         subtotalEl.textContent = `RM ${subtotal.toFixed(2)}`;
         totalEl.textContent = `RM ${(subtotal + shippingFee).toFixed(2)}`;
         selectedCountEl.textContent = selectedCount;
-        
-        // Update select all checkbox state
-        selectAllCheckbox.checked = selectedCount === itemCheckboxes.length;
-        
-        // Disable checkout button if no items selected
-        checkoutBtn.disabled = selectedCount === 0;
-    }
 
-    // Select all functionality
-    selectAllCheckbox.addEventListener('change', function() {
+        // If every item is checked, keep "Select all" checked
+        selectAllCheckbox.checked = (selectedCount === itemCheckboxes.length);
+
+        // Disable “Checkout” if nothing is selected
+        checkoutBtn.disabled = (selectedCount === 0);
+      }
+
+      // Toggle all checkboxes
+      selectAllCheckbox.addEventListener('change', function() {
         itemCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
+          checkbox.checked = this.checked;
         });
         updateTotals();
-    });
+      });
 
-    // Individual checkbox event listeners
-    itemCheckboxes.forEach(checkbox => {
+      // Update subtotal/total when any individual box changes
+      itemCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateTotals);
-    });
+      });
 
-    // Form validation
-    document.getElementById('checkout-form').addEventListener('submit', function(e) {
-        const selectedItems = Array.from(itemCheckboxes).filter(cb => cb.checked);
-        if (selectedItems.length === 0) {
-            e.preventDefault();
-            alert('Please select at least one item to checkout');
+      // Prevent form submission if no items selected
+      document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        const anyChecked = Array.from(itemCheckboxes).some(cb => cb.checked);
+        if (!anyChecked) {
+          e.preventDefault();
+          alert('Please select at least one item to checkout');
         }
+      });
+
+      // Initial totals calculation
+      updateTotals();
     });
-
-    // Initial update
-    updateTotals();
-});
-</script>
-
+  </script>
 {% endblock %}

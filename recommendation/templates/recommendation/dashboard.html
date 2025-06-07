@@ -1,0 +1,153 @@
+{% extends "store/basestore.html" %}
+{% load static %}
+
+{% block title %}Your Personalized Makeup Recommendations | Brew Beauty{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="recommendation-container">
+  <!-- HEADER SECTION -->
+  <div class="recommendation-header">
+    <div class="header-content">
+      <h1><i class="fas fa-sparkles"></i> Your Personalized Makeup Recommendations</h1>
+      <p class="subtitle">Hello {{ user.first_name|default:"customer" }}! These products were carefully selected based on your skin assessment.</p>
+    </div>
+    
+    <!-- FILTERS AND SORTING -->
+    <div class="recommendation-tools">
+      <div class="filter-group">
+        <label for="category-filter"><i class="fas fa-filter"></i> Filter:</label>
+        <select id="category-filter" class="form-select" onchange="filterByCategory(this.value)">
+          <option value="">All Categories</option>
+          {% for category in categories %}
+            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="sort-group">
+        <label><i class="fas fa-sort"></i> Sort By:</label>
+        <div class="btn-group">
+          <a href="?price_sort=asc" class="btn btn-sort {% if sort_price == 'asc' %}active{% endif %}">Price Low-High</a>
+          <a href="?price_sort=desc" class="btn btn-sort {% if sort_price == 'desc' %}active{% endif %}">Price High-Low</a>
+          <a href="?score_sort=desc" class="btn btn-sort {% if sort_score == 'desc' %}active{% endif %}">Best Match</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS GRID -->
+  {% if recommendations %}
+    <div class="recommendation-grid">
+      {% for rec in recommendations %}
+        <div class="recommendation-card">
+          <!-- PRODUCT IMAGE -->
+          <div class="product-image">
+            {% with rec.product.product_images.first as img %}
+              {% if img %}
+                <img src="{{ img.image.url }}" alt="{{ rec.product.name }}" class="product-img">
+                <div class="score-badge">Match: {{ rec.combined_score|floatformat:2 }}</div>
+              {% else %}
+                <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-img">
+              {% endif %}
+            {% endwith %}
+          </div>
+          
+          <!-- PRODUCT INFO -->
+          <div class="product-info">
+            <h3>{{ rec.product.name }}</h3>
+            <p class="price">RM {{ rec.product.price }}</p>
+            
+            <!-- SHADE MATCHING -->
+            {% if rec.product.variations.all %}
+              {% with request.user.customerprofile.skin_assessments.first as assess %}
+                <div class="shade-matches">
+                  <span class="shade-label">Your Shades:</span>
+                  <div class="shade-chips">
+                    {% for v in rec.product.variations.all %}
+                      {% if v.skin_tone == assess.undertone and assess.surface_tone in v.surface_tones %}
+                        <span class="shade-chip" title="{{ v.variation_code }}"></span>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endwith %}
+            {% endif %}
+            
+            <!-- REASON FOR RECOMMENDATION -->
+            <div class="recommendation-reason">
+              <i class="fas fa-info-circle"></i>
+              <span>{{ rec.reason }}</span>
+            </div>
+            
+            <!-- ACTION BUTTONS -->
+            <div class="product-actions">
+              <a href="{% url 'store:view_product' rec.product.id %}" class="btn btn-details">
+                <i class="fas fa-search"></i> Details
+              </a>
+              <form method="POST" action="{% url 'store:add_to_cart' rec.product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="variation_id" value="{{ rec.product.variations.first.id }}">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-add-to-cart">
+                  <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-recommendations">
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <h3>No recommendations found</h3>
+        <p>Complete your skin assessment to get personalized makeup recommendations</p>
+        <a href="{% url 'recommendation:take_assessment' %}" class="btn btn-primary">
+          <i class="fas fa-clipboard-check"></i> Take Skin Assessment
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- ASSESSMENT SUMMARY -->
+  {% if request.user.customerprofile.skin_assessments.exists %}
+    {% with request.user.customerprofile.skin_assessments.first as assess %}
+    <div class="assessment-summary">
+      <h3><i class="fas fa-user-circle"></i> Your Skin Profile</h3>
+      <div class="profile-details">
+        <div class="detail-item">
+          <span class="detail-label">Skin Type:</span>
+          <span class="detail-value">{{ assess.skin_type|capfirst }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Undertone:</span>
+          <span class="detail-value">{{ assess.undertone|capfirst }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Primary Concerns:</span>
+          <span class="detail-value">{{ assess.concerns|default:"None" }}</span>
+        </div>
+      </div>
+      <a href="{% url 'recommendation:take_assessment' %}" class="btn btn-edit-profile">
+        <i class="fas fa-edit"></i> Update Profile
+      </a>
+    </div>
+    {% endwith %}
+  {% endif %}
+</section>
+
+<script>
+function filterByCategory(category) {
+  if (category) {
+    window.location.href = '?category=' + encodeURIComponent(category);
+  } else {
+    window.location.href = '{% url "recommendation:dashboard" %}';
+  }
+}
+</script>
+{% endblock %}

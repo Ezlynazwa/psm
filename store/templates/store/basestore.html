@@ -29,7 +29,7 @@
                     <ul class="nav-list">
                         <li><a href="{% url 'store:homepage' %}"><i class="fas fa-home"></i> Home</a></li>
                         <li><a href="{% url 'store:catalog' %}"><i class="fas fa-store"></i> Shop</a></li>
-                        <li><a href="{% url 'recommendation:recomhome' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
+                        <li><a href="{% url 'recommendation:dashboard' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
                         <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> Cart</a></li>
                         <li><a href="{% url 'store:track_order' %}"><i class="fas fa-truck"></i> Track Order</a></li>
                     </ul>
@@ -74,7 +74,7 @@
         <ul>
             <li><a href="{% url 'store:homepage' %}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{% url 'store:catalog' %}"><i class="fas fa-store"></i> Shop</a></li>
-            <li><a href="{% url 'recommendation:recomhome' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
+            <li><a href="{% url 'recommendation:dashboard' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
             <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> Cart</a></li>
             <li><a href="{% url 'store:track_order' %}"><i class="fas fa-truck"></i> Track Order</a></li>
             {% if user.is_authenticated %}
@@ -134,7 +134,7 @@
                 </div>
             </div>
         </div>
-
+ 
         <div class="footer-bottom">
             <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
             

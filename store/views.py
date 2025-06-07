@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Order, OrderItem, ShippingAddress, ProductImage, ProductVariation
+from .models import Product, Order, OrderItem, ShippingAddress, CustomerAddress, ProductVariation
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from dashboard.forms import ProductForm
@@ -19,10 +19,6 @@ from datetime import timedelta
 from decimal import Decimal
 import logging
 logger = logging.getLogger(__name__)
-
-
-
-
 
 
 # Homepage view
@@ -46,6 +42,20 @@ def homepage(request):
 def catalog(request):
     products = Product.objects.all()
     product_data = []
+    category = request.GET.get('category')
+    sort_option = request.GET.get('sort')
+
+    if category:
+        products = products.filter(category__iexact=category)
+
+    if sort_option == 'price_asc':
+        products = products.order_by('price')
+    elif sort_option == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_option == 'popular':
+        products = products.order_by('-popularity_score')
+    elif sort_option == 'newest':
+        products = products.order_by('-created_at')
 
     for product in products:
         images = product.product_images.all()
@@ -54,6 +64,8 @@ def catalog(request):
             'product': product,
             'image': first_image
         })
+
+    categories = Product.objects.values_list('category', flat=True).distinct()
 
     return render(request, 'store/catalog.html', {
         'product_data': product_data
@@ -67,21 +79,33 @@ def view_product(request, product_id):
     if request.method == 'POST':
 
         if not request.user.is_authenticated:
-            # Redirect to login page and return here after login
-            login_url = f"{reverse('users/login')}?next={request.path}"
             return redirect('login_url')
         
         quantity = int(request.POST.get('quantity', 1))
+        variation_id = request.POST.get('variation_id')
+        if not variation_id:
+            messages.error(request, "Please Choose Product Code")
+            return redirect('store:view_product', product_id=product.id)
         
-        # Get or create an order for the user
+        variation = get_object_or_404(ProductVariation, id=variation_id, product=product)
+        if variation.quantity < 1:
+            messages.error(request, "Thid Code is Out of Stock")
+            return redirect('store:view_product', product_id=product.id)
+
         order, created = Order.objects.get_or_create(user=request.user, complete=False)
-        
-        # Add the item to the cart
-        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
-        order_item.quantity += quantity  # Increment the quantity
+        order_item, item_created = OrderItem.objects.get_or_create(
+            order=order,
+            product=product,
+            variation=variation
+        )
+        if not item_created:
+            order_item.quantity += quantity
+        else:
+            order_item.quantity = quantity
         order_item.save()
 
-        return redirect('store:cart')  # Redirect to the cart page after adding the item
+        return redirect('store:cart')
+
     
     images = product.product_images.all()
 
@@ -101,8 +125,12 @@ def cart(request):
         if orders.count() > 1:
             orders.exclude(id=orders.first().id).delete()
 
-        # Guna order yang kekal
-        order = orders.first()
+        # Jika tiada satu pun, buat satu order baru (keranjang baru)
+        if not orders.exists():
+            order = Order.objects.create(user=request.user, complete=False, total=Decimal('0.00'))
+        else:
+            order = orders.first()
+
         items = order.orderitem_set.all()
         total = order.get_cart_total
         cart_items = order.get_cart_items
@@ -121,133 +149,114 @@ def cart(request):
 @login_required
 def checkout(request, order_id):
     try:
-        order = get_object_or_404(Order, id=order_id, user=request.user)
-        saved_addresses = ShippingAddress.objects.filter(user=request.user)
-        
+        # Dapatkan order yang belum lengkap milik user ini
+        order = get_object_or_404(
+            Order, id=order_id, user=request.user, complete=False
+        )
+        # Dapatkan semua alamat tersimpan (CustomerAddress) bagi user
+        saved_addresses = CustomerAddress.objects.filter(user=request.user)
+
+        # Ambil item yang user pilih di session
         selected_item_ids = request.session.get('checkout_items', [])
         if not selected_item_ids:
             messages.error(request, "No items selected for checkout")
             return redirect('store:cart')
-            
+
         selected_items = order.orderitem_set.filter(id__in=selected_item_ids)
         if not selected_items.exists():
             messages.error(request, "Selected items no longer available")
             return redirect('store:cart')
-        
+
+        # Kira subtotal, shipping fee, dan total
         subtotal = sum(item.get_total for item in selected_items)
-        shipping = Decimal('8.00')
-        total = subtotal + shipping
+        shipping_fee = Decimal('8.00')
+        total = subtotal + shipping_fee
 
         if request.method == 'POST':
             form = CheckoutForm(request.POST, request.FILES)
-            
             if form.is_valid():
-                print("Form is valid")  # Debug
-                
-                # Create new order
-                try:
-                    new_order = Order.objects.create(
-                        user=request.user,
-                        complete=True,
-                        total=total,
-                        status='pending'
+                # 1) Buat order baru (complete=True)
+                new_order = Order.objects.create(
+                    user=request.user,
+                    complete=True,
+                    total=total,
+                    status='pending'
+                )
+
+                # 2) Salin setiap OrderItem terpilih ke new_order
+                for item in selected_items:
+                    OrderItem.objects.create(
+                        product=item.product,
+                        quantity=item.quantity,
+                        variation=item.variation,
+                        order=new_order
                     )
-                    print(f"New order created: {new_order.id}")  # Debug
-                except Exception as e:
-                    print(f"Error creating order: {str(e)}")  # Debug
-                    messages.error(request, "Failed to create order")
-                    return redirect('store:cart')
-                
-                # Copy items
-                try:
-                    for item in selected_items:
-                        OrderItem.objects.create(
-                            product=item.product,
-                            order=new_order,
-                            quantity=item.quantity,
-                            variation=item.variation
-                        )
-                    print("Items copied successfully")  # Debug
-                except Exception as e:
-                    print(f"Error copying items: {str(e)}")  # Debug
-                    new_order.delete()  # Clean up
-                    messages.error(request, "Failed to process order items")
-                    return redirect('store:cart')
-                
-                # Process address
-                shipping_address = None
-                try:
-                    if request.POST.get('add_new_address') == 'on':
-                        print("Creating new address")  # Debug
-                        shipping_address = ShippingAddress.objects.create(
-                            user=request.user,
-                            address=form.cleaned_data['address'],
-                            city=form.cleaned_data['city'],
-                            state=form.cleaned_data['state'],
-                            zipcode=form.cleaned_data['zipcode']
-                        )
-                    else:
-                        shipping_address_id = request.POST.get('selected_address')
-                        if shipping_address_id:
-                            print(f"Using existing address: {shipping_address_id}")  # Debug
-                            shipping_address = get_object_or_404(ShippingAddress, id=shipping_address_id, user=request.user)
-                    
-                    if shipping_address:
-                        new_order.shipping_address = shipping_address
-                        print(f"Address set: {shipping_address.id}")  # Debug
-                except Exception as e:
-                    print(f"Error processing address: {str(e)}")  # Debug
-                    messages.error(request, "Error processing shipping address")
-                
-                # Process receipt
-                try:
-                    if 'receipt' in request.FILES:
-                        new_order.receipt = request.FILES['receipt']
-                        print("Receipt uploaded")  # Debug
+
+                # 3) Proses alamat
+                if form.cleaned_data.get('add_new_address'):
+                    # Simpan alamat baru ke CustomerAddress
+                    saved_address = CustomerAddress.objects.create(
+                        user=request.user,
+                        address=form.cleaned_data['address'],
+                        city=form.cleaned_data['city'],
+                        state=form.cleaned_data['state'],
+                        zipcode=form.cleaned_data['zipcode']
+                    )
+                else:
+                    saved_id = form.cleaned_data.get('selected_address')
+                    saved_address = get_object_or_404(
+                        CustomerAddress, id=saved_id, user=request.user
+                    )
+
+                # Simpan snapshot ke ShippingAddress
+                _ = ShippingAddress.objects.create(
+                    order=new_order,
+                    address=saved_address.address,
+                    city=saved_address.city,
+                    state=saved_address.state,
+                    zipcode=saved_address.zipcode
+                )
+
+                # 4) Simpan resit (receipt)
+                if 'receipt' in request.FILES:
+                    new_order.receipt = request.FILES['receipt']
                     new_order.save()
-                    print("Order saved successfully")  # Debug
-                except Exception as e:
-                    print(f"Error saving receipt: {str(e)}")  # Debug
-                    messages.error(request, "Error processing payment receipt")
-                
-                # Clear session
-                try:
-                    if 'checkout_items' in request.session:
-                        del request.session['checkout_items']
-                        request.session.modified = True
-                        print("Session cleared")  # Debug
-                except Exception as e:
-                    print(f"Error clearing session: {str(e)}")  # Debug
-                
+
+                # 5) Kosongkan session dan padam order lama (cart)
+                request.session.pop('checkout_items', None)
+                request.session.modified = True
+                order.delete()
+
                 return redirect('store:order_confirmation', order_id=new_order.id)
             else:
-                print("Form errors:", form.errors)  # Debug
-                messages.error(request, "Please correct the errors below")
+                messages.error(request, "Sila betulkan kesilapan di borang")
         else:
             form = CheckoutForm()
-        
+
         return render(request, 'store/checkout.html', {
             'order': order,
             'selected_items': selected_items,
             'selected_items_count': selected_items.count(),
             'subtotal': subtotal,
             'total': total,
-            'shipping_fee': shipping,
+            'shipping_fee': shipping_fee,
             'form': form,
             'qr_code_url': '/media/qr_code/qrezlyn.jpg',
             'saved_addresses': saved_addresses,
         })
-        
+
     except Exception as e:
-        print(f"Checkout error: {str(e)}", exc_info=True)  # Debug
-        messages.error(request, f"An error occurred during checkout: {str(e)}")
+        messages.error(request, f"Ralat semasa checkout: {e}")
         return redirect('store:cart')
 
 @login_required
 def checkout_selected(request):
     if request.method == 'POST':
         try:
-            selected_item_ids = [int(id) for id in request.POST.getlist('selected_items') if id.isdigit()]
+            selected_item_ids = [
+                int(id) for id in request.POST.getlist('selected_items')
+                if id.isdigit()
+            ]
             
             if not selected_item_ids:
                 messages.error(request, "Please select at least one item to checkout")
@@ -258,7 +267,6 @@ def checkout_selected(request):
             if not order:
                 messages.error(request, "No active order found")
                 return redirect('store:cart')
-            
             # Verify all selected items belong to this order
             valid_items = order.orderitem_set.filter(id__in=selected_item_ids)
             if valid_items.count() != len(selected_item_ids):
@@ -266,17 +274,15 @@ def checkout_selected(request):
                 return redirect('store:cart')
             
             request.session['checkout_items'] = selected_item_ids
+            request.session.modified = True
             return redirect('store:checkout', order_id=order.id)
-        
-            # Di view checkout_selected:
-            request.session['checkout_items'] = selected_item_ids
-            request.session.modified = True  # Pastikan session disimpan
             
         except Exception as e:
             messages.error(request, f"Error processing selection: {str(e)}")
             return redirect('store:cart')
     
     return redirect('store:cart')
+
 
 
 def search(request):
@@ -311,18 +317,29 @@ def add_to_cart(request, product_id):
     # Redirect back to the catalog page or product detail page
     return redirect('store:catalog')  # Or redirect to the product detail page
 
-def remove_from_cart(request, product_id):
-    if request.user.is_authenticated:
-        order_item = get_object_or_404(
-            OrderItem, 
-            product__id=product_id, 
-            order__user=request.user, 
+# store/views.py
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Order, OrderItem
+
+@login_required
+def remove_from_cart(request, item_id):
+    try:
+        # Only fetch an OrderItem that belongs to the logged‐in user’s incomplete order
+        order_item = OrderItem.objects.get(
+            id=item_id,
+            order__user=request.user,
             order__complete=False
-            )
-        order_item.delete()
-        return redirect('store:cart')  # Redirect back to the cart page
-    else:
-        return redirect('users:login')
+        )
+    except OrderItem.DoesNotExist:
+        messages.error(request, "That item was not found in your cart.")
+        return redirect('store:cart')
+
+    order_item.delete()
+    messages.success(request, "Item removed from cart.")
+    return redirect('store:cart')
+
 
 def increase_quantity(request, product_id):
     if request.user.is_authenticated:
@@ -356,18 +373,42 @@ def decrease_quantity(request, product_id):
         return redirect('users:login')
     
 
-
+@login_required
 def track_order(request):
-    if request.user.is_authenticated:
-        # Only show complete orders (orders that have been placed)
-        orders = Order.objects.filter(user=request.user, complete=True).order_by('-date_ordered')
-    else:
-        orders = None
+    status_tabs = ["pending", "verified", "preparing", "shipped"]
+    status = request.GET.get('status')
+    shipping_fee = Decimal('8.00')
+
+    orders = Order.objects.filter(user=request.user, complete=True)
+    if status:
+        orders = orders.filter(status=status)
+        
+    orders = orders.order_by('-date_ordered')
+
+    return render(
+        request,
+        'store/track_order.html',
+        {
+            'orders': orders,
+            'selected_status': status,
+            'status_tabs': status_tabs,
+            'shipping_fee': shipping_fee,
+        }
+    )
+
+def order_detail(request, order_id):
+    
+    shipping_fee = Decimal('8.00')
+    subtotal = order.get_cart_total
+    total = subtotal + shipping_fee
 
     context = {
-        'orders': orders,
+        'order': order,
+        'shipping_fee': shipping_fee,
+        'subtotal': subtotal,
+        'total': total,
     }
-    return render(request, 'store/track_order.html', context)
+    return render(request, 'store/order_detail.html', context)
 
 def upload_receipt(request):
     if request.method == 'POST':

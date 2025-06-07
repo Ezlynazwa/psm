@@ -1,0 +1,341 @@
+{% extends "store/basestore.html" %}
+{% load static %}
+
+{% block title %}Skin Assessment | Brew Beauty{% endblock %}
+
+{% block content %}
+<div class="skin-assessment-container">
+    <div class="assessment-header text-center">
+        <div class="header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                <line x1="16" y1="8" x2="2" y2="22"></line>
+                <line x1="17.5" y1="15" x2="9" y2="15"></line>
+            </svg>
+        </div>
+        <h1 class="display-4">Personalized Skin Assessment</h1>
+        <p class="lead text-muted">Answer a few questions to receive customized product recommendations tailored to your unique skin needs</p>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small class="text-muted">Step 1 of 5</small>
+        </div>
+    </div>
+
+    <form method="post" class="skin-assessment-form">
+        {% csrf_token %}
+
+        <!-- Skin Type -->
+        <div class="form-section active" id="skin-type-section">
+            <h2><span class="section-number">1</span> What is your skin type?</h2>
+            <p class="section-description">Understanding your skin type helps us recommend the right products for your needs</p>
+            
+            <div class="option-grid">
+                {% for choice in form.skin_type.field.choices %}
+                <div class="option-card">
+                    <input type="radio" id="skin_type_{{ forloop.counter }}" name="{{ form.skin_type.name }}" value="{{ choice.0 }}" {% if form.skin_type.value == choice.0 %}checked{% endif %}>
+                    <label for="skin_type_{{ forloop.counter }}">
+                        <div class="option-icon">
+                            {% if choice.0 == 'dry' %}
+                            <i class="fas fa-leaf"></i>
+                            {% elif choice.0 == 'oily' %}
+                            <i class="fas fa-tint"></i>
+                            {% elif choice.0 == 'combination' %}
+                            <i class="fas fa-random"></i>
+                            {% elif choice.0 == 'normal' %}
+                            <i class="fas fa-check-circle"></i>
+                            {% elif choice.0 == 'sensitive' %}
+                            <i class="fas fa-allergies"></i>
+                            {% endif %}
+                        </div>
+                        <span class="option-title">{{ choice.1 }}</span>
+                        <span class="option-description">
+                            {% if choice.0 == 'dry' %}
+                            Feels tight, may have flaky patches
+                            {% elif choice.0 == 'oily' %}
+                            Shiny appearance, prone to breakouts
+                            {% elif choice.0 == 'combination' %}
+                            Oily T-zone, dry/normal cheeks
+                            {% elif choice.0 == 'normal' %}
+                            Balanced, not too dry or oily
+                            {% elif choice.0 == 'sensitive' %}
+                            Easily irritated, may turn red
+                            {% endif %}
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-navigation">
+                <button type="button" class="btn btn-next" data-next="undertone-section">Next: Undertone <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Undertone -->
+        <div class="form-section" id="undertone-section">
+            <h2><span class="section-number">2</span> What is your skin's undertone?</h2>
+            <p class="section-description">This helps us recommend products that will complement your natural coloring</p>
+            
+            <div class="option-grid">
+                {% for choice in form.undertone.field.choices %}
+                <div class="option-card">
+                    <input type="radio" id="undertone_{{ forloop.counter }}" name="{{ form.undertone.name }}" value="{{ choice.0 }}" {% if form.undertone.value == choice.0 %}checked{% endif %}>
+                    <label for="undertone_{{ forloop.counter }}">
+                        <div class="undertone-swatch swatch-{{ choice.0 }}">
+                            <div class="vein-example"></div>
+                        </div>
+                        <span class="option-title">{{ choice.1 }}</span>
+                        <span class="option-description">
+                            {% if choice.0 == 'cool' %}
+                            Veins appear blue, silver jewelry flatters
+                            {% elif choice.0 == 'warm' %}
+                            Veins appear green, gold jewelry flatters
+                            {% elif choice.0 == 'neutral' %}
+                            Veins appear teal, both metals look good
+                            {% endif %}
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-navigation">
+                <button type="button" class="btn btn-prev" data-prev="skin-type-section"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button type="button" class="btn btn-next" data-next="concerns-section">Next: Concerns <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Concerns -->
+        <div class="form-section" id="concerns-section">
+            <h2><span class="section-number">3</span> Select your top skin concerns</h2>
+            <p class="section-description">Choose all that apply (max 3 recommended)</p>
+            
+            <div class="concerns-grid">
+                {% for choice in form.concerns.field.choices %}
+                <div class="concern-card">
+                    <input type="checkbox" id="concern_{{ forloop.counter }}" name="{{ form.concerns.name }}" value="{{ choice.0 }}" {% if choice.0 in form.concerns.value %}checked{% endif %}>
+                    <label for="concern_{{ forloop.counter }}">
+                        <div class="concern-icon">
+                            {% if choice.0 == 'acne' %}
+                            <i class="fas fa-bacteria"></i>
+                            {% elif choice.0 == 'aging' %}
+                            <i class="fas fa-hourglass-half"></i>
+                            {% elif choice.0 == 'dark_spots' %}
+                            <i class="fas fa-circle"></i>
+                            {% elif choice.0 == 'redness' %}
+                            <i class="fas fa-burn"></i>
+                            {% elif choice.0 == 'dryness' %}
+                            <i class="fas fa-water"></i>
+                            {% elif choice.0 == 'oiliness' %}
+                            <i class="fas fa-oil-can"></i>
+                            {% elif choice.0 == 'pores' %}
+                            <i class="fas fa-dot-circle"></i>
+                            {% elif choice.0 == 'dullness' %}
+                            <i class="fas fa-cloud"></i>
+                            {% endif %}
+                        </div>
+                        <span class="option-title">{{ choice.1 }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-navigation">
+                <button type="button" class="btn btn-prev" data-prev="undertone-section"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button type="button" class="btn btn-next" data-next="sliders-section">Next: Skin Profile <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Sliders Section - Enhanced -->
+        <div class="form-section" id="sliders-section">
+            <h2><span class="section-number">4</span> Rate these aspects of your skin</h2>
+            <p class="section-description">Slide to indicate how much each characteristic applies to you</p>
+            
+            <div class="slider-group">
+                <!-- Hydration Level -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ form.hydration_level.id_for_label }}">Hydration Level</label>
+                        <span class="slider-value" id="hydration-value">5</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        {{ form.hydration_level }}
+                        <div class="slider-labels">
+                            <span>Dehydrated</span>
+                            <span>Balanced</span>
+                            <span>Hydrated</span>
+                        </div>
+                        <div class="slider-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Oiliness Level -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ form.oiliness_level.id_for_label }}">Oiliness Level</label>
+                        <span class="slider-value" id="oiliness-value">4</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        {{ form.oiliness_level }}
+                        <div class="slider-labels">
+                            <span>Dry</span>
+                            <span>Normal</span>
+                            <span>Oily</span>
+                        </div>
+                        <div class="slider-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sensitivity Level -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ form.sensitivity_level.id_for_label }}">Sensitivity Level</label>
+                        <span class="slider-value" id="sensitivity-value">5</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        {{ form.sensitivity_level }}
+                        <div class="slider-labels">
+                            <span>Resistant</span>
+                            <span>Normal</span>
+                            <span>Sensitive</span>
+                        </div>
+                        <div class="slider-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Acne Proneness -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ form.acne_proneness.id_for_label }}">Acne Proneness</label>
+                        <span class="slider-value" id="acne-value">1</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        {{ form.acne_proneness }}
+                        <div class="slider-labels">
+                            <span>Rare</span>
+                            <span>Occasional</span>
+                            <span>Frequent</span>
+                        </div>
+                        <div class="slider-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aging Concerns -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ form.aging_concerns.id_for_label }}">Aging Concerns</label>
+                        <span class="slider-value" id="aging-value">3</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        {{ form.aging_concerns }}
+                        <div class="slider-labels">
+                            <span>None</span>
+                            <span>Preventative</span>
+                            <span>Visible Signs</span>
+                        </div>
+                        <div class="slider-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-navigation">
+                <button type="button" class="btn btn-prev" data-prev="concerns-section"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button type="button" class="btn btn-next" data-next="preferences-section">Next: Preferences <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="form-section" id="preferences-section">
+            <h2><span class="section-number">5</span> Your Product Preferences</h2>
+            <p class="section-description">Tell us what you like in your skincare products</p>
+            
+            <div class="preference-group">
+                <h3>Preferred Finish</h3>
+                <div class="option-grid">
+                    {% for choice in form.finish_preference.field.choices %}
+                    <div class="option-card">
+                        <input type="radio" id="finish_{{ forloop.counter }}" name="{{ form.finish_preference.name }}" value="{{ choice.0 }}" {% if form.finish_preference.value == choice.0 %}checked{% endif %}>
+                        <label for="finish_{{ forloop.counter }}">
+                            <div class="option-icon">
+                                {% if choice.0 == 'matte' %}
+                                <i class="fas fa-sun"></i>
+                                {% elif choice.0 == 'dewy' %}
+                                <i class="fas fa-sparkles"></i>
+                                {% elif choice.0 == 'natural' %}
+                                <i class="fas fa-leaf"></i>
+                                {% elif choice.0 == 'no_preference' %}
+                                <i class="fas fa-question"></i>
+                                {% endif %}
+                            </div>
+                            <span class="option-title">{{ choice.1 }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <h3>Preferred Texture</h3>
+                <div class="option-grid">
+                    {% for choice in form.texture_preference.field.choices %}
+                    <div class="option-card">
+                        <input type="radio" id="texture_{{ forloop.counter }}" name="{{ form.texture_preference.name }}" value="{{ choice.0 }}" {% if form.texture_preference.value == choice.0 %}checked{% endif %}>
+                        <label for="texture_{{ forloop.counter }}">
+                            <div class="option-icon">
+                                {% if choice.0 == 'light' %}
+                                <i class="fas fa-feather"></i>
+                                {% elif choice.0 == 'medium' %}
+                                <i class="fas fa-weight-hanging"></i>
+                                {% elif choice.0 == 'rich' %}
+                                <i class="fas fa-weight"></i>
+                                {% elif choice.0 == 'no_preference' %}
+                                <i class="fas fa-question"></i>
+                                {% endif %}
+                            </div>
+                            <span class="option-title">{{ choice.1 }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-navigation">
+                <button type="button" class="btn btn-prev" data-prev="sliders-section"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button type="submit" class="btn btn-submit">Get My Recommendations <i class="fas fa-magic"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="assessment-sidebar">
+    <div class="sidebar-tip">
+        <h4><i class="fas fa-lightbulb"></i> Quick Tip</h4>
+        <p>Not sure about your skin type? Try the blotting test: press a clean tissue to your face first thing in the morning. Oil on all areas indicates oily skin, just the T-zone means combination, and little to no oil suggests dry skin.</p>
+    </div>
+    <div class="sidebar-benefits">
+        <h4><i class="fas fa-star"></i> Why Complete This Assessment?</h4>
+        <ul>
+            <li>Personalized product matches</li>
+            <li>Tailored skincare routine</li>
+            <li>Avoid products that won't work for you</li>
+            <li>Save time and money</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/skin_assessment.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/skin_assessment.js' %}"></script>
+{% endblock %}

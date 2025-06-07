@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import SignupForm, CustomerForm
-from users.models import User, Customer
+from .models import User, CustomerProfile
 from django.contrib.auth.decorators import login_required
 
 
@@ -49,7 +49,7 @@ def logout_view(request):
 
 @login_required
 def customer_profile(request):
-    customer, created = Customer.objects.get_or_create(user=request.user)
+    customer, created = CustomerProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         form = CustomerForm(request.POST, request.FILES, instance=customer)
