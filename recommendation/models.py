@@ -82,7 +82,7 @@ class SkinAssessment(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text="1=no aging issues, 5=major wrinkles/aging"
     )
-
+    
     surface_tone = models.CharField(
     max_length=20,
     choices=[
@@ -166,3 +166,22 @@ class SkinAssessment(models.Model):
         ordering = ['-assessment_date']
         verbose_name = "Skin Assessment"
         verbose_name_plural = "Skin Assessments"
+
+class RecommendationEvent(models.Model):
+    EVENT_CHOICES = [
+        ('view', 'View'),
+        ('click', 'Click'),
+        ('purchase', 'Purchase'),
+    ]
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey('store.Product', on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=10, choices=EVENT_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'product']),
+            models.Index(fields=['event_type']),
+            models.Index(fields=['timestamp']),
+        ]
+        ordering = ['-timestamp']

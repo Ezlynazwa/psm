@@ -1,0 +1,196 @@
+{% extends "store/basestore.html" %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/recommendation.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="rec-container">
+  <header class="rec-header">
+    <div class="rec-header-content">
+      <h1 class="rec-title"><i class="fas fa-sparkles"></i> Your Personalized Recommendations</h1>
+      <p class="rec-subtitle">Curated just for your unique skin profile</p>
+      <div class="rec-header-illustration">
+        <img src="{% static 'images/skincare-illustration.svg' %}" alt="Skin care illustration" loading="lazy">
+      </div>
+    </div>
+    <a class="btn rec-btn-assess" href="{% url 'recommendation:take_assessment' %}">
+      <i class="fas fa-user-edit"></i> Update Profile
+    </a>
+  </header>
+
+  <section class="rec-filters">
+    <form method="get" class="rec-filter-form">
+      <div class="filter-group">
+        <label for="category"><i class="fas fa-tags"></i> Category</label>
+        <select name="category" id="category" class="rec-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="score_sort"><i class="fas fa-percentage"></i> Match Score</label>
+        <select name="score_sort" id="score_sort" class="rec-select">
+          <option value="">Default</option>
+          <option value="asc" {% if sort_score == 'asc' %}selected{% endif %}>Low to High</option>
+          <option value="desc" {% if sort_score == 'desc' %}selected{% endif %}>High to Low</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="price_sort"><i class="fas fa-coins"></i> Price</label>
+        <select name="price_sort" id="price_sort" class="rec-select">
+          <option value="">Default</option>
+          <option value="asc" {% if sort_price == 'asc' %}selected{% endif %}>Low to High</option>
+          <option value="desc" {% if sort_price == 'desc' %}selected{% endif %}>High to Low</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn rec-btn-apply">
+        <i class="fas fa-sliders-h"></i> Apply Filters
+      </button>
+    </form>
+  </section>
+
+  {% if recommendations %}
+  <section class="rec-grid">
+    {% for rec in recommendations %}
+      <article class="rec-card">
+        <div class="rec-card-badge">
+                <span class="match-badge"
+                    style="background-color: 
+                        {% if rec.combined_score >= 0.8 %}#d10000
+                        {% elif rec.combined_score >= 0.5 %}#e67e22
+                        {% else %}#3498db
+                        {% endif %};">
+            {{ rec.combined_score|floatformat:1 }} Match
+          </span>
+          {% if "Popular" in rec.reason %}
+            <span class="popular-badge"><i class="fas fa-bolt"></i> Trending</span>
+          {% endif %}
+        </div>
+        
+        <div class="rec-image-wrapper">
+          {% if rec.product.product_images.first %}
+            <img src="{{ rec.product.product_images.first.image.url }}" alt="{{ rec.product.name }}" loading="lazy">
+          {% else %}
+            <div class="rec-image-placeholder">
+              <i class="fas fa-spa"></i>
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="rec-details">
+          <h2>{{ rec.product.name }}</h2>
+          <p class="rec-brand">{{ rec.product.brand }}</p>
+          <div class="rec-price-container">
+            <span class="rec-price">RM {{ rec.product.price }}</span>
+            {% if rec.product.quantity <= 5 %}
+              <span class="stock-warning"><i class="fas fa-box-open"></i> Low stock</span>
+            {% endif %}
+          </div>
+          
+          <div class="rec-tags">
+            {% if rec.product.skin_type %}
+              <span class="tag">{{ rec.product.skin_type }}</span>
+            {% endif %}
+            {% if rec.product.finish %}
+              <span class="tag">{{ rec.product.finish }}</span>
+            {% endif %}
+            {% if rec.product.is_hypoallergenic %}
+              <span class="tag"><i class="fas fa-allergies"></i> Hypoallergenic</span>
+            {% endif %}
+          </div>
+          
+          <p class="rec-reason">
+            <i class="fas fa-heart"></i> {{ rec.reason }}
+          </p>
+        </div>
+        
+        <footer class="rec-footer">
+          <a href="{% url 'store:view_product' rec.product.id %}" class="btn rec-btn-view">
+            <i class="fas fa-info-circle"></i> Details
+          </a>
+          {% if rec.product.is_in_stock %}
+            <a href="{% url 'store:add_to_cart' rec.product.id %}" class="btn rec-btn-cart">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </a>
+          {% else %}
+            <button class="btn rec-btn-disabled" disabled>
+              <i class="fas fa-ban"></i> Out of Stock
+            </button>
+          {% endif %}
+        </footer>
+      </article>
+    {% endfor %}
+  </section>
+  {% else %}
+  <section class="rec-empty-state">
+    <div class="empty-content">
+      <div class="empty-icon">
+        <i class="fas fa-search fa-4x"></i>
+      </div>
+      <h2>No Perfect Matches Found</h2>
+      <p>We couldn't find products that perfectly match your current profile, but here are some popular options you might like:</p>
+      
+      <div class="popular-fallback">
+        {% for product in fallback_products %}
+          <article class="rec-card">
+            <div class="rec-card-badge">
+              <span class="popular-badge"><i class="fas fa-crown"></i> Popular Choice</span>
+            </div>
+            
+            <div class="rec-image-wrapper">
+              {% if product.product_images.first %}
+                <img src="{{ product.product_images.first.image.url }}" alt="{{ product.name }}" loading="lazy">
+              {% else %}
+                <div class="rec-image-placeholder">
+                  <i class="fas fa-spa"></i>
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="rec-details">
+              <h2>{{ product.name }}</h2>
+              <p class="rec-brand">{{ product.brand }}</p>
+              <p class="rec-price">RM {{ product.price }}</p>
+              
+              <div class="rec-tags">
+                {% if product.skin_type %}
+                  <span class="tag">{{ product.skin_type }}</span>
+                {% endif %}
+                {% if product.finish %}
+                  <span class="tag">{{ product.finish }}</span>
+                {% endif %}
+              </div>
+            </div>
+            
+            <footer class="rec-footer">
+              <a href="{% url 'store:product_detail' product.id %}" class="btn rec-btn-view">
+                <i class="fas fa-info-circle"></i> Details
+              </a>
+              <a href="{% url 'store:add_to_cart' product.id %}" class="btn rec-btn-cart">
+                <i class="fas fa-cart-plus"></i> Add to Cart
+              </a>
+            </footer>
+          </article>
+        {% endfor %}
+      </div>
+      
+      <div class="empty-actions">
+        <a href="{% url 'recommendation:take_assessment' %}" class="btn rec-btn-primary">
+          <i class="fas fa-clipboard-list"></i> Update Skin Profile
+        </a>
+        <a href="{% url 'store:catalog' %}" class="btn rec-btn-secondary">
+          <i class="fas fa-store-alt"></i> Browse All Products
+        </a>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

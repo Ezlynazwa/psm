@@ -14,7 +14,7 @@ from .models import SkinAssessment
 from store.models import Product
 
 @login_required
-def dashboard(request):
+def recommendation_page(request):
     customer, created = CustomerProfile.objects.get_or_create(user=request.user)
     categories = Product.objects.exclude(category__isnull=True).exclude(category__exact='').values_list('category', flat=True).distinct()
 
@@ -54,8 +54,7 @@ def dashboard(request):
         'categories': categories,
     }
 
-    return render(request, 'recommendation/dashboard.html', context)
-
+    return render(request, 'recommendation/recommendation_page.html', context)
 
 @login_required
 def take_assessment(request):
@@ -74,7 +73,7 @@ def take_assessment(request):
             messages.success(request, "Skin assessment saved!")
             from django.core.cache import cache
             cache.delete(f"makeup_recs_{customer.id}")
-            return redirect('recommendation:dashboard')
+            return redirect('recommendation:recommendation_page')
         else:
             print(form.errors)
     else:
@@ -146,7 +145,7 @@ def skin_assessment(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Skin assessment updated!")
-            return redirect('recommendation:dashboard')
+            return redirect('recommendation:recommendation_page')
     else:
         # pre-fill dengan data sedia ada
         initial = {}

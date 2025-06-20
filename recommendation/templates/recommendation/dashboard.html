@@ -5,21 +5,57 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <section class="recommendation-container">
   <!-- HEADER SECTION -->
-  <div class="recommendation-header">
-    <div class="header-content">
-      <h1><i class="fas fa-sparkles"></i> Your Personalized Makeup Recommendations</h1>
-      <p class="subtitle">Hello {{ user.first_name|default:"customer" }}! These products were carefully selected based on your skin assessment.</p>
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1><i class="fas fa-sparkles"></i> Your Personalized Recommendations</h1>
+      <p class="subtitle">Hello {{ user.first_name|default:"customer" }}! These products were carefully selected for your skin profile.</p>
     </div>
     
-    <!-- FILTERS AND SORTING -->
-    <div class="recommendation-tools">
+    <!-- PROFILE SUMMARY -->
+    {% if request.user.customerprofile.skin_assessments.exists %}
+      {% with request.user.customerprofile.skin_assessments.first as assess %}
+      <div class="profile-summary-card">
+        <div class="profile-summary-content">
+          <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="profile-details">
+            <h3>Your Skin Profile</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Type:</span>
+                <span class="detail-value">{{ assess.skin_type|capfirst }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Undertone:</span>
+                <span class="detail-value">{{ assess.undertone|capfirst }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Concerns:</span>
+                <span class="detail-value">{{ assess.concerns|truncatechars:20|default:"None" }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'recommendation:take_assessment' %}" class="update-profile-btn">
+          <i class="fas fa-edit"></i> Update
+        </a>
+      </div>
+      {% endwith %}
+    {% endif %}
+  </div>
+
+  <!-- FILTERS AND SORTING -->
+  <div class="filter-controls">
+    <div class="filter-section">
       <div class="filter-group">
-        <label for="category-filter"><i class="fas fa-filter"></i> Filter:</label>
+        <label for="category-filter"><i class="fas fa-filter"></i> Category:</label>
         <select id="category-filter" class="form-select" onchange="filterByCategory(this.value)">
           <option value="">All Categories</option>
           {% for category in categories %}
@@ -29,117 +65,136 @@
       </div>
       
       <div class="sort-group">
-        <label><i class="fas fa-sort"></i> Sort By:</label>
-        <div class="btn-group">
-          <a href="?price_sort=asc" class="btn btn-sort {% if sort_price == 'asc' %}active{% endif %}">Price Low-High</a>
-          <a href="?price_sort=desc" class="btn btn-sort {% if sort_price == 'desc' %}active{% endif %}">Price High-Low</a>
-          <a href="?score_sort=desc" class="btn btn-sort {% if sort_score == 'desc' %}active{% endif %}">Best Match</a>
+        <label><i class="fas fa-sort-amount-down"></i> Sort:</label>
+        <div class="sort-options">
+          <a href="?price_sort=asc" class="sort-btn {% if sort_price == 'asc' %}active{% endif %}">
+            <i class="fas fa-sort-numeric-down"></i> Price Low
+          </a>
+          <a href="?price_sort=desc" class="sort-btn {% if sort_price == 'desc' %}active{% endif %}">
+            <i class="fas fa-sort-numeric-up"></i> Price High
+          </a>
+          <a href="?score_sort=desc" class="sort-btn {% if sort_score == 'desc' %}active{% endif %}">
+            <i class="fas fa-star"></i> Best Match
+          </a>
         </div>
       </div>
+    </div>
+    <div class="results-count">
+      Showing {{ recommendations|length }} recommendation{{ recommendations|length|pluralize }}
     </div>
   </div>
 
   <!-- RECOMMENDATIONS GRID -->
   {% if recommendations %}
-    <div class="recommendation-grid">
+    <div class="products-grid">
       {% for rec in recommendations %}
-        <div class="recommendation-card">
+        <div class="product-card">
           <!-- PRODUCT IMAGE -->
-          <div class="product-image">
+          <div class="product-image-container">
             {% with rec.product.product_images.first as img %}
               {% if img %}
-                <img src="{{ img.image.url }}" alt="{{ rec.product.name }}" class="product-img">
-                <div class="score-badge">Match: {{ rec.combined_score|floatformat:2 }}</div>
+                <img src="{{ img.image.url }}" alt="{{ rec.product.name }}" class="product-image">
+                <div class="match-badge">Match: {{ rec.combined_score|floatformat:2 }}</div>
+                {% if rec.product.is_new %}
+                  <div class="new-badge">New</div>
+                {% endif %}
               {% else %}
-                <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-img">
+                <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-image">
               {% endif %}
             {% endwith %}
+            <button class="quick-view-btn" data-product-id="{{ rec.product.id }}">
+              <i class="fas fa-eye"></i> Quick View
+            </button>
           </div>
           
           <!-- PRODUCT INFO -->
           <div class="product-info">
-            <h3>{{ rec.product.name }}</h3>
-            <p class="price">RM {{ rec.product.price }}</p>
+            <div class="product-brand">{{ rec.product.brand }}</div>
+            <h3 class="product-title">{{ rec.product.name }}</h3>
+            
+            <!-- PRICE SECTION -->
+            <div class="price-section">
+              <span class="current-price">RM {{ rec.product.price }}</span>
+              {% if rec.product.old_price %}
+                <span class="old-price">RM {{ rec.product.old_price }}</span>
+              {% endif %}
+            </div>
             
             <!-- SHADE MATCHING -->
             {% if rec.product.variations.all %}
               {% with request.user.customerprofile.skin_assessments.first as assess %}
-                <div class="shade-matches">
-                  <span class="shade-label">Your Shades:</span>
-                  <div class="shade-chips">
-                    {% for v in rec.product.variations.all %}
-                      {% if v.skin_tone == assess.undertone and assess.surface_tone in v.surface_tones %}
-                        <span class="shade-chip" title="{{ v.variation_code }}"></span>
-                      {% endif %}
-                    {% endfor %}
+                {% if assess.undertone and assess.surface_tone %}
+                  <div class="shade-matching">
+                    <div class="shade-label">Your matches:</div>
+                    <div class="shade-swatches">
+                      {% for v in rec.product.variations.all %}
+                        {% if v.skin_tone == assess.undertone and v.surface_tones == assess.surface_tone %}
+                          <div class="shade-swatch" 
+                              style="background-color: {{ v.hex_color|default:'#f0f0f0' }}" 
+                              title="{{ v.variation_code }}">
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
                   </div>
-                </div>
+                {% endif %}
               {% endwith %}
             {% endif %}
+
+            <!-- DEBUG: Show assessment values -->
+            <div style="display: none;">
+              Undertone: {{ assess.undertone }}<br>
+              Surface Tone: {{ assess.surface_tone }}<br>
+              Variations: {{ rec.product.variations.all|length }}<br>
+              {% for v in rec.product.variations.all %}
+                Variation {{ forloop.counter }}: {{ v.skin_tone }}, {{ v.surface_tones }}<br>
+              {% endfor %}
+            </div>
             
             <!-- REASON FOR RECOMMENDATION -->
             <div class="recommendation-reason">
-              <i class="fas fa-info-circle"></i>
-              <span>{{ rec.reason }}</span>
+              <div class="reason-header">
+                <i class="fas fa-info-circle"></i>
+                <span>Why we recommend this:</span>
+              </div>
+              <div class="reason-content">{{ rec.reason }}</div>
             </div>
             
             <!-- ACTION BUTTONS -->
             <div class="product-actions">
-              <a href="{% url 'store:view_product' rec.product.id %}" class="btn btn-details">
+              <a href="{% url 'store:view_product' rec.product.id %}" class="details-btn">
                 <i class="fas fa-search"></i> Details
               </a>
-              <form method="POST" action="{% url 'store:add_to_cart' rec.product.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="variation_id" value="{{ rec.product.variations.first.id }}">
-                <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="btn btn-add-to-cart">
-                  <i class="fas fa-shopping-cart"></i> Add to Cart
-                </button>
-              </form>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <div class="no-recommendations">
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
+    <div class="empty-state">
+      <div class="empty-state-content">
+        <div class="empty-icon">
+          <i class="fas fa-paint-brush"></i>
+        </div>
         <h3>No recommendations found</h3>
-        <p>Complete your skin assessment to get personalized makeup recommendations</p>
-        <a href="{% url 'recommendation:take_assessment' %}" class="btn btn-primary">
+        <p>Complete your skin assessment to get personalized makeup recommendations tailored to your unique needs.</p>
+        <a href="{% url 'recommendation:take_assessment' %}" class="primary-btn">
           <i class="fas fa-clipboard-check"></i> Take Skin Assessment
         </a>
       </div>
     </div>
   {% endif %}
-
-  <!-- ASSESSMENT SUMMARY -->
-  {% if request.user.customerprofile.skin_assessments.exists %}
-    {% with request.user.customerprofile.skin_assessments.first as assess %}
-    <div class="assessment-summary">
-      <h3><i class="fas fa-user-circle"></i> Your Skin Profile</h3>
-      <div class="profile-details">
-        <div class="detail-item">
-          <span class="detail-label">Skin Type:</span>
-          <span class="detail-value">{{ assess.skin_type|capfirst }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Undertone:</span>
-          <span class="detail-value">{{ assess.undertone|capfirst }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Primary Concerns:</span>
-          <span class="detail-value">{{ assess.concerns|default:"None" }}</span>
-        </div>
-      </div>
-      <a href="{% url 'recommendation:take_assessment' %}" class="btn btn-edit-profile">
-        <i class="fas fa-edit"></i> Update Profile
-      </a>
-    </div>
-    {% endwith %}
-  {% endif %}
 </section>
+
+<!-- QUICK VIEW MODAL (hidden by default) -->
+<div class="modal-overlay" id="quickViewModal">
+  <div class="modal-content">
+    <button class="close-modal">&times;</button>
+    <div class="modal-body" id="quickViewContent">
+      <!-- Content will be loaded via AJAX -->
+    </div>
+  </div>
+</div>
 
 <script>
 function filterByCategory(category) {
@@ -149,5 +204,29 @@ function filterByCategory(category) {
     window.location.href = '{% url "recommendation:dashboard" %}';
   }
 }
+
+// Quick view modal functionality
+document.querySelectorAll('.quick-view-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productId = this.getAttribute('data-product-id');
+    fetch(`/store/products/${productId}/quickview/`)
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('quickViewContent').innerHTML = html;
+        document.getElementById('quickViewModal').style.display = 'flex';
+      });
+  });
+});
+
+document.querySelector('.close-modal').addEventListener('click', function() {
+  document.getElementById('quickViewModal').style.display = 'none';
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+  if (event.target === document.getElementById('quickViewModal')) {
+    document.getElementById('quickViewModal').style.display = 'none';
+  }
+});
 </script>
 {% endblock %}

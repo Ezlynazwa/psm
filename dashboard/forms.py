@@ -26,7 +26,8 @@ ProductVariationFormSet = inlineformset_factory(
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = fields = '__all__'
+        fields = '__all__'
+        exclude = ['recommended_for', 'created_at', 'match_score', 'reason', 'texture']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),}
 

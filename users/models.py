@@ -40,6 +40,7 @@ class User(AbstractUser):
     )
 
 class CustomerProfile(models.Model):
+
     SKIN_TYPE_CHOICES = [
         ('oily', 'Oily'),
         ('dry', 'Dry'),

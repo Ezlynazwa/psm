@@ -57,16 +57,18 @@ class MakeupRecommender:
             self.vectorizer = None
             self.prod_tfidf = None
 
+    def _get_popular_fallback(self, top_n=5):
+        products = Product.objects.filter(quantity__gt=0).order_by('-popularity_score')[:top_n]
+        recs = []
+        for p in products:
+            recs.append({
+                "product": p,
+                "combined_score": 0.3, 
+                "reason": "Popular choice",
+            })
+        return recs
+
     def get_recommendations(self, customer, top_n=10):
-        """
-        Returns a list of dictionaries: [
-            {
-                "product": <Product instance>,
-                "combined_score": <float>,
-                "reason": <string explanation>
-            }, ...
-        ]
-        """
 
         # 1) Retrieve the latest SkinAssessment for this customer (or a TemporaryAssessment)
         try:
@@ -94,9 +96,10 @@ class MakeupRecommender:
                 + self.w_rule * r_norm.get(pid, 0.0)
                 + self.w_popular * p_norm.get(pid, 0.0)
             )
-            # If a product is absolutely outside rules (rule_score=0 and excluded),
-            # it will not appear in rule_scores, so r_norm.get(pid,0) stays 0.
             final_scores[pid] = score
+
+            if not final_scores:
+                return self._get_popular_fallback()
 
         # 5) Sort product IDs by descending final score
         sorted_pairs = sorted(final_scores.items(), key=lambda kv: kv[1], reverse=True)
@@ -177,6 +180,8 @@ class MakeupRecommender:
             assess.skin_type or "",
             assess.finish_preference or "",
             assess.texture_preference or "",
+            assess.surface_tone or "",
+            assess.undertone or "",
         ]
         if assess.concerns:
             # assume assess.concerns is a comma‐separated string
@@ -273,8 +278,7 @@ class MakeupRecommender:
                 surface_tones=assess.surface_tone,
             ).exists()
             if not shade_ok:
-                # Skip entirely—no matching shade
-                continue
+                rule_score -= 0.3
 
             if rule_score > 0:
                 scores[pid] = rule_score
