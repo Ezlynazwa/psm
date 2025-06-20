@@ -325,3 +325,89 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Match Elements Styles */
+.match-elements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.match-badge i {
+    font-size: 0.6rem;
+}
+
+.content-match {
+    background-color: rgba(75, 192, 192, 0.1);
+    color: #2d7d7d;
+    border: 1px solid rgba(75, 192, 192, 0.3);
+}
+
+.rule-match {
+    background-color: rgba(54, 162, 235, 0.1);
+    color: #1a5d8a;
+    border: 1px solid rgba(54, 162, 235, 0.3);
+}
+
+.shade-match {
+    background-color: rgba(255, 159, 64, 0.1);
+    color: #b35900;
+    border: 1px solid rgba(255, 159, 64, 0.3);
+}
+
+.popularity-match {
+    background-color: rgba(255, 206, 86, 0.1);
+    color: #b38f00;
+    border: 1px solid rgba(255, 206, 86, 0.3);
+}
+
+/* Keyword Match Styles */
+.match-details {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.match-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.match-label {
+  color: #555;
+  font-weight: 500;
+}
+
+.keyword-chips, .rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.keyword-chip {
+  background-color: rgba(75, 192, 192, 0.15);
+  color: #2d7d7d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.rule-chip {
+  background-color: rgba(54, 162, 235, 0.15);
+  color: #1a5d8a;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}

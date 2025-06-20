@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from users.models import User, CustomerProfile
+from users.models import User, CustomerProfile, Employee
+
 class SignupForm(UserCreationForm):
     class Meta:
         model = User
@@ -16,22 +17,51 @@ class CustomerForm(forms.ModelForm):
             'phone_number',
             'first_name',
             'last_name',
+            'email',
             'preferred_contact_method',
             'gender',
             'date_of_birth',
             'profile_picture',
-            'skin_type',
-            'undertone',
-            'surface_tone',
-            'concerns',
-            'sensitivity_level',
-            'known_allergies',
-            'preferred_finish',
-            'preferred_coverage',
-            'preferred_texture',
-            'ethical_preferences',
+
         ]
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'ethical_preferences': forms.TextInput(attrs={'placeholder': "e.g. vegan, cruelty_free"}),
         }
+
+class StaffForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = [
+            'contact',
+            'name',
+            'first_name',
+            'last_name',
+            'email',
+            'date_hired',
+            'password',
+            'photo',
+        ]
+        widgets = {
+            'date_hired': forms.DateInput(attrs={'type': 'date'}),
+            'password': forms.PasswordInput(render_value=True),
+        }
+
+class AdminForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = [
+            'contact',
+            'name',
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+            'photo',
+            'date_hired', 
+
+        ]
+        widgets = {
+        'date_hired': forms.DateInput(attrs={'type': 'date'}),
+        'password': forms.PasswordInput(render_value=True),
+    }

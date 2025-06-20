@@ -66,10 +66,6 @@
                     <span class="old-price">RM {{ item.product.old_price }}</span>
                     {% endif %}
                 </div>
-                
-                <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">
-                    <i class="fas fa-shopping-cart"></i> Add to Cart
-                </a>
             </div>
         </div>
         {% empty %}

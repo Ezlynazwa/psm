@@ -7,7 +7,8 @@ from users.models import CustomerProfile
 from store.models import ProductRecommendation
 
 from .engine import MakeupRecommender
-
+import logging
+logger = logging.getLogger(__name__)
 
 class RecommendationService:
     """
@@ -21,11 +22,18 @@ class RecommendationService:
         )
 
     def get_for_customer(self, customer: CustomerProfile, top_n=10):
-
-        cache_key = f"makeup_recs_{customer.id}"
-        recs = cache.get(cache_key)
-        if recs is not None:
-            return recs
+        try:
+            recs = self.engine.get_recommendations(customer, top_n=top_n)
+            logger.info(f"Generated {len(recs)} recommendations for customer {customer.id}")
+            if not recs:
+                logger.warning("No recommendations generated - checking engine output")
+        except Exception as e:
+            logger.error(f"Recommendation error: {str(e)}", exc_info=True)
+            raise
+            cache_key = f"makeup_recs_{customer.id}"
+            recs = cache.get(cache_key)
+            if recs is not None:
+                return recs
 
         # 1) Compute fresh recommendations
         recs = self.engine.get_recommendations(customer, top_n=top_n)

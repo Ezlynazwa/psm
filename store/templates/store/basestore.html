@@ -21,7 +21,7 @@
             <div class="header-top">
                 <div class="logo-container">
                     <a href="{% url 'store:homepage' %}" class="logo">
-                        <img src="{% static 'images/logo.png' %}" alt="Brew Beauty Logo" width="50">
+                        <img src="{% static 'images/logo.jpg' %}" alt="Brew Beauty Logo" width="200" height="100">
                     </a>
                 </div>
 
@@ -74,7 +74,7 @@
         <ul>
             <li><a href="{% url 'store:homepage' %}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{% url 'store:catalog' %}"><i class="fas fa-store"></i> Shop</a></li>
-            <li><a href="{% url 'recommendation:dashboard' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
+            <li><a href="#" onclick="handleRecommendationClick()"><i class="fas fa-magic"></i> Recommendations</a></li>
             <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> Cart</a></li>
             <li><a href="{% url 'store:track_order' %}"><i class="fas fa-truck"></i> Track Order</a></li>
             {% if user.is_authenticated %}
@@ -151,6 +151,18 @@
                 }
             } else {
                 window.location.href = "{% url 'store:cart' %}";
+            }
+        }
+
+        function handleRecommendationClick() {
+            const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
+
+            if (!isAuthenticated) {
+                if (confirm("You need to log in to access the Recommendation. Do you want to log in now?")) {
+                    window.location.href = "{% url 'users:login' %}?next={% url 'recommendation:dashboard' %}";
+                }
+            } else {
+                window.location.href = "{% url 'recommendation:dashboard' %}";
             }
         }
 

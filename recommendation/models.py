@@ -83,6 +83,21 @@ class SkinAssessment(models.Model):
         help_text="1=no aging issues, 5=major wrinkles/aging"
     )
 
+    surface_tone = models.CharField(
+    max_length=20,
+    choices=[
+        ('very_fair', 'Very Fair'),
+        ('fair', 'Fair'),
+        ('light', 'Light'),
+        ('medium', 'Medium'),
+        ('tan', 'Tan'),
+        ('dark', 'Dark'),
+        ('very_dark', 'Very Dark'),
+    ],
+    blank=True,
+    null=True
+)
+
     # Free-form “multiple choice” fields capture user preferences.
     # We store them as comma-separated strings in the DB, but render them
     # in forms as checkboxes so the user can pick multiple.

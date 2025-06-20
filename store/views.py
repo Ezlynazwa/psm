@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # Homepage view
 def homepage(request):
-    products = Product.objects.all()  # Fetch all products for the homepage
+    products = Product.objects.filter(is_featured=True)[:8] # Fetch all products for the homepage
     product_data = []
 
     for product in products:
@@ -149,14 +149,11 @@ def cart(request):
 @login_required
 def checkout(request, order_id):
     try:
-        # Dapatkan order yang belum lengkap milik user ini
         order = get_object_or_404(
             Order, id=order_id, user=request.user, complete=False
         )
-        # Dapatkan semua alamat tersimpan (CustomerAddress) bagi user
         saved_addresses = CustomerAddress.objects.filter(user=request.user)
 
-        # Ambil item yang user pilih di session
         selected_item_ids = request.session.get('checkout_items', [])
         if not selected_item_ids:
             messages.error(request, "No items selected for checkout")
@@ -209,13 +206,16 @@ def checkout(request, order_id):
                     )
 
                 # Simpan snapshot ke ShippingAddress
-                _ = ShippingAddress.objects.create(
+                Shipping_address = ShippingAddress.objects.create(
                     order=new_order,
                     address=saved_address.address,
                     city=saved_address.city,
                     state=saved_address.state,
                     zipcode=saved_address.zipcode
                 )
+
+                new_order.shipping_address = Shipping_address
+                new_order.save()
 
                 # 4) Simpan resit (receipt)
                 if 'receipt' in request.FILES:
@@ -228,8 +228,6 @@ def checkout(request, order_id):
                 order.delete()
 
                 return redirect('store:order_confirmation', order_id=new_order.id)
-            else:
-                messages.error(request, "Sila betulkan kesilapan di borang")
         else:
             form = CheckoutForm()
 
@@ -286,42 +284,29 @@ def checkout_selected(request):
 
 
 def search(request):
-    query = request.GET.get('q', '')  # Ambil parameter 'q' dari URL
-    results = Product.objects.filter(name__icontains=query) if query else []  # Cari produk berdasarkan nama
+    query = request.GET.get('q', '')  
+    results = Product.objects.filter(name__icontains=query) if query else []
     return render(request, 'store/search.html', {'query': query, 'results': results})
 
 def add_to_cart(request, product_id):
-    # Fetch the product by ID
     product = get_object_or_404(Product, id=product_id)
     
-    # If the user is logged in, get or create an order for the user
     if request.user.is_authenticated:
         order, created = Order.objects.get_or_create(user=request.user, complete=False)
     else:
-        # If the user is not logged in, handle guest carts (optional)
-        # You can redirect to login page or handle it differently.
-        return redirect('users:login')  # Assuming you have a login URL
+        return redirect('users:login')  
     
-    # Try to get an existing OrderItem for the product
     order_item, item_created = OrderItem.objects.get_or_create(order=order, product=product)
     
     if not item_created:
-        # If the item already exists in the cart, increment the quantity
         order_item.quantity += 1
         order_item.save()
     else:
-        # Otherwise, set the quantity to 1 for the new item
         order_item.quantity = 1
         order_item.save()
     
-    # Redirect back to the catalog page or product detail page
-    return redirect('store:catalog')  # Or redirect to the product detail page
+    return redirect('store:catalog') 
 
-# store/views.py
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Order, OrderItem
 
 @login_required
 def remove_from_cart(request, item_id):
@@ -397,7 +382,10 @@ def track_order(request):
     )
 
 def order_detail(request, order_id):
-    
+
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    shipping_address = ShippingAddress.objects.filter(order=order).last()
+
     shipping_fee = Decimal('8.00')
     subtotal = order.get_cart_total
     total = subtotal + shipping_fee
@@ -407,6 +395,8 @@ def order_detail(request, order_id):
         'shipping_fee': shipping_fee,
         'subtotal': subtotal,
         'total': total,
+        'shipping_address': shipping_address,
+
     }
     return render(request, 'store/order_detail.html', context)
 

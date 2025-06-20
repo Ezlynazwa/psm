@@ -54,7 +54,8 @@ body {
 }
 
 .admin-logo {
-    max-width: 120px;
+    width: 200px;
+    height: 100px;
     margin-bottom: 1rem;
     transition: var(--transition);
 }

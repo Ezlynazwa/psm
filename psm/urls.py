@@ -25,7 +25,6 @@ admin.site.index_title = 'Dashboard'
 
 urlpatterns = [
     path('', include('store.urls')),
-    path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('recommendation/', include('recommendation.urls'))

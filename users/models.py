@@ -62,6 +62,7 @@ class CustomerProfile(models.Model):
     # Contact Information
     first_name = models.CharField(max_length=20, blank=True, null=True)
     last_name = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=20, blank=True, null=True)
 
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     preferred_contact_method = models.CharField(
@@ -78,8 +79,8 @@ class CustomerProfile(models.Model):
         null=True
     )
     date_of_birth = models.DateField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='customer_profiles/', blank=True, null=True)
-    
+    profile_picture = models.ImageField(upload_to='customer_photo/', blank=True, null=True)
+
     # Skin Profile
     skin_type = models.CharField(max_length=20, choices=SKIN_TYPE_CHOICES, blank=True, null=True)
     undertone = models.CharField(max_length=10, choices=UNDERTONE_CHOICES, blank=True, null=True)

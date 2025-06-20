@@ -1,0 +1,123 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}My Profile | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/customerprofile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+        <p class="profile-subtitle">Manage your personal information and preferences</p>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-sidebar">
+            <div class="profile-picture-container">
+                {% if staff.photo %}
+                    <img src="{{ staff.photo.url }}" class="profile-picture" id="profile-picture-preview" />
+                {% else %}
+                    <div class="profile-picture-default" id="profile-picture-preview">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                {% endif %}
+                <label for="id_photo" class="picture-upload-btn">
++                    <i class="fas fa-camera"></i> Change Photo
++                </label>
++                {{ form.photo }}
+            </div>
+
+            <div class="profile-menu">
+                <a href="#" class="menu-item active"><i class="fas fa-user"></i> Personal Info</a>
+            </div>
+        </div>
+
+        <div class="profile-form-container">
+            <form method="POST" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3><i class="fas fa-id-card"></i> Basic Information</h3>
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_date_hired">Date Hired</label>
+                        {{ form.date_hired }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        {{ form.password }}
+                    </div>
+                </div>
+
+                <!-- Contact Preferences -->
+                <div class="form-section">
+                    <h3><i class="fas fa-envelope"></i> Contact Preferences</h3>
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_contact">Phone Number</label>
+                        {{ form.contact }}
+                    </div>
+
+                </div>
+
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{% url 'dashboard:homeadmin' %}" class="btn btn-cancel">
+                        <i class ="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const profilePictureInput = document.getElementById('id_profile_picture');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+
+    if (profilePictureInput) {
+        profilePictureInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (profilePicturePreview.tagName === 'IMG') {
+                        profilePicturePreview.src = e.target.result;
+                    } else {
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'profile-picture';
+                        profilePicturePreview.parentNode.replaceChild(newImg, profilePicturePreview);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

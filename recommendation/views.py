@@ -101,6 +101,7 @@ def take_assessment(request):
                 'aging_concerns': latest.aging_concerns,
                 'finish_preference': latest.finish_preference,
                 'texture_preference': latest.texture_preference,
+                'surface_tone': latest.surface_tone,
             }
             form = SkinAssessmentForm(initial=initial_data)
         else:

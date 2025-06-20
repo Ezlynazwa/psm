@@ -1,0 +1,410 @@
+<!-- dashboard/templates/dashboard/report.html -->
+{% extends 'dashboard/adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/report.css' %}">
+
+<div class="container-fluid">
+    <h1 class="mt-4">Sales Report</h1>
+    
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-filter mr-1"></i>
+            Filters
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <div class="form-group mr-3">
+                    <label for="date_range" class="mr-2">Date Range:</label>
+                    <select name="date_range" id="date_range" class="form-control">
+                        <option value="7" {% if date_range == '7' %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30" {% if date_range == '30' %}selected{% endif %}>Last 30 Days</option>
+                        <option value="90" {% if date_range == '90' %}selected{% endif %}>Last 90 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mr-2">Apply</button>
+                <div class="btn-group">
+                    <a href="{% url 'dashboard:export_report' 'pdf' %}?date_range={{ date_range }}" class="btn btn-secondary">Export PDF</a>
+                    <a href="{% url 'dashboard:export_report' 'csv' %}?date_range={{ date_range }}" class="btn btn-secondary">Export CSV</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h2 class="card-text">RM{{ total_revenue|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <h2 class="card-text">{{ total_orders }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Avg. Order Value</h5>
+                    <h2 class="card-text">RM{{ aov|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Revenue Growth</h5>
+                    <h2 class="card-text">{{ revenue_growth|floatformat:1 }}%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-secondary text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Customers</h5>
+                    <h2 class="card-text">{{ customer_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card bg-dark text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">New vs Returning</h5>
+                    <h2 class="card-text">{{ new_customers }} / {{ returning_customers }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Sales Over Time -->
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-line mr-1"></i>
+                    Sales Over Time
+                </div>
+                <div class="card-body">
+                    <canvas id="salesOverTimeChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Breakdown -->
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Customer Breakdown
+                </div>
+                <div class="card-body">
+                    <canvas id="customerPieChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Performance -->
+    <div class="row mb-4">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar mr-1"></i>
+                    Category Performance
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Products -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table mr-1"></i>
+                    Top Selling Products
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Quantity</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_products %}
+                                <tr>
+                                    <td>{{ product.product__name }}</td>
+                                    <td>{{ product.product__category }}</td>
+                                    <td>{{ product.quantity_sold }}</td>
+                                    <td>${{ product.revenue|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            Recent Orders
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders_table %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.date_ordered|date:"M d, Y" }}</td>
+                            <td>{{ order.user.get_full_name }}</td>
+                            <td>${{ order.total|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'delivered' %}badge-success
+                                    {% elif order.status == 'cancelled' %}badge-danger
+                                    {% else %}badge-info{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Sold Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-boxes mr-1"></i>
+            Products Sold
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Quantity Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products_sold %}
+                        <tr>
+                            <td>{{ product.product__name }}</td>
+                            <td>{{ product.product__category }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>${{ product.revenue|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Customer Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-users mr-1"></i>
+            Top Customers
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="customersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Total Spent</th>
+                            <th>Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customer_spending %}
+                        <tr>
+                            <td>{{ customer.user__first_name }} {{ customer.user__last_name }}</td>
+                            <td>{{ customer.user__email }}</td>
+                            <td>${{ customer.total_spent|floatformat:2 }}</td>
+                            <td>{{ customer.order_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Sales Over Time Chart
+const salesCtx = document.getElementById('salesOverTimeChart').getContext('2d');
+const salesChart = new Chart(salesCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in sales_over_time %}"{{ item.date|date:'M d' }}",{% endfor %}],
+        datasets: [{
+            label: 'Revenue',
+            data: [{% for item in sales_over_time %}{{ item.revenue|default:0 }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2,
+            yAxisID: 'y'
+        }, {
+            label: 'Orders',
+            data: [{% for item in sales_over_time %}{{ item.orders }},{% endfor %}],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Revenue (RM)'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Orders'
+                },
+                grid: {
+                    drawOnChartArea: false,
+                }
+            }
+        }
+    }
+});
+
+// Customer Pie Chart
+const customerCtx = document.getElementById('customerPieChart').getContext('2d');
+const customerChart = new Chart(customerCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['New Customers', 'Returning Customers'],
+        datasets: [{
+            data: [{{ new_customers }}, {{ returning_customers }}],
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 99, 132, 0.7)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Customer Breakdown'
+            }
+        }
+    }
+});
+
+// Category Performance Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for cat in category_performance %}"{{ cat.product__category }}",{% endfor %}],
+        datasets: [{
+            label: 'Revenue by Category',
+            data: [{% for cat in category_performance %}{{ cat.revenue|default:0 }},{% endfor %}],
+            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Revenue by Category'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Revenue ($)'
+                }
+            }
+        }
+    }
+});
+
+// Initialize DataTables for better table functionality
+$(document).ready(function() {
+    $('#ordersTable').DataTable({
+        order: [[1, 'desc']]
+    });
+    $('#productsTable').DataTable({
+        order: [[2, 'desc']]
+    });
+    $('#customersTable').DataTable({
+        order: [[2, 'desc']]
+    });
+});
+</script>
+{% endblock %}

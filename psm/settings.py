@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users.apps.UserConfig',
     'dashboard',
     'recommendation',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

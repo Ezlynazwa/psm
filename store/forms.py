@@ -25,7 +25,6 @@ ProductImageFormSet = inlineformset_factory(
 class CheckoutForm(forms.Form):
     PAYMENT_CHOICES = [
         ('qr', 'QR Code'),
-        ('gateway', 'Payment Gateway'),
     ]
     address = forms.CharField(
         max_length=255,
@@ -36,12 +35,6 @@ class CheckoutForm(forms.Form):
     state = forms.CharField(max_length=100, required=False)
     zipcode = forms.CharField(max_length=10, required=False)
 
-    # Add these two lines so Django knows about them:
-    payment_method = forms.ChoiceField(
-        choices=PAYMENT_CHOICES,
-        widget=forms.RadioSelect,
-        initial='qr'
-    )
     selected_address = forms.IntegerField(required=False)
     add_new_address = forms.BooleanField(required=False)
 

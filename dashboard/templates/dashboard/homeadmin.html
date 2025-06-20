@@ -19,8 +19,7 @@
             </div>
             <div class="card-content">
                 <h3>Total Users</h3>
-                <p class="stat-value"></p>
-                <p class="stat-change"><i class="fas fa-arrow-up"></i></p>
+                <p class="stat-value">{{ total_users }}</p>
             </div>
         </div>
         
@@ -30,8 +29,7 @@
             </div>
             <div class="card-content">
                 <h3>Orders Today</h3>
-                <p class="stat-value"></p>
-                <p class="stat-change"><i class="fas fa-arrow-up"></i></p>
+                <p class="stat-value">{{ orders_today }}</p>
             </div>
         </div>
         
@@ -40,20 +38,28 @@
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="card-content">
-                <h3>Revenue</h3>
-                <p class="stat-value"></p>
-                <p class="stat-change"><i class="fas fa-arrow-up"></i></p>
+                <h3>Revenue Today</h3>
+                <p class="stat-value">RM {{ revenue_today|floatformat:2 }}</p>
             </div>
         </div>
         
+        <div class="stat-card">
+            <div class="card-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="card-content">
+                <h3>Total Revenue</h3>
+                <p class="stat-value">RM {{ total_revenue|floatformat:2 }}</p>
+            </div>
+        </div>
+
         <div class="stat-card">
             <div class="card-icon">
                 <i class="fas fa-star"></i>
             </div>
             <div class="card-content">
                 <h3>New Products</h3>
-                <p class="stat-value"></p>
-                <p class="stat-change"></p>
+                <p class="stat-value">{{ total_products }}</p>
             </div>
         </div>
     </div>
@@ -61,33 +67,42 @@
     <div class="recent-activity">
         <h3><i class="fas fa-clock"></i> Recent Activity</h3>
         <div class="activity-list">
+
+            {% for order in recent_orders %}
             <div class="activity-item">
                 <div class="activity-icon success">
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="activity-details">
-                    <p>Order:</p>
-                    <small></small>
+                    <p>Order #{{ order.id }} placed by {{ order.user.username }}</p>
+                    <small>{{ order.date_ordered|timesince }} ago</small>
                 </div>
             </div>
+            {% endfor %}
+
+            {% for product in low_stock_products %}
             <div class="activity-item">
                 <div class="activity-icon warning">
                     <i class="fas fa-exclamation-circle"></i>
                 </div>
                 <div class="activity-details">
-                    <p>Low stock alert: </p>
-                    <small></small>
+                    <p>Low stock: {{ product.name }}</p>
+                    <small>Remaining: {{ product.quantity }}</small>
                 </div>
             </div>
+            {% endfor %}
+
+            {% for user in new_users %}
             <div class="activity-item">
                 <div class="activity-icon primary">
                     <i class="fas fa-user-plus"></i>
                 </div>
                 <div class="activity-details">
-                    <p>New user registered:</p>
-                    <small></small>
+                    <p>New user registered: {{ user.user.username }}</p>
+                    <small>{{ user.created_at|timesince }} ago</small>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
 </section>

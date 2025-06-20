@@ -1,0 +1,86 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}Product Detail | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/viewproduct.css' %}">
+
+<div class="product-detail-container">
+    <div class="product-header">
+        <h2>{{ product.name }} ({{ product.brand }})</h2>
+        <a href="{% url 'dashboard:manageproducts' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="product-section">
+        <h3>Basic Info</h3>
+        <p><strong>Price:</strong> RM {{ product.price }}</p>
+        <p><strong>Size:</strong> {{ product.size }}</p>
+        <p><strong>Description:</strong> {{ product.description }}</p>
+        <p><strong>Detailed Description:</strong> {{ product.detailed_description }}</p>
+        <p><strong>Category:</strong> {{ product.category }}</p>
+        <p><strong>Subcategory:</strong> {{ product.subcategory }}</p>
+        <p><strong>Created At:</strong> {{ product.created_at }}</p>
+    </div>
+
+    <div class="product-section">
+        <h3>Skin Compatibility</h3>
+        <p><strong>Skin Type:</strong> {{ product.skin_type }}</p>
+        <p><strong>Finish:</strong> {{ product.finish }}</p>
+        <p><strong>Texture:</strong> {{ product.texture }}</p>
+        <p><strong>Coverage:</strong> {{ product.coverage }}</p>
+        <p><strong>Skin Condition:</strong> {{ product.skin_condition }}</p>
+        <p><strong>Skin Texture:</strong> {{ product.skin_texture }}</p>
+        <p><strong>Sensitivity Level:</strong> {{ product.sensitivity_level }}</p>
+    </div>
+
+    <div class="product-section">
+        <h3>Features</h3>
+        <p><strong>Waterproof:</strong> {{ product.waterproof|yesno:"Yes,No" }}</p>
+        <p><strong>SPF:</strong> {{ product.spf }}</p>
+        <p><strong>Vegan:</strong> {{ product.is_vegan|yesno:"Yes,No" }}</p>
+        <p><strong>Cruelty-Free:</strong> {{ product.is_cruelty_free|yesno:"Yes,No" }}</p>
+        <p><strong>Hypoallergenic:</strong> {{ product.is_hypoallergenic|yesno:"Yes,No" }}</p>
+        <p><strong>Tags:</strong> {{ product.tags }}</p>
+    </div>
+
+    <div class="product-section">
+        <h3>Product Images</h3>
+        <div class="image-gallery">
+            {% for image in images %}
+            <img src="{{ image.image.url }}" alt="Product Image">
+            {% empty %}
+            <p>No images available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="product-section">
+        <h3>Color Variations</h3>
+        <table class="variation-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Quantity</th>
+                    <th>Skin Tone</th>
+                    <th>Surface Tone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for variation in variations %}
+                <tr>
+                    <td>{{ variation.variation_code }}</td>
+                    <td>{{ variation.quantity }}</td>
+                    <td>{{ variation.skin_tone }}</td>
+                    <td>{{ variation.surface_tones }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No variations available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

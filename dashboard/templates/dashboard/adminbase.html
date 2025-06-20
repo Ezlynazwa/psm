@@ -16,7 +16,7 @@
     <!-- Admin Sidebar -->
     <div class="admin-sidebar">
         <div class="sidebar-header">
-            <img src="{% static 'images/logo-white.png' %}" alt="Brew Beauty Logo" class="admin-logo">
+            <img src="{% static 'images/logo.png' %}" alt="Brew Beauty Logo" class="admin-logo" >
             <h2>Admin Dashboard</h2>
         </div>
 
@@ -41,7 +41,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'dashboard:generatereports' %}" class="nav-link">
+                    <a href="{% url 'dashboard:sales_report' %}" class="nav-link">
                         <i class="fas fa-chart-bar"></i>
                         <span>Reports & Analytics</span>
                     </a>
@@ -71,17 +71,14 @@
                 <div class="admin-profile">
                     <div class="profile-dropdown">
                         <div class="profile-info">
-                            <img src="{% static 'images/admin-avatar.png' %}" alt="Admin Photo" class="profile-avatar">
                             <span class="profile-name">{{ request.user.username }}</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">
+                            <a href="{% url 'users:admin_profile'%}" class="dropdown-item">
                                 <i class="fas fa-user"></i> My Profile
                             </a>
-                            <!-- <a href="#" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Settings
-                            </a> -->
+                
                             <a href="{% url 'users:logout' %}" class="dropdown-item">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>

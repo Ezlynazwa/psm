@@ -1,0 +1,171 @@
+<!-- dashboard/templates/dashboard/report_pdf.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #333; }
+        .metric-card { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+        }
+        .metric-title { font-weight: bold; font-size: 16px; }
+        .metric-value { font-size: 24px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .section-title { 
+            background-color: #f8f9fa; 
+            padding: 10px; 
+            margin: 20px 0 10px 0; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Report</h1>
+    <p>Date Range: Last {{ date_range }} days (since {{ start_date|date:"M d, Y" }})</p>
+    
+    <div class="section-title">Key Metrics</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+        <div class="metric-card">
+            <div class="metric-title">Total Revenue</div>
+            <div class="metric-value">${{ total_revenue|floatformat:2 }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Total Orders</div>
+            <div class="metric-value">{{ total_orders }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Avg. Order Value</div>
+            <div class="metric-value">${{ aov|floatformat:2 }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Revenue Growth</div>
+            <div class="metric-value">{{ revenue_growth|floatformat:1 }}%</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Customers</div>
+            <div class="metric-value">{{ customer_count }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">New vs Returning</div>
+            <div class="metric-value">{{ new_customers }} / {{ returning_customers }}</div>
+        </div>
+    </div>
+    
+    <div class="section-title">Top Selling Products</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Quantity Sold</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in top_products %}
+            <tr>
+                <td>{{ product.product__name }}</td>
+                <td>{{ product.product__category }}</td>
+                <td>{{ product.quantity_sold }}</td>
+                <td>${{ product.revenue|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="section-title">Category Performance</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Revenue</th>
+                <th>Orders</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in category_performance %}
+            <tr>
+                <td>{{ cat.product__category }}</td>
+                <td>${{ cat.revenue|floatformat:2 }}</td>
+                <td>{{ cat.count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="section-title">Recent Orders</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders_table %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.date_ordered|date:"M d, Y" }}</td>
+                <td>{{ order.user.get_full_name }}</td>
+                <td>${{ order.total|floatformat:2 }}</td>
+                <td>{{ order.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="section-title">Products Sold</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Quantity Sold</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products_sold %}
+            <tr>
+                <td>{{ product.product__name }}</td>
+                <td>{{ product.product__category }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>${{ product.revenue|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="section-title">Top Customers</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Total Spent</th>
+                <th>Orders</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customer_spending %}
+            <tr>
+                <td>{{ customer.user__first_name }} {{ customer.user__last_name }}</td>
+                <td>{{ customer.user__email }}</td>
+                <td>${{ customer.total_spent|floatformat:2 }}</td>
+                <td>{{ customer.order_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

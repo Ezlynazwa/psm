@@ -3,8 +3,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import SignupForm, CustomerForm
-from .models import User, CustomerProfile
+from .forms import SignupForm, CustomerForm, StaffForm, AdminForm
+from .models import User, CustomerProfile, Employee
 from django.contrib.auth.decorators import login_required
 
 
@@ -55,8 +55,41 @@ def customer_profile(request):
         form = CustomerForm(request.POST, request.FILES, instance=customer)
         if form.is_valid():
             form.save()
-            return redirect('customer_profile')
+            return redirect('users:customer_profile')
     else:
         form = CustomerForm(instance=customer)
 
     return render(request, 'customerprofile.html', {'form': form, 'customer': customer})
+
+@login_required
+def staff_profile(request):
+    staff, created = Employee.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = StaffForm(request.POST, request.FILES, instance=staff)
+        if form.is_valid():
+            form.save()
+            return redirect('users:staff_profile')
+    else:
+        form = StaffForm(instance=staff)
+
+    return render(request, 'staffprofile.html', {'form': form, 'staff': staff})
+
+@login_required
+def admin_profile(request):
+    try:
+        admin=Employee.objects.get(user=request.user)
+    except Employee.DoesNotExist:
+        admin=None
+
+    if request.method == 'POST':
+        form = AdminForm(request.POST, request.FILES, instance=admin)
+        if form.is_valid():
+            admin = form.save(commit=False)
+            admin.user = request.user
+            admin.save()
+            return redirect('users:admin_profile')
+    else:
+        form = AdminForm(instance=admin)
+
+    return render(request, 'adminprofile.html', {'form': form, 'admin': admin})

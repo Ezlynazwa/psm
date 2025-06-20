@@ -1,0 +1,285 @@
+{% extends "dashboard/adminbase.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/menambahproduk.css' %}">
+
+<div class="product-form-container">
+    <div class="product-form-header">
+        <h2> Update Product</h2>
+        <div class="form-actions">
+            <a href="{% url 'dashboard:manageproducts' %}" class="btn btn-cancel">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <button type="submit" form="productForm" class="btn btn-save">
+                <i class="fas fa-save"></i> Save Product
+            </button>
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="alert-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form id="productForm" method="post" enctype="multipart/form-data" class="product-form">
+        {% csrf_token %}
+        
+        <!-- Main Product Form -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>Product Information</h3>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="form-error">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Images Formset -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="fas fa-images"></i>
+                <h3>Product Images</h3>
+            </div>
+            {{ image_formset.management_form }}
+            <div class="image-grid" id="image-container">
+                {% for form in image_formset %}
+                <div class="image-upload-box {% if form.instance.pk %}existing-image{% endif %}">
+                    {{ form.id }}
+                    <div class="image-preview">
+                        {% if form.instance.image %}
+                            <img src="{{ form.instance.image.url }}" alt="Product image">
+                            <div class="image-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        {% else %}
+                            <div class="placeholder">
+                                <i class="fas fa-camera"></i>
+                                <span>Click to upload</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {{ form.image }}
+                    <button type="button" class="btn btn-remove remove-image" title="Remove image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                </div>
+                {% endfor %}
+                <div class="image-upload-box add-image-box" id="add-image">
+                    <div class="add-image-content">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Image</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variations Formset -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="fas fa-palette"></i>
+                <h3>Color Variations</h3>
+            </div>
+            {{ variation_formset.management_form }}
+            <div class="variation-grid" id="variation-container">
+                {% for form in variation_formset %}
+                <div class="variation-item {% if form.instance.pk %}existing-variation{% endif %}">
+                    {{ form.id }}
+                    <div class="form-row">
+                        <label>Shade Code</label>
+                        {{ form.variation_code }}
+                    </div>
+                    <div class="form-row">
+                        <label>Quantity</label>
+                        {{ form.quantity }}
+                    </div>
+                    <div class="form-row">
+                        <label>Skin Tone</label>
+                        {{ form.skin_tone }}
+                    </div>
+                    <div class="form-row">
+                        <label>Surface Tone</label>
+                        {{ form.surface_tones }}
+                    </div>
+                    <button type="button" class="btn btn-remove remove-variation" title="Remove variation">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                </div>
+                {% endfor %}
+                <div class="variation-item add-variation-box" id="add-variation">
+                    <div class="add-variation-content">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Variation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image upload functionality
+    const imageContainer = document.getElementById('image-container');
+    const addImageBtn = document.getElementById('add-image');
+    const totalImageForms = document.getElementById('id_images-TOTAL_FORMS');
+    let imageFormCount = parseInt(totalImageForms.value);
+
+    // Function to handle image preview
+    function setupImagePreview(input) {
+        const preview = input.closest('.image-upload-box').querySelector('.image-preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Uploaded image">
+                    <div class="image-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Add new image field
+    addImageBtn.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.className = 'image-upload-box';
+        newForm.innerHTML = `
+            <div class="image-preview">
+                <div class="placeholder">
+                    <i class="fas fa-camera"></i>
+                    <span>Click to upload</span>
+                </div>
+            </div>
+            <input type="file" name="images-${imageFormCount}-image" id="id_images-${imageFormCount}-image" accept="image/*">
+            <button type="button" class="btn btn-remove remove-image" title="Remove image">
+                <i class="fas fa-times"></i>
+            </button>
+            <input type="hidden" name="images-${imageFormCount}-id" id="id_images-${imageFormCount}-id">
+        `;
+        imageContainer.insertBefore(newForm, addImageBtn);
+        
+        // Setup event listener for the new input
+        const newInput = newForm.querySelector('input[type="file"]');
+        newInput.addEventListener('change', function() {
+            setupImagePreview(this);
+        });
+        
+        imageFormCount++;
+        totalImageForms.value = imageFormCount;
+    });
+
+    // Remove image field
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-image')) {
+            const imageBox = e.target.closest('.image-upload-box');
+            const deleteInput = imageBox.querySelector('input[name$="-DELETE"]');
+            
+            if (deleteInput) {
+                // For existing images
+                deleteInput.value = 'on';
+                imageBox.style.display = 'none';
+            } else {
+                // For new images
+                imageBox.remove();
+                imageFormCount--;
+                totalImageForms.value = imageFormCount;
+            }
+        }
+    });
+
+    // Initialize image previews for existing forms
+    document.querySelectorAll('.image-upload-box:not(.add-image-box) input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            setupImagePreview(this);
+        });
+    });
+
+    // Variation functionality
+    const variationContainer = document.getElementById('variation-container');
+    const addVariationBtn = document.getElementById('add-variation');
+    const totalVariationForms = document.getElementById('id_variations-TOTAL_FORMS');
+    let variationFormCount = parseInt(totalVariationForms.value);
+    
+    addVariationBtn.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.className = 'variation-item';
+        newForm.innerHTML = `
+            <div class="form-row">
+                <label>Shade Code</label>
+                <input type="text" name="variations-${variationFormCount}-variation_code" required>
+            </div>
+            <div class="form-row">
+                <label>Quantity</label>
+                <input type="number" name="variations-${variationFormCount}-quantity" required>
+            </div>
+            <div class="form-row">
+                <label>Skin Tone</label>
+                <select name="variations-${variationFormCount}-skin_tone">
+                    {% for value, label in variation_formset.form.skin_tone.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Surface Tone</label>
+                <select name="variations-${variationFormCount}-surface_tones">
+                    {% for value, label in variation_formset.form.surface_tones.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn btn-remove remove-variation" title="Remove variation">
+                <i class="fas fa-times"></i>
+            </button>
+            <input type="hidden" name="variations-${variationFormCount}-id" id="id_variations-${variationFormCount}-id">
+        `;
+        variationContainer.insertBefore(newForm, addVariationBtn);
+        variationFormCount++;
+        totalVariationForms.value = variationFormCount;
+    });
+
+    // Remove variation
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-variation')) {
+            const variationItem = e.target.closest('.variation-item');
+            const deleteInput = variationItem.querySelector('input[name$="-DELETE"]');
+            
+            if (deleteInput) {
+                deleteInput.value = 'on';
+                variationItem.style.display = 'none';
+            } else {
+                variationItem.remove();
+                variationFormCount--;
+                totalVariationForms.value = variationFormCount;
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

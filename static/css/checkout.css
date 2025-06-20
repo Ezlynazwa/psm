@@ -165,7 +165,7 @@
 }
 
 .payment-option.active {
-    border-color: #6d28d9;
+    border-color: #d30000;
     background-color: #f5f3ff;
 }
 
@@ -182,7 +182,7 @@
 
 .payment-content i {
     font-size: 1.5rem;
-    color: #6d28d9;
+    color: #d30000;
 }
 
 .payment-details {
@@ -220,7 +220,7 @@
 .upload-btn {
     display: inline-block;
     padding: 10px 15px;
-    background: #6d28d9;
+    background: #d30000;
     color: white;
     border-radius: 4px;
     cursor: pointer;
@@ -231,7 +231,7 @@
 }
 
 .upload-btn:hover {
-    background: #5b21b6;
+    background: #d30000;
 }
 
 .upload-btn input[type="file"] {
@@ -356,7 +356,7 @@
 .complete-order-btn {
     width: 100%;
     padding: 15px;
-    background: #6d28d9;
+    background: #d30000;
     color: white;
     border: none;
     border-radius: 6px;
@@ -372,7 +372,7 @@
 }
 
 .complete-order-btn:hover {
-    background: #5b21b6;
+    background: #d30000;
 }
 
 .secure-checkout {

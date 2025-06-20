@@ -11,12 +11,14 @@ urlpatterns = [
     path('menambahproduk/', views.menambahproduk, name='menambahproduk'),
     path('editproduct/<int:pk>/', views.edit_product, name='edit_product'),
     path('deleteproduct/<int:pk>/', views.delete_product, name='delete_product'),
-    path('generatereports/', views.generatereport, name='generatereports'), 
     path('addstaff/', views.addstaff, name='addstaff'),  
     path('addadmin/', views.addadmin, name='addadmin'), 
-    path('staffproduct/', views.staffproduct, name='staffproduct'),
+    path('staffproduct/', views.staffviewproducts, name='staffproduct'),
     path('manageorder/', views.manageorder, name='manageorder'),
     path('order/<int:id>/', views.orderdetail, name='orderdetail'), 
+    path('report/', views.sales_report, name='sales_report'),
+    path('report/export/<str:format_type>/', views.export_report, name='export_report'),
+    path('product/<int:pk>/view/', views.view_product, name='view_product'),
 
     
 ]

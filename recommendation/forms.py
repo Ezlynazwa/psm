@@ -1,5 +1,3 @@
-# recommendation/forms.py
-
 from django import forms
 from .models import SkinAssessment
 from store.models import Product  # for pulling choices if needed
@@ -24,7 +22,7 @@ class SkinAssessmentForm(forms.ModelForm):
     class Meta:
         model = SkinAssessment
         fields = [
-            'skin_type', 'undertone', 'concerns', 'hydration_level', 'oiliness_level',
+            'skin_type', 'undertone', 'surface_tone', 'concerns', 'hydration_level', 'oiliness_level',
             'sensitivity_level', 'acne_proneness', 'aging_concerns',
             'finish_preference', 'texture_preference',
         ]
@@ -41,3 +39,4 @@ class SkinAssessmentForm(forms.ModelForm):
         if commit:
             inst.save()
         return inst
+    

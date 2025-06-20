@@ -93,6 +93,8 @@
                             Veins appear green, gold jewelry flatters
                             {% elif choice.0 == 'neutral' %}
                             Veins appear teal, both metals look good
+                            {% elif choice.0 == 'olive'%}
+                            Veins appear greenish-blue or slightly darker, rose gold flatters
                             {% endif %}
                         </span>
                     </label>
@@ -115,25 +117,32 @@
                 <div class="concern-card">
                     <input type="checkbox" id="concern_{{ forloop.counter }}" name="{{ form.concerns.name }}" value="{{ choice.0 }}" {% if choice.0 in form.concerns.value %}checked{% endif %}>
                     <label for="concern_{{ forloop.counter }}">
-                        <div class="concern-icon">
-                            {% if choice.0 == 'acne' %}
+                        {% if choice.0 == 'acne' %}
                             <i class="fas fa-bacteria"></i>
-                            {% elif choice.0 == 'aging' %}
+                        {% elif choice.0 == 'aging' %}
                             <i class="fas fa-hourglass-half"></i>
-                            {% elif choice.0 == 'dark_spots' %}
+                        {% elif choice.0 == 'dark_spots' %}
                             <i class="fas fa-circle"></i>
-                            {% elif choice.0 == 'redness' %}
+                        {% elif choice.0 == 'redness' %}
                             <i class="fas fa-burn"></i>
-                            {% elif choice.0 == 'dryness' %}
+                        {% elif choice.0 == 'dryness' %}
                             <i class="fas fa-water"></i>
-                            {% elif choice.0 == 'oiliness' %}
+                        {% elif choice.0 == 'oiliness' %}
                             <i class="fas fa-oil-can"></i>
-                            {% elif choice.0 == 'pores' %}
+                        {% elif choice.0 == 'pores' %}
                             <i class="fas fa-dot-circle"></i>
-                            {% elif choice.0 == 'dullness' %}
+                        {% elif choice.0 == 'dullness' %}
                             <i class="fas fa-cloud"></i>
-                            {% endif %}
-                        </div>
+                        {% elif choice.0 == 'dehydrated' %}
+                            <i class="fas fa-tint-slash"></i>
+                        {% elif choice.0 == 'sensitive' %}
+                            <i class="fas fa-allergies"></i>
+                        {% elif choice.0 == 'pigmentation' %}
+                            <i class="fas fa-adjust"></i>
+                        {% else %}
+                            <i class="fas fa-question-circle"></i>
+                        {% endif %}
+
                         <span class="option-title">{{ choice.1 }}</span>
                     </label>
                 </div>
@@ -158,14 +167,23 @@
                         <span class="slider-value" id="hydration-value">5</span>
                     </div>
                     <div class="slider-wrapper">
-                        {{ form.hydration_level }}
                         <div class="slider-labels">
                             <span>Dehydrated</span>
                             <span>Balanced</span>
                             <span>Hydrated</span>
                         </div>
+
+                        <input
+                            type="range"
+                            id="{{ form.hydration_level.id_for_label }}"
+                            name="{{ form.hydration_level.html_name }}"
+                            min="1" max="5" step="1"
+                            list="hydration-scale"
+                            value="{{ form.hydration_level.value|default:3 }}"
+                            oninput="document.getElementById('hydration-value').innerText = this.value"
+                            >
                         <div class="slider-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -177,14 +195,22 @@
                         <span class="slider-value" id="oiliness-value">4</span>
                     </div>
                     <div class="slider-wrapper">
-                        {{ form.oiliness_level }}
                         <div class="slider-labels">
                             <span>Dry</span>
                             <span>Normal</span>
                             <span>Oily</span>
                         </div>
+                        <input
+                            type="range"
+                            id="{{ form.oiliness_level.id_for_label }}"
+                            name="{{ form.oiliness_level.html_name }}"
+                            min="1" max="5" step="1"
+                            list="oiliness-scale"
+                            value="{{ form.oiliness_level.value|default:3 }}"
+                            oninput="document.getElementById('oiliness-value').innerText = this.value"
+                            >
                         <div class="slider-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -196,14 +222,22 @@
                         <span class="slider-value" id="sensitivity-value">5</span>
                     </div>
                     <div class="slider-wrapper">
-                        {{ form.sensitivity_level }}
                         <div class="slider-labels">
                             <span>Resistant</span>
                             <span>Normal</span>
                             <span>Sensitive</span>
                         </div>
+                        <input
+                            type="range"
+                            id="{{ form.sensitivity_level.id_for_label }}"
+                            name="{{ form.sensitivity_level.html_name }}"
+                            min="1" max="5" step="1"
+                            list="sensitivity-scale"
+                            value="{{ form.sensitivity_level.value|default:3 }}"
+                            oninput="document.getElementById('sensitivity-value').innerText = this.value"
+                            >
                         <div class="slider-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -215,14 +249,22 @@
                         <span class="slider-value" id="acne-value">1</span>
                     </div>
                     <div class="slider-wrapper">
-                        {{ form.acne_proneness }}
                         <div class="slider-labels">
                             <span>Rare</span>
                             <span>Occasional</span>
                             <span>Frequent</span>
                         </div>
+                        <input
+                            type="range"
+                            id="{{ form.acne_proneness.id_for_label }}"
+                            name="{{ form.acne_proneness.html_name }}"
+                            min="1" max="5" step="1"
+                            list="acne-scale"
+                            value="{{ form.acne_proneness.value|default:3 }}"
+                            oninput="document.getElementById('acne-value').innerText = this.value"
+                            >
                         <div class="slider-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -234,14 +276,22 @@
                         <span class="slider-value" id="aging-value">3</span>
                     </div>
                     <div class="slider-wrapper">
-                        {{ form.aging_concerns }}
                         <div class="slider-labels">
                             <span>None</span>
                             <span>Preventative</span>
                             <span>Visible Signs</span>
                         </div>
+                        <input
+                            type="range"
+                            id="{{ form.aging_concerns.id_for_label }}"
+                            name="{{ form.aging_concerns.html_name }}"
+                            min="1" max="5" step="1"
+                            list="aging-scale"
+                            value="{{ form.aging_concerns.value|default:3 }}"
+                            oninput="document.getElementById('aging-value').innerText = this.value"
+                            >
                         <div class="slider-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -269,11 +319,11 @@
                                 {% if choice.0 == 'matte' %}
                                 <i class="fas fa-sun"></i>
                                 {% elif choice.0 == 'dewy' %}
-                                <i class="fas fa-sparkles"></i>
-                                {% elif choice.0 == 'natural' %}
+                                <i class="fas fa-cloud"></i>
+                                {% elif choice.0 == 'satin' %}
                                 <i class="fas fa-leaf"></i>
-                                {% elif choice.0 == 'no_preference' %}
-                                <i class="fas fa-question"></i>
+                                {% elif choice.0 == 'glitter' %}
+                                <i class="fas fa-star"></i>
                                 {% endif %}
                             </div>
                             <span class="option-title">{{ choice.1 }}</span>

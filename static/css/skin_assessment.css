@@ -13,6 +13,16 @@
     --transition: all 0.3s ease;
 }
 
+.slider-numbers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+.slider-numbers span {
+  font-size: 0.9rem;
+}
+
+
 .skin-assessment-container {
     max-width: 800px;
     margin: 2rem auto;

@@ -67,6 +67,7 @@ class Product(models.Model):
     brand = models.CharField(max_length=100, default='Brand')
     size = models.CharField(max_length=20, help_text="e.g., 30ml, 50g", default='Size')
     description = models.TextField(blank=True, null=True)
+    is_featured = models.BooleanField(default=False)
     detailed_description = models.TextField(
         blank=True,
         null=True,
@@ -100,7 +101,7 @@ class Product(models.Model):
     category = models.CharField(max_length=20, null=True, blank=True)
     subcategory = models.CharField(max_length=50, blank=True, null=True)
     digital = models.BooleanField(default=False, null=True, blank=True)
-    long_last = models.BooleanField(default=False, verbose_name="Tahan Lama?", blank=True, null=True)
+    long_last = models.BooleanField(default=False, verbose_name="Long Lasting?", blank=True, null=True)
     waterproof = models.BooleanField(default=False, blank=True, null=True)
     spf = models.IntegerField(null=True, blank=True)
     coverage = models.CharField(max_length=20, choices=COVERAGE_LEVEL, blank=True, null=True)

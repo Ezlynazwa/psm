@@ -26,9 +26,7 @@ ProductVariationFormSet = inlineformset_factory(
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = fields = 'name', 'brand','size', 'description', 'price', 'min_stock','max_stock', 'skin_type', 'suitable_for', 
-        'finish', 'texture', 'skin_condition','skin_texture', 'sensivity_level', 'is_vegan','is_cruelty_free','category', 
-        'long_last', 'waterproof','spf', 'coverage'
+        fields = fields = '__all__'
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),}
 
