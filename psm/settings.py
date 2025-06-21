@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
 
 
 
@@ -25,9 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*dp)4th+8*9-!ahjbosucsgl9pge&gv)!&5@s%h=p^#f$v7x*r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
+DEBUG = False
+ALLOWED_HOSTS = ['https://brewbeauty.pythonanywhere.com/']
 
 
 # Application definition
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,6 +57,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'psm.urls'
 
@@ -84,10 +87,11 @@ WSGI_APPLICATION = 'psm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'BREWBEAUTY',
-        'USER': 'root',
+        'default': dj_database_url.config(conn_max_age=600),
+        'NAME': 'brewbeauty$brewbeauty',
+        'USER': 'brewbeauty',
         'PASSWORD' : 'Ezlynazwa0910@',
-        'HOST': 'localhost',
+        'HOST': 'brewbeauty.mysql.pythonanywhere-services.com',
         'PORT': '3306'
     }
 }
