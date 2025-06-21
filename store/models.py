@@ -76,7 +76,7 @@ class Product(models.Model):
 
     # Pricing & Stock
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(blank=True, null=True)
     min_stock = models.PositiveIntegerField(default=0)
     max_stock = models.PositiveIntegerField(default=100)
 
