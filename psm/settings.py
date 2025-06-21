@@ -87,12 +87,16 @@ WSGI_APPLICATION = 'psm.wsgi.application'
 
 import dj_database_url
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600,
-        engine='django.db.backends.mysql'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'BREWBEAUTY',
+        'USER': 'root',
+        'PASSWORD' : 'Ezlynazwa0910@',
+        'HOST': 'localhost',
+        'PORT': '3306'
+    }
 }
+
 
 import pymysql
 pymysql.install_as_MySQLdb()
