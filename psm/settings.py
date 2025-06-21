@@ -86,20 +86,19 @@ WSGI_APPLICATION = 'psm.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 import dj_database_url
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'BREWBEAUTY',
-        'USER': 'root',
-        'PASSWORD' : 'Ezlynazwa0910@',
-        'HOST': 'localhost',
-        'PORT': '3306'
-    }
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        engine='django.db.backends.mysql'
+    )
 }
 
-
-import pymysql
-pymysql.install_as_MySQLdb()
 
 
 # Password validation
