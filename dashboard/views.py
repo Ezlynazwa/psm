@@ -238,6 +238,18 @@ def view_product(request, pk):
         'variations': variations,
     })
 
+@staff_member_required
+def staff_view_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    images = ProductImage.objects.filter(product=product)
+    variations = ProductVariation.objects.filter(product=product)
+    
+    return render(request, 'dashboard/staffviewproduct.html', {
+        'product': product,
+        'images': images,
+        'variations': variations,
+    })
+
 
 def addstaff(request):
     if request.method == 'POST':

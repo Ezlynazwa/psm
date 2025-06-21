@@ -146,6 +146,18 @@ class Product(models.Model):
     @property
     def is_in_stock(self):
         return self.quantity > 0
+    
+    @property
+    def total_variation_quantity(self):
+        return self.variations.aggregate(total=models.Sum('quantity'))['total'] or 0
+
+    @property
+    def units_sold(self):
+        from store.models import OrderItem
+        return OrderItem.objects.filter(
+            product=self,
+            order__complete=True
+        ).aggregate(total=models.Sum('quantity'))['total'] or 0
 
 
 class ProductImage(models.Model):
@@ -196,6 +208,13 @@ class ProductVariation(models.Model):
             return self.image.url
         except:
             return ''
+
+    @property
+    def units_sold(self):
+        from store.models import OrderItem
+        return OrderItem.objects.filter(variation=self, order__complete=True).aggregate(
+            total=models.Sum('quantity')
+        )['total'] or 0
 
 
 # Keep product.quantity in sync with sum of variation quantities

@@ -59,15 +59,15 @@
         {% for product in products %}
         <div class="product-card">
             <div class="card-image">
-                {% if item.image %}
-                    <img src="{{ item.image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                {% if product.product_images.all %}
+                    <img src="{{ product.product_images.all.0.image.url }}" alt="{{ product.name }}" loading="lazy">
                 {% else %}
                     <div class="no-image">
                         <i class="fas fa-camera"></i>
                         <span>No Image</span>
                     </div>
                 {% endif %}
-                <div class="card-badge">{{ product.category.name }}</div>
+                <div class="card-badge">{{ product.category }}</div>
             </div>
             
             <div class="card-body">
@@ -80,7 +80,7 @@
             </div>
             
             <div class="card-actions">
-                <a href="#" class="btn-action btn-view" title="View">
+                <a href="{% url 'dashboard:staff_view_product' product.pk  %}" class="btn-action btn-view" title="View">
                     <i class="fas fa-eye"></i>
                 </a>
             </div>

@@ -27,7 +27,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
-        exclude = ['recommended_for', 'created_at', 'match_score', 'reason', 'texture']
+        exclude = ['recommended_for', 'created_at', 'match_score', 'reason', 'texture', 'quantity']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),}
 

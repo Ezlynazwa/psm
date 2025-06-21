@@ -19,6 +19,8 @@ urlpatterns = [
     path('report/', views.sales_report, name='sales_report'),
     path('report/export/<str:format_type>/', views.export_report, name='export_report'),
     path('product/<int:pk>/view/', views.view_product, name='view_product'),
+    path('staff/viewproduct/<int:pk>/', views.staff_view_product, name='staff_view_product'),
+
 
     
 ]
