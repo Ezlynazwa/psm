@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import dj_database_url
 
 
 
@@ -89,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'brewbeauty$BrewBeauty',
         'USER': 'brewbeauty',
-        'PASSWORD' : 'Ezlynazwa0910@',
+        'PASSWORD' : 'Azwa0910@',
         'HOST': 'brewbeauty.mysql.pythonanywhere-services.com',
         'PORT': '3306', 
         'OPTIONS': {
