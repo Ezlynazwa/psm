@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-*dp)4th+8*9-!ahjbosucsgl9pge&gv)!&5@s%h=p^#f$v7x*r
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['https://brewbeauty.pythonanywhere.com/']
+ALLOWED_HOSTS = ['localhost','https://brewbeauty.pythonanywhere.com/']
 
 
 # Application definition
@@ -87,12 +87,14 @@ WSGI_APPLICATION = 'psm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'default': dj_database_url.config(conn_max_age=600),
         'NAME': 'brewbeauty$brewbeauty',
         'USER': 'brewbeauty',
         'PASSWORD' : 'Ezlynazwa0910@',
         'HOST': 'brewbeauty.mysql.pythonanywhere-services.com',
-        'PORT': '3306'
+        'PORT': '3306', 
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
 
