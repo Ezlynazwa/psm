@@ -391,10 +391,21 @@ def manageorder(request):
     paginator = Paginator(orders, 10) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    pending_count = Order.objects.filter(status='pending', complete=True).count()
+    verified_count = Order.objects.filter(status='verified', complete=True).count()
+    preparing_count = Order.objects.filter(status='preparing', complete=True).count()
+    shipped_count = Order.objects.filter(status='shipped', complete=True).count()
+
     
     context = {
         'page_obj': page_obj,
         'status_filter': status_filter,
+        'pending_count': pending_count,
+        'verified_count': verified_count,
+        'preparing_count': preparing_count,
+        'shipped_count': shipped_count,
+
     }
     return render(request, 'dashboard/manageorder.html', context)
 
@@ -610,3 +621,13 @@ def staffviewproducts(request):
 
     return render(request, 'dashboard/staffproduct.html', context)
     
+@staff_member_required
+def toggle_customer_active(request, user_id):
+    user = get_object_or_404(User, id=user_id, is_staff=False, is_superuser=False)
+
+    user.is_active = not user.is_active
+    user.save()
+
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(request, f"Customer '{user.username}' has been {status}.")
+    return redirect('dashboard:manageusers')

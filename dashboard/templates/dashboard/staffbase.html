@@ -65,16 +65,12 @@
                 <div class="staff-profile">
                     <div class="profile-dropdown">
                         <div class="profile-info">
-                            <img src="{% static 'media/employee_photo' %}" alt="Staff Photo" class="profile-avatar">
                             <span class="profile-name">{{ request.user.username }}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
                         <div class="dropdown-menu">
                             <a href="{% url 'users:staff_profile'%}" class="dropdown-item">
                                 <i class="fas fa-user"></i> My Profile
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Settings
                             </a>
                             <a href="{% url 'users:logout' %}" class="dropdown-item">
                                 <i class="fas fa-sign-out-alt"></i> Logout

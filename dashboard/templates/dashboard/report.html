@@ -153,7 +153,7 @@
                                     <td>{{ product.product__name }}</td>
                                     <td>{{ product.product__category }}</td>
                                     <td>{{ product.quantity_sold }}</td>
-                                    <td>${{ product.revenue|floatformat:2 }}</td>
+                                    <td>RM{{ product.revenue|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -188,7 +188,7 @@
                             <td>{{ order.id }}</td>
                             <td>{{ order.date_ordered|date:"M d, Y" }}</td>
                             <td>{{ order.user.get_full_name }}</td>
-                            <td>${{ order.total|floatformat:2 }}</td>
+                            <td>RM{{ order.total|floatformat:2 }}</td>
                             <td>
                                 <span class="badge 
                                     {% if order.status == 'delivered' %}badge-success
@@ -228,7 +228,7 @@
                             <td>{{ product.product__name }}</td>
                             <td>{{ product.product__category }}</td>
                             <td>{{ product.quantity }}</td>
-                            <td>${{ product.revenue|floatformat:2 }}</td>
+                            <td>RM{{ product.revenue|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -259,7 +259,7 @@
                         <tr>
                             <td>{{ customer.user__first_name }} {{ customer.user__last_name }}</td>
                             <td>{{ customer.user__email }}</td>
-                            <td>${{ customer.total_spent|floatformat:2 }}</td>
+                            <td>RM{{ customer.total_spent|floatformat:2 }}</td>
                             <td>{{ customer.order_count }}</td>
                         </tr>
                         {% endfor %}

@@ -218,10 +218,25 @@
     font-weight: 500;
 }
 
-.status-badge.active {
-    background-color: rgba(40, 167, 69, 0.1);
-    color: var(--success);
+.status-badge.inactive {
+    background-color: #ff8080;
+    color: #6c0202;
 }
+
+.status-badge.active {
+    background-color: #d7f4d4;
+    color: #08a000;
+}
+
+
+.action-btn.activate-btn {
+    color: green;
+}
+
+.action-btn.deactivate-btn {
+    color: red;
+}
+
 
 .role-badge.admin {
     background-color: rgba(220, 53, 69, 0.1);

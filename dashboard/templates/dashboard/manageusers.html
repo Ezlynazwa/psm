@@ -56,21 +56,30 @@
                         <td>{{ customer.email }}</td>
                         <td>{{ customer.date_joined|date:"M d, Y" }}</td>
                         <td>
+                            {% if customer.is_active %}
                             <span class="status-badge active">Active</span>
+                            {% else %}
+                            <span class="status-badge inactive">Inactive</span>
+                            {% endif %}
                         </td>
+
                         <td>
                             <div class="action-icons">
-                                <a href="#" class="action-btn view-btn" title="View Profile">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="#" class="action-btn edit-btn" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" class="action-btn delete-btn" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
+                                <form method="post" action="{% url 'dashboard:toggle_customer_active' customer.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    {% if customer.is_active %}
+                                    <button type="submit" class="action-btn deactivate-btn" title="Deactivate" onclick="return confirm('Deactivate this customer?');">
+                                        <i class="fas fa-user-slash"></i>
+                                    </button>
+                                    {% else %}
+                                    <button type="submit" class="action-btn activate-btn" title="Activate" onclick="return confirm('Activate this customer?');">
+                                        <i class="fas fa-user-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </form>
                             </div>
                         </td>
+
                     </tr>
                     {% empty %}
                     <tr>
