@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'psm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'brewbeauty$brewbeauty',
+        'NAME': 'brewbeauty$BrewBeauty',
         'USER': 'brewbeauty',
         'PASSWORD' : 'Ezlynazwa0910@',
         'HOST': 'brewbeauty.mysql.pythonanywhere-services.com',
