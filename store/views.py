@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Order, OrderItem, ShippingAddress, CustomerAddress, ProductVariation
+from .models import Product, Order, OrderItem, ShippingAddress, CustomerAddress, ProductVariation, Wishlist
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from dashboard.forms import ProductForm
@@ -147,6 +147,28 @@ def cart(request):
     })
 
 @login_required
+def wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-added_on')
+    return render(request, 'store/wishlist.html', {
+        'wishlist_items': wishlist_items,
+    })
+
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    Wishlist.objects.get_or_create(user=request.user, product=product)
+    messages.success(request, "Added to your wishlist.")
+    return redirect('store:wishlist')
+
+@login_required
+def remove_from_wishlist(request, wishlist_id):
+    item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
+    item.delete()
+    messages.success(request, "Removed from your wishlist.")
+    return redirect('store:wishlist')
+
+
+@login_required
 def checkout(request, order_id):
     try:
         order = get_object_or_404(
@@ -190,32 +212,44 @@ def checkout(request, order_id):
                     )
 
                 # 3) Proses alamat
-                if form.cleaned_data.get('add_new_address'):
-                    # Simpan alamat baru ke CustomerAddress
-                    saved_address = CustomerAddress.objects.create(
-                        user=request.user,
-                        address=form.cleaned_data['address'],
-                        city=form.cleaned_data['city'],
-                        state=form.cleaned_data['state'],
-                        zipcode=form.cleaned_data['zipcode']
-                    )
-                else:
-                    saved_id = form.cleaned_data.get('selected_address')
-                    saved_address = get_object_or_404(
-                        CustomerAddress, id=saved_id, user=request.user
+               # Validasi: Mesti pilih salah satu - alamat sedia ada atau masukkan alamat baru
+                    if form.cleaned_data.get('add_new_address'):
+                        if not all([
+                            form.cleaned_data.get('address'),
+                            form.cleaned_data.get('city'),
+                            form.cleaned_data.get('state'),
+                            form.cleaned_data.get('zipcode')
+                        ]):
+                            messages.error(request, "Please fill in all new address fields.")
+                            return redirect('store:checkout', order_id=order.id)
+
+                        saved_address = CustomerAddress.objects.create(
+                            user=request.user,
+                            address=form.cleaned_data['address'],
+                            city=form.cleaned_data['city'],
+                            state=form.cleaned_data['state'],
+                            zipcode=form.cleaned_data['zipcode']
+                        )
+                    else:
+                        saved_id = request.POST.get('selected_address')
+                        if not saved_id:
+                            messages.error(request, "Please select a shipping address.")
+                            return redirect('store:checkout', order_id=order.id)
+
+                        saved_address = get_object_or_404(CustomerAddress, id=saved_id, user=request.user)
+
+
+                    # Simpan snapshot ke ShippingAddress
+                    Shipping_address = ShippingAddress.objects.create(
+                        order=new_order,
+                        address=saved_address.address,
+                        city=saved_address.city,
+                        state=saved_address.state,
+                        zipcode=saved_address.zipcode
                     )
 
-                # Simpan snapshot ke ShippingAddress
-                Shipping_address = ShippingAddress.objects.create(
-                    order=new_order,
-                    address=saved_address.address,
-                    city=saved_address.city,
-                    state=saved_address.state,
-                    zipcode=saved_address.zipcode
-                )
-
-                new_order.shipping_address = Shipping_address
-                new_order.save()
+                    new_order.shipping_address = Shipping_address
+                    new_order.save()
 
                 # 4) Simpan resit (receipt)
                 if 'receipt' in request.FILES:

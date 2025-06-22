@@ -86,25 +86,25 @@
 
   <!-- RECOMMENDATIONS GRID -->
   {% if recommendations %}
+    <!-- Update your product card section with this enhanced version -->
     <div class="products-grid">
       {% for rec in recommendations %}
-        <div class="product-card">
+        <div class="product-card" style="--order: {{ forloop.counter }}">
           <!-- PRODUCT IMAGE -->
           <div class="product-image-container">
             {% with rec.product.product_images.first as img %}
               {% if img %}
-                <img src="{{ img.image.url }}" alt="{{ rec.product.name }}" class="product-image">
-                <div class="match-badge">Match: {{ rec.combined_score|floatformat:2 }}</div>
+                <img src="{{ img.image.url }}" alt="{{ rec.product.name }}" class="product-image" loading="lazy">
+                <div class="match-badge">
+                  <i class="fas fa-heart"></i> {{ rec.combined_score|floatformat:2 }} Match
+                </div>
                 {% if rec.product.is_new %}
-                  <div class="new-badge">New</div>
+                  <div class="new-badge">New Arrival</div>
                 {% endif %}
               {% else %}
-                <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-image">
+                <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-image" loading="lazy">
               {% endif %}
             {% endwith %}
-            <button class="quick-view-btn" data-product-id="{{ rec.product.id }}">
-              <i class="fas fa-eye"></i> Quick View
-            </button>
           </div>
           
           <!-- PRODUCT INFO -->
@@ -117,6 +117,27 @@
               <span class="current-price">RM {{ rec.product.price }}</span>
               {% if rec.product.old_price %}
                 <span class="old-price">RM {{ rec.product.old_price }}</span>
+                <span class="discount-badge">
+                  {{ rec.product.discount_percentage|floatformat:0 }}% OFF
+                </span>
+              {% endif %}
+            </div>
+            
+            <!-- PRODUCT HIGHLIGHTS -->
+            <div class="product-highlights">
+              <div class="highlight-item">
+                <i class="fas fa-check-circle"></i>
+                <span>{% if rec.product.is_hypoallergenic %}Hypoallergenic{% else %}Gentle formula{% endif %}</span>
+              </div>
+              <div class="highlight-item">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ rec.product.texture|title }} texture</span>
+              </div>
+              {% if rec.product.spf %}
+              <div class="highlight-item">
+                <i class="fas fa-check-circle"></i>
+                <span>SPF {{ rec.product.spf }} protection</span>
+              </div>
               {% endif %}
             </div>
             
@@ -125,12 +146,15 @@
               {% with request.user.customerprofile.skin_assessments.first as assess %}
                 {% if assess.undertone and assess.surface_tone %}
                   <div class="shade-matching">
-                    <div class="shade-label">Your matches:</div>
+                    <div class="shade-label">
+                      <i class="fas fa-palette"></i> Your matching shades:
+                    </div>
                     <div class="shade-swatches">
                       {% for v in rec.product.variations.all %}
                         {% if v.skin_tone == assess.undertone and v.surface_tones == assess.surface_tone %}
                           <div class="shade-swatch" 
                               style="background-color: {{ v.hex_color|default:'#f0f0f0' }}" 
+                              data-toggle="tooltip" 
                               title="{{ v.variation_code }}">
                           </div>
                         {% endif %}
@@ -140,24 +164,17 @@
                 {% endif %}
               {% endwith %}
             {% endif %}
-
-            <!-- DEBUG: Show assessment values -->
-            <div style="display: none;">
-              Undertone: {{ assess.undertone }}<br>
-              Surface Tone: {{ assess.surface_tone }}<br>
-              Variations: {{ rec.product.variations.all|length }}<br>
-              {% for v in rec.product.variations.all %}
-                Variation {{ forloop.counter }}: {{ v.skin_tone }}, {{ v.surface_tones }}<br>
-              {% endfor %}
-            </div>
             
             <!-- REASON FOR RECOMMENDATION -->
             <div class="recommendation-reason">
               <div class="reason-header">
                 <i class="fas fa-info-circle"></i>
-                <span>Why we recommend this:</span>
+                <span>Why this works for you:</span>
               </div>
-              <div class="reason-content">{{ rec.reason }}</div>
+              <div class="reason-content">
+                {{ rec.reason|capfirst }}. Perfect for {{ assess.skin_type }} skin with 
+                {{ assess.concerns|default:"your skin concerns" }}.
+              </div>
             </div>
             
             <!-- ACTION BUTTONS -->
@@ -165,6 +182,9 @@
               <a href="{% url 'store:view_product' rec.product.id %}" class="details-btn">
                 <i class="fas fa-search"></i> Details
               </a>
+              <button class="add-to-cart-btn" data-product-id="{{ rec.product.id }}">
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
             </div>
           </div>
         </div>
@@ -220,6 +240,40 @@ document.querySelectorAll('.quick-view-btn').forEach(btn => {
 
 document.querySelector('.close-modal').addEventListener('click', function() {
   document.getElementById('quickViewModal').style.display = 'none';
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tooltips for shade swatches
+  $('[data-toggle="tooltip"]').tooltip();
+  
+  // Add to cart functionality
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const productId = this.getAttribute('data-product-id');
+      // Implement your add to cart logic here
+      alert(`Product ${productId} added to cart!`);
+      this.innerHTML = '<i class="fas fa-check"></i> Added';
+      this.style.backgroundColor = 'var(--success-color)';
+      setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+        this.style.backgroundColor = 'var(--primary-color)';
+      }, 2000);
+    });
+  });
+  
+  // Animate cards on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = 1;
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  document.querySelectorAll('.product-card').forEach(card => {
+    observer.observe(card);
+  });
 });
 
 // Close modal when clicking outside

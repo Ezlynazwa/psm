@@ -1,11 +1,22 @@
 {% extends 'store/basestore.html' %}
 {% load static %}
 
-{% block title %}Product - Brew Beauty{% endblock %}
+{% block title %}{{ product.name }} - Brew Beauty{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/view_product.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+{% endblock %}
 
 {% block content %}
   <!-- Product Details -->
   <section class="product-details">
+    <div class="breadcrumb">
+      <a href="{% url 'store:homepage' %}">Home</a> &gt; 
+      <a href="{% url 'store:catalog' %}">Shop</a> &gt; 
+      <span>{{ product.name }}</span>
+    </div>
+    
     <div class="product-container">
       <div class="product-image-container">
         <div class="main-image">
@@ -14,50 +25,72 @@
               src="{{ images.0.image.url }}"
               alt="{{ product.name }}"
               id="main-product-image"
+              class="zoomable"
             />
           {% else %}
-            <div class="no-image">No image available</div>
+            <div class="no-image">
+              <i class="fas fa-image"></i>
+              <span>No image available</span>
+            </div>
           {% endif %}
         </div>
+        
         {% if images|length > 1 %}
           <div class="thumbnail-container">
             {% for image in images %}
-              <img
-                src="{{ image.image.url }}"
-                alt="Thumbnail {{ forloop.counter }}"
-                class="thumbnail {% if forloop.first %}active{% endif %}"
-                data-full-image="{{ image.image.url }}"
-                onclick="changeMainImage(this)"
-              />
+              <div class="thumbnail-wrapper">
+                <img
+                  src="{{ image.image.url }}"
+                  alt="Thumbnail {{ forloop.counter }}"
+                  class="thumbnail {% if forloop.first %}active{% endif %}"
+                  data-full-image="{{ image.image.url }}"
+                  onclick="changeMainImage(this)"
+                />
+              </div>
             {% endfor %}
           </div>
         {% endif %}
       </div>
 
       <div class="product-info">
-        <h1 class="product-title">{{ product.name }}</h1>
+        <div class="product-header">
+          <h1 class="product-title">{{ product.name }}</h1>
+          <div class="rating">
+            <div class="stars">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+            </div>
+            <span class="review-count">(42 reviews)</span>
+          </div>
+        </div>
+        
         <div class="price-section">
           <span class="price">RM {{ product.price }}</span>
           {% if product.old_price %}
             <span class="old-price">RM {{ product.old_price }}</span>
+            <span class="discount-badge">-{{ product.discount_percentage }}%</span>
           {% endif %}
         </div>
 
         <div class="product-meta">
-          <span class="category">Category: {{ product.category }}</span>
-          <span class="stock-status">In Stock</span>
+          <span class="category"><i class="fas fa-tag"></i> {{ product.category }}</span>
+          <span class="stock-status"><i class="fas fa-check-circle"></i> In Stock</span>
+          <span class="sku"><i class="fas fa-barcode"></i> SKU: {{ product.sku|default:"N/A" }}</span>
         </div>
 
-        <p class="description">{{ product.description }}</p>
+        <div class="description">
+          <h3>Description</h3>
+          <p>{{ product.description }}</p>
+        </div>
 
         {% if product.variations.all %}
           <div class="product-variations">
             <h4>
-              Available Variations Code:
-              <span
-                id="selected-variation-text"
-                class="selected-variation-text"
-              >
+              Available Variations:
+              <span id="selected-variation-text" class="selected-variation-text">
                 (Please select one)
               </span>
             </h4>
@@ -70,9 +103,8 @@
                 >
                   <p class="variation-code">
                     <strong>{{ variation.variation_code }}</strong>
-                    <small>Stock: {{ variation.quantity }}</small>
-                    <small>{{ variation.units_sold }} sold</small>
-
+                    <small><i class="fas fa-box"></i> Stock: {{ variation.quantity }}</small>
+                    <small><i class="fas fa-fire"></i> {{ variation.units_sold }} sold</small>
                   </p>
                   <input
                     type="radio"
@@ -83,24 +115,16 @@
                 </div>
               {% endfor %}
             </div>
-            <div
-              id="variation-error"
-              class="error-message"
-              style="display: none; color: red; margin-top: 10px;"
-            >
-              Please select a variation before adding to cart
+            <div id="variation-error" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> Please select a variation before adding to cart
             </div>
           </div>
         {% endif %}
 
         <div class="product-actions">
           <div class="quantity-selector">
-            <button
-              class="qty-btn minus"
-              onclick="adjustQuantity(-1)"
-              type="button"
-            >
-              -
+            <button class="qty-btn minus" onclick="adjustQuantity(-1)" type="button">
+              <i class="fas fa-minus"></i>
             </button>
             <input
               type="number"
@@ -109,25 +133,120 @@
               class="qty-input"
               id="product-quantity"
             />
-            <button
-              class="qty-btn plus"
-              onclick="adjustQuantity(1)"
-              type="button"
-            >
-              +
+            <button class="qty-btn plus" onclick="adjustQuantity(1)" type="button">
+              <i class="fas fa-plus"></i>
             </button>
           </div>
-          <button
-            class="cta-button add-to-cart"
-            onclick="addToCart()"
-            type="button"
-          >
+          <button class="cta-button add-to-cart" onclick="addToCart()" type="button">
             <i class="fas fa-shopping-cart"></i> Add to Cart
           </button>
           <button class="wishlist-btn" type="button">
-            <i class="far fa-heart"></i> Wishlist
+            <i class="far fa-heart"></i> <span class="wishlist-text">Wishlist</span>
           </button>
         </div>
+
+        <div class="product-details-footer">
+          <div class="detail-item">
+            <i class="fas fa-truck"></i>
+            <span>Free shipping on orders over RM50</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-undo"></i>
+            <span>30-day easy returns</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>100% authentic products</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Tabs -->
+  <section class="product-tabs">
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="description">Description</button>
+        <button class="tab-btn" data-tab="ingredients">Ingredients</button>
+        <button class="tab-btn" data-tab="reviews">Reviews (42)</button>
+        <button class="tab-btn" data-tab="shipping">Shipping & Returns</button>
+      </div>
+      
+      <div class="tabs-content">
+        <div class="tab-pane active" id="description">
+          <h3>Product Details</h3>
+          <p>{{ product.description }}</p>
+          <h3>How To Use</h3>
+          <p>Apply a small amount to clean skin and blend gently. Use morning and night for best results.</p>
+        </div>
+        
+        <div class="tab-pane" id="ingredients">
+          <h3>Key Ingredients</h3>
+          <ul class="ingredients-list">
+            <li><strong>Hyaluronic Acid:</strong> Deep hydration and plumping</li>
+            <li><strong>Vitamin C:</strong> Brightens and evens skin tone</li>
+            <li><strong>Niacinamide:</strong> Reduces redness and inflammation</li>
+            <li><strong>Peptides:</strong> Stimulates collagen production</li>
+          </ul>
+        </div>
+        
+        <div class="tab-pane" id="reviews">
+          <div class="review-summary">
+            <div class="overall-rating">
+              <span class="rating-value">4.7</span>
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <span class="total-reviews">42 reviews</span>
+            </div>
+            <button class="write-review-btn">Write a Review</button>
+          </div>
+          <!-- Reviews would be dynamically loaded here -->
+        </div>
+        
+        <div class="tab-pane" id="shipping">
+          <h3>Shipping Information</h3>
+          <p>We offer free standard shipping on orders over RM50. Orders are typically processed within 1-2 business days.</p>
+          <h3>Returns Policy</h3>
+          <p>We offer a 30-day return policy for unused and unopened products. Please contact our customer service for return authorization.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Products -->
+  <section class="related-products">
+    <h2>You May Also Like</h2>
+    <div class="related-products-grid">
+      <!-- These would be dynamically generated -->
+      <div class="related-product-card">
+        <img src="{% static 'images/product1.jpg' %}" alt="Related Product">
+        <h3>Hydrating Serum</h3>
+        <div class="price">RM 89.00</div>
+        <button class="quick-view-btn">Quick View</button>
+      </div>
+      <div class="related-product-card">
+        <img src="{% static 'images/product2.jpg' %}" alt="Related Product">
+        <h3>Vitamin C Cream</h3>
+        <div class="price">RM 75.00</div>
+        <button class="quick-view-btn">Quick View</button>
+      </div>
+      <div class="related-product-card">
+        <img src="{% static 'images/product3.jpg' %}" alt="Related Product">
+        <h3>Night Repair Oil</h3>
+        <div class="price">RM 120.00</div>
+        <button class="quick-view-btn">Quick View</button>
+      </div>
+      <div class="related-product-card">
+        <img src="{% static 'images/product4.jpg' %}" alt="Related Product">
+        <h3>SPF 50 Sunscreen</h3>
+        <div class="price">RM 65.00</div>
+        <button class="quick-view-btn">Quick View</button>
       </div>
     </div>
   </section>
@@ -140,25 +259,16 @@
     style="display: none;"
   >
     {% csrf_token %}
-
-    <!-- This hidden field must be named exactly "variation_id" -->
-    <input
-      type="hidden"
-      name="variation_id"
-      id="form-variation-id"
-      value=""
-    />
-
-    <!-- This hidden field must be named exactly "quantity" -->
-    <input
-      type="hidden"
-      name="quantity"
-      id="form-quantity"
-      value="1"
-    />
-
-    <button id="btn-add-to-cart" type="submit">Tambah ke Cart</button>
+    <input type="hidden" name="variation_id" id="form-variation-id" value="" />
+    <input type="hidden" name="quantity" id="form-quantity" value="1" />
+    <button id="btn-add-to-cart" type="submit">Add to Cart</button>
   </form>
+
+  <!-- Image Zoom Modal -->
+  <div class="zoom-modal">
+    <span class="close-zoom">&times;</span>
+    <img class="zoom-modal-content" id="zoomed-image">
+  </div>
 
   <!-- JavaScript -->
   <script>
@@ -168,6 +278,7 @@
       const thumbnails = document.querySelectorAll('.thumbnail');
 
       mainImage.src = thumbnail.dataset.fullImage;
+      document.querySelector('.zoom-modal-content').src = thumbnail.dataset.fullImage;
 
       thumbnails.forEach((t) => t.classList.remove('active'));
       thumbnail.classList.add('active');
@@ -187,7 +298,7 @@
 
       const variationName = card.querySelector('p').textContent;
       selectedText.textContent = variationName;
-      selectedText.style.color = 'green';
+      selectedText.style.color = 'var(--primary)';
       variationError.style.display = 'none';
     }
 
@@ -206,7 +317,7 @@
     function addToCart() {
       const variationError = document.getElementById('variation-error');
       if (!selectedVariationId) {
-        variationError.style.display = 'block';
+        variationError.style.display = 'flex';
         return;
       }
 
@@ -216,13 +327,43 @@
       // Submit the (hidden) form back to view_product
       document.getElementById('add-to-cart-form').submit();
     }
-  </script>
-{% endblock %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/view_product.css' %}" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-  />
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        
+        // Update active tab button
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update active tab content
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Image zoom functionality
+    const zoomable = document.querySelector('.zoomable');
+    const zoomModal = document.querySelector('.zoom-modal');
+    const zoomedImg = document.getElementById('zoomed-image');
+    const closeZoom = document.querySelector('.close-zoom');
+
+    if (zoomable) {
+      zoomable.addEventListener('click', function() {
+        zoomModal.style.display = 'block';
+        zoomedImg.src = this.src;
+      });
+    }
+
+    closeZoom.addEventListener('click', function() {
+      zoomModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+      if (event.target === zoomModal) {
+        zoomModal.style.display = 'none';
+      }
+    });
+  </script>
 {% endblock %}

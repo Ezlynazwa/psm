@@ -8,11 +8,16 @@
     <title>{% block title %}Brew Beauty - Premium Cosmetics{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/basestore.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     {% block extra_css %}{% endblock %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
 </head>
 
 <body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <p>✨ Free shipping on orders over RM100 | Use code BEAUTY20 for 20% off</p>
+    </div>
 
     <!-- Header -->
     <header class="main-header">
@@ -30,14 +35,20 @@
                         <li><a href="{% url 'store:homepage' %}"><i class="fas fa-home"></i> Home</a></li>
                         <li><a href="{% url 'store:catalog' %}"><i class="fas fa-store"></i> Shop</a></li>
                         <li><a href="{% url 'recommendation:dashboard' %}"><i class="fas fa-magic"></i> Recommendations</a></li>
-                        <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> Cart</a></li>
+                        <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> <span class="cart-count">Cart</span></a></li>
+                        <li><a href="{% url 'store:wishlist' %}"><i class="far fa-heart"></i>Wishlist</a></li>
                         <li><a href="{% url 'store:track_order' %}"><i class="fas fa-truck"></i> Track Order</a></li>
                     </ul>
                 </nav>
 
-                <button class="mobile-menu-toggle" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div class="header-actions">
+                    <button class="mobile-search-toggle" aria-label="Toggle search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="mobile-menu-toggle" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Bottom Row: Search + Auth -->
@@ -45,7 +56,7 @@
                 <div class="search-container">
                     <form action="{% url 'store:search' %}" method="GET" class="search-form">
                         <input type="text" name="q" placeholder="Search products..." class="search-input">
-                        <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+                        <button type="submit" class="search-btn"><i class="fas fa-search"></i> Search</button>
                     </form>
                 </div>
 
@@ -53,7 +64,7 @@
                     {% if user.is_authenticated %}
                         <div class="dropdown">
                             <button class="dropdown-btn">
-                                <i class="fas fa-user-circle"></i> My Account
+                                <i class="fas fa-user-circle"></i> <span class="auth-text">My Account</span>
                             </button>
                             <div class="dropdown-content">
                                 <a href="{% url 'users:customer_profile' %}"><i class="fas fa-user"></i> Profile</a>
@@ -61,8 +72,8 @@
                             </div>
                         </div>
                     {% else %}
-                        <a href="{% url 'users:login' %}" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
-                        <a href="{% url 'users:signup' %}" class="auth-btn signup-btn"><i class="fas fa-user-plus"></i> Sign Up</a>
+                        <a href="{% url 'users:login' %}" class="auth-btn login-btn"><i class="fas fa-sign-in-alt"></i> <span class="auth-text">Login</span></a>
+                        <a href="{% url 'users:signup' %}" class="auth-btn signup-btn"><i class="fas fa-user-plus"></i> <span class="auth-text">Sign Up</span></a>
                     {% endif %}
                 </div>
             </div>
@@ -71,11 +82,28 @@
 
     <!-- Mobile Navigation -->
     <nav class="mobile-nav">
-        <ul>
+        <div class="mobile-nav-header">
+            <div class="mobile-logo">
+                <img src="{% static 'images/logo.jpg' %}" alt="Brew Beauty Logo" width="150" height="75">
+            </div>
+            <button class="mobile-close-btn" aria-label="Close navigation">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-search-container">
+            <form action="{% url 'store:search' %}" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Search products..." class="search-input">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        
+        <ul class="mobile-nav-list">
             <li><a href="{% url 'store:homepage' %}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{% url 'store:catalog' %}"><i class="fas fa-store"></i> Shop</a></li>
             <li><a href="#" onclick="handleRecommendationClick()"><i class="fas fa-magic"></i> Recommendations</a></li>
             <li><a href="#" onclick="handleCartClick()"><i class="fas fa-shopping-bag"></i> Cart</a></li>
+            <li><a href="{% url 'store:wishlist' %}"><i class="far fa-heart"></i>Wishlist</a></li>
             <li><a href="{% url 'store:track_order' %}"><i class="fas fa-truck"></i> Track Order</a></li>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'users:customer_profile' %}"><i class="fas fa-user"></i> Profile</a></li>
@@ -85,7 +113,16 @@
                 <li><a href="{% url 'users:signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a></li>
             {% endif %}
         </ul>
+        
+        <div class="mobile-social-links">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
     </nav>
+
+    <!-- Overlay -->
+    <div class="overlay"></div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -113,31 +150,44 @@
                     <li><a href="#">Contact Us</a></li>
                     <li><a href="#">FAQs</a></li>
                     <li><a href="#">Shipping Info</a></li>
+                    <li><a href="#">Returns & Exchanges</a></li>
                 </ul>
             </div>
 
             <div class="footer-section">
                 <h3>About Us</h3>
                 <ul>
-                    <li><a href="#">History</a></li>
-                    <li><a href="#">Branch</a></li>
-
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Ingredients</a></li>
+                    <li><a href="#">Sustainability</a></li>
+                    <li><a href="#">Blog</a></li>
                 </ul>
             </div>
 
             <div class="footer-section newsletter">
                 <h3>Stay Connected</h3>
+                <p>Subscribe to our newsletter for exclusive offers and beauty tips</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
                 <div class="social-links">
                     <a href="#"><i class="fab fa-facebook-f"></i></a>
                     <a href="#"><i class="fab fa-instagram"></i></a>
                     <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#"><i class="fab fa-pinterest-p"></i></a>
                 </div>
             </div>
         </div>
  
         <div class="footer-bottom">
             <p>&copy; 2025 Brew Beauty. All Rights Reserved.</p>
-            
+            <div class="payment-methods">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-paypal"></i>
+                <i class="fab fa-cc-apple-pay"></i>
+            </div>
         </div>
     </footer>
 
@@ -168,12 +218,31 @@
 
         // Mobile menu toggle
         document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
-            document.querySelector('.mobile-nav').classList.toggle('active');
-            this.classList.toggle('active');
+            document.querySelector('.mobile-nav').classList.add('active');
+            document.querySelector('.overlay').classList.add('active');
+            document.body.classList.add('no-scroll');
+        });
+
+        // Mobile menu close
+        document.querySelector('.mobile-close-btn').addEventListener('click', function() {
+            document.querySelector('.mobile-nav').classList.remove('active');
+            document.querySelector('.overlay').classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        });
+
+        // Overlay click to close menu
+        document.querySelector('.overlay').addEventListener('click', function() {
+            document.querySelector('.mobile-nav').classList.remove('active');
+            this.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        });
+
+        // Mobile search toggle
+        document.querySelector('.mobile-search-toggle').addEventListener('click', function() {
+            document.querySelector('.header-bottom').classList.toggle('active');
         });
     </script>
 
     {% block extra_js %}{% endblock %}
 </body>
 </html>
-

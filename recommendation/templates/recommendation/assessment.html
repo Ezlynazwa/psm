@@ -3,32 +3,46 @@
 
 {% block title %}Skin Assessment | Brew Beauty{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/skin_assessment.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
 {% block content %}
-<div class="skin-assessment-container">
-    <div class="assessment-header text-center">
-        <div class="header-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                <line x1="16" y1="8" x2="2" y2="22"></line>
-                <line x1="17.5" y1="15" x2="9" y2="15"></line>
-            </svg>
-        </div>
-        <h1 class="display-4">Personalized Skin Assessment</h1>
-        <p class="lead text-muted">Answer a few questions to receive customized product recommendations tailored to your unique skin needs</p>
-        <div class="progress-container">
-            <div class="progress">
-                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+<div class="assessment-container">
+    <!-- Header Section -->
+    <div class="assessment-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                    <line x1="16" y1="8" x2="2" y2="22"></line>
+                    <line x1="17.5" y1="15" x2="9" y2="15"></line>
+                </svg>
             </div>
-            <small class="text-muted">Step 1 of 5</small>
+            <h1>Personalized Skin Assessment</h1>
+            <p class="subtitle">Answer a few questions to receive customized product recommendations tailored to your unique skin needs</p>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 20%"></div>
+                </div>
+                <div class="progress-text">Step <span class="current-step">1</span> of 5</div>
+            </div>
         </div>
     </div>
 
-    <form method="post" class="skin-assessment-form">
+    <!-- Main Form -->
+    <form method="post" class="assessment-form">
         {% csrf_token %}
-
-        <!-- Skin Type -->
+        
+        <!-- Skin Type Section -->
         <div class="form-section active" id="skin-type-section">
-            <h2><span class="section-number">1</span> What is your skin type?</h2>
+            <div class="section-header">
+                <span class="section-number">1</span>
+                <h2>What is your skin type?</h2>
+            </div>
             <p class="section-description">Understanding your skin type helps us recommend the right products for your needs</p>
             
             <div class="option-grid">
@@ -67,14 +81,18 @@
                 </div>
                 {% endfor %}
             </div>
+            
             <div class="form-navigation">
-                <button type="button" class="btn btn-next" data-next="undertone-section">Next: Undertone <i class="fas fa-arrow-right"></i></button>
+                <button type="button" class="btn btn-next" data-next="undertone-section">Next: Skin Undertone <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
-        <!-- Undertone -->
+        <!-- Undertone Section -->
         <div class="form-section" id="undertone-section">
-            <h2><span class="section-number">2</span> What is your skin's undertone?</h2>
+            <div class="section-header">
+                <span class="section-number">2</span>
+                <h2>What is your skin's undertone?</h2>
+            </div>
             <p class="section-description">This helps us recommend products that will complement your natural coloring</p>
             
             <div class="option-grid">
@@ -93,23 +111,27 @@
                             Veins appear green, gold jewelry flatters
                             {% elif choice.0 == 'neutral' %}
                             Veins appear teal, both metals look good
-                            {% elif choice.0 == 'olive'%}
-                            Veins appear greenish-blue or slightly darker, rose gold flatters
+                            {% elif choice.0 == 'olive' %}
+                            Greenish undertone, rose gold flatters
                             {% endif %}
                         </span>
                     </label>
                 </div>
                 {% endfor %}
             </div>
+            
             <div class="form-navigation">
                 <button type="button" class="btn btn-prev" data-prev="skin-type-section"><i class="fas fa-arrow-left"></i> Previous</button>
-                <button type="button" class="btn btn-next" data-next="concerns-section">Next: Concerns <i class="fas fa-arrow-right"></i></button>
+                <button type="button" class="btn btn-next" data-next="concerns-section">Next: Skin Concerns <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
-        <!-- Concerns -->
+        <!-- Concerns Section -->
         <div class="form-section" id="concerns-section">
-            <h2><span class="section-number">3</span> Select your top skin concerns</h2>
+            <div class="section-header">
+                <span class="section-number">3</span>
+                <h2>Select your top skin concerns</h2>
+            </div>
             <p class="section-description">Choose all that apply (max 3 recommended)</p>
             
             <div class="concerns-grid">
@@ -117,46 +139,51 @@
                 <div class="concern-card">
                     <input type="checkbox" id="concern_{{ forloop.counter }}" name="{{ form.concerns.name }}" value="{{ choice.0 }}" {% if choice.0 in form.concerns.value %}checked{% endif %}>
                     <label for="concern_{{ forloop.counter }}">
-                        {% if choice.0 == 'acne' %}
-                            <i class="fas fa-bacteria"></i>
-                        {% elif choice.0 == 'aging' %}
-                            <i class="fas fa-hourglass-half"></i>
-                        {% elif choice.0 == 'dark_spots' %}
-                            <i class="fas fa-circle"></i>
-                        {% elif choice.0 == 'redness' %}
-                            <i class="fas fa-burn"></i>
-                        {% elif choice.0 == 'dryness' %}
-                            <i class="fas fa-water"></i>
-                        {% elif choice.0 == 'oiliness' %}
-                            <i class="fas fa-oil-can"></i>
-                        {% elif choice.0 == 'pores' %}
-                            <i class="fas fa-dot-circle"></i>
-                        {% elif choice.0 == 'dullness' %}
-                            <i class="fas fa-cloud"></i>
-                        {% elif choice.0 == 'dehydrated' %}
-                            <i class="fas fa-tint-slash"></i>
-                        {% elif choice.0 == 'sensitive' %}
-                            <i class="fas fa-allergies"></i>
-                        {% elif choice.0 == 'pigmentation' %}
-                            <i class="fas fa-adjust"></i>
-                        {% else %}
-                            <i class="fas fa-question-circle"></i>
-                        {% endif %}
-
+                        <div class="concern-icon">
+                            {% if choice.0 == 'acne' %}
+                                <i class="fas fa-bacteria"></i>
+                            {% elif choice.0 == 'aging' %}
+                                <i class="fas fa-hourglass-half"></i>
+                            {% elif choice.0 == 'dark_spots' %}
+                                <i class="fas fa-circle"></i>
+                            {% elif choice.0 == 'redness' %}
+                                <i class="fas fa-burn"></i>
+                            {% elif choice.0 == 'dryness' %}
+                                <i class="fas fa-water"></i>
+                            {% elif choice.0 == 'oiliness' %}
+                                <i class="fas fa-oil-can"></i>
+                            {% elif choice.0 == 'pores' %}
+                                <i class="fas fa-dot-circle"></i>
+                            {% elif choice.0 == 'dullness' %}
+                                <i class="fas fa-cloud"></i>
+                            {% elif choice.0 == 'dehydrated' %}
+                                <i class="fas fa-tint-slash"></i>
+                            {% elif choice.0 == 'sensitive' %}
+                                <i class="fas fa-allergies"></i>
+                            {% elif choice.0 == 'pigmentation' %}
+                                <i class="fas fa-adjust"></i>
+                            {% else %}
+                                <i class="fas fa-question-circle"></i>
+                            {% endif %}
+                        </div>
                         <span class="option-title">{{ choice.1 }}</span>
                     </label>
                 </div>
                 {% endfor %}
             </div>
+            
             <div class="form-navigation">
                 <button type="button" class="btn btn-prev" data-prev="undertone-section"><i class="fas fa-arrow-left"></i> Previous</button>
                 <button type="button" class="btn btn-next" data-next="sliders-section">Next: Skin Profile <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
-        <!-- Sliders Section - Enhanced -->
+        <!-- Sliders Section -->
         <div class="form-section" id="sliders-section">
-            <h2><span class="section-number">4</span> Rate these aspects of your skin</h2>
+            <div class="section-header">
+                <span class="section-number">4</span>
+                <h2>Rate these aspects of your skin</h2>
+            </div>
             <p class="section-description">Slide to indicate how much each characteristic applies to you</p>
             
             <div class="slider-group">
@@ -164,7 +191,7 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <label for="{{ form.hydration_level.id_for_label }}">Hydration Level</label>
-                        <span class="slider-value" id="hydration-value">5</span>
+                        <span class="slider-value" id="hydration-value">{{ form.hydration_level.value|default:"3" }}</span>
                     </div>
                     <div class="slider-wrapper">
                         <div class="slider-labels">
@@ -172,18 +199,9 @@
                             <span>Balanced</span>
                             <span>Hydrated</span>
                         </div>
-
-                        <input
-                            type="range"
-                            id="{{ form.hydration_level.id_for_label }}"
-                            name="{{ form.hydration_level.html_name }}"
-                            min="1" max="5" step="1"
-                            list="hydration-scale"
-                            value="{{ form.hydration_level.value|default:3 }}"
-                            oninput="document.getElementById('hydration-value').innerText = this.value"
-                            >
+                        <input type="range" id="{{ form.hydration_level.id_for_label }}" name="{{ form.hydration_level.html_name }}" min="1" max="5" step="1" value="{{ form.hydration_level.value|default:"3" }}" oninput="document.getElementById('hydration-value').innerText = this.value">
                         <div class="slider-ticks">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span></span><span></span><span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
@@ -192,7 +210,7 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <label for="{{ form.oiliness_level.id_for_label }}">Oiliness Level</label>
-                        <span class="slider-value" id="oiliness-value">4</span>
+                        <span class="slider-value" id="oiliness-value">{{ form.oiliness_level.value|default:"3" }}</span>
                     </div>
                     <div class="slider-wrapper">
                         <div class="slider-labels">
@@ -200,17 +218,9 @@
                             <span>Normal</span>
                             <span>Oily</span>
                         </div>
-                        <input
-                            type="range"
-                            id="{{ form.oiliness_level.id_for_label }}"
-                            name="{{ form.oiliness_level.html_name }}"
-                            min="1" max="5" step="1"
-                            list="oiliness-scale"
-                            value="{{ form.oiliness_level.value|default:3 }}"
-                            oninput="document.getElementById('oiliness-value').innerText = this.value"
-                            >
+                        <input type="range" id="{{ form.oiliness_level.id_for_label }}" name="{{ form.oiliness_level.html_name }}" min="1" max="5" step="1" value="{{ form.oiliness_level.value|default:"3" }}" oninput="document.getElementById('oiliness-value').innerText = this.value">
                         <div class="slider-ticks">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span></span><span></span><span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
@@ -219,7 +229,7 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <label for="{{ form.sensitivity_level.id_for_label }}">Sensitivity Level</label>
-                        <span class="slider-value" id="sensitivity-value">5</span>
+                        <span class="slider-value" id="sensitivity-value">{{ form.sensitivity_level.value|default:"3" }}</span>
                     </div>
                     <div class="slider-wrapper">
                         <div class="slider-labels">
@@ -227,17 +237,9 @@
                             <span>Normal</span>
                             <span>Sensitive</span>
                         </div>
-                        <input
-                            type="range"
-                            id="{{ form.sensitivity_level.id_for_label }}"
-                            name="{{ form.sensitivity_level.html_name }}"
-                            min="1" max="5" step="1"
-                            list="sensitivity-scale"
-                            value="{{ form.sensitivity_level.value|default:3 }}"
-                            oninput="document.getElementById('sensitivity-value').innerText = this.value"
-                            >
+                        <input type="range" id="{{ form.sensitivity_level.id_for_label }}" name="{{ form.sensitivity_level.html_name }}" min="1" max="5" step="1" value="{{ form.sensitivity_level.value|default:"3" }}" oninput="document.getElementById('sensitivity-value').innerText = this.value">
                         <div class="slider-ticks">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span></span><span></span><span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
@@ -246,7 +248,7 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <label for="{{ form.acne_proneness.id_for_label }}">Acne Proneness</label>
-                        <span class="slider-value" id="acne-value">1</span>
+                        <span class="slider-value" id="acne-value">{{ form.acne_proneness.value|default:"3" }}</span>
                     </div>
                     <div class="slider-wrapper">
                         <div class="slider-labels">
@@ -254,17 +256,9 @@
                             <span>Occasional</span>
                             <span>Frequent</span>
                         </div>
-                        <input
-                            type="range"
-                            id="{{ form.acne_proneness.id_for_label }}"
-                            name="{{ form.acne_proneness.html_name }}"
-                            min="1" max="5" step="1"
-                            list="acne-scale"
-                            value="{{ form.acne_proneness.value|default:3 }}"
-                            oninput="document.getElementById('acne-value').innerText = this.value"
-                            >
+                        <input type="range" id="{{ form.acne_proneness.id_for_label }}" name="{{ form.acne_proneness.html_name }}" min="1" max="5" step="1" value="{{ form.acne_proneness.value|default:"3" }}" oninput="document.getElementById('acne-value').innerText = this.value">
                         <div class="slider-ticks">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span></span><span></span><span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
@@ -273,7 +267,7 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <label for="{{ form.aging_concerns.id_for_label }}">Aging Concerns</label>
-                        <span class="slider-value" id="aging-value">3</span>
+                        <span class="slider-value" id="aging-value">{{ form.aging_concerns.value|default:"3" }}</span>
                     </div>
                     <div class="slider-wrapper">
                         <div class="slider-labels">
@@ -281,17 +275,9 @@
                             <span>Preventative</span>
                             <span>Visible Signs</span>
                         </div>
-                        <input
-                            type="range"
-                            id="{{ form.aging_concerns.id_for_label }}"
-                            name="{{ form.aging_concerns.html_name }}"
-                            min="1" max="5" step="1"
-                            list="aging-scale"
-                            value="{{ form.aging_concerns.value|default:3 }}"
-                            oninput="document.getElementById('aging-value').innerText = this.value"
-                            >
+                        <input type="range" id="{{ form.aging_concerns.id_for_label }}" name="{{ form.aging_concerns.html_name }}" min="1" max="5" step="1" value="{{ form.aging_concerns.value|default:"3" }}" oninput="document.getElementById('aging-value').innerText = this.value">
                         <div class="slider-ticks">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span></span><span></span><span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
@@ -303,9 +289,12 @@
             </div>
         </div>
 
-        <!-- Preferences -->
+        <!-- Preferences Section -->
         <div class="form-section" id="preferences-section">
-            <h2><span class="section-number">5</span> Your Product Preferences</h2>
+            <div class="section-header">
+                <span class="section-number">5</span>
+                <h2>Your Product Preferences</h2>
+            </div>
             <p class="section-description">Tell us what you like in your skincare products</p>
             
             <div class="preference-group">
@@ -362,30 +351,147 @@
             </div>
         </div>
     </form>
+
+    <!-- Sidebar Tips (Hidden on mobile) -->
+    <div class="assessment-sidebar">
+        <div class="sidebar-card">
+            <div class="sidebar-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3>Quick Tip</h3>
+            <p>Not sure about your skin type? Try the blotting test: press a clean tissue to your face first thing in the morning.</p>
+        </div>
+        
+        <div class="sidebar-card">
+            <div class="sidebar-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3>Why Complete This?</h3>
+            <ul>
+                <li><i class="fas fa-check"></i> Personalized product matches</li>
+                <li><i class="fas fa-check"></i> Tailored skincare routine</li>
+                <li><i class="fas fa-check"></i> Avoid unsuitable products</li>
+                <li><i class="fas fa-check"></i> Save time and money</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
-<div class="assessment-sidebar">
-    <div class="sidebar-tip">
-        <h4><i class="fas fa-lightbulb"></i> Quick Tip</h4>
-        <p>Not sure about your skin type? Try the blotting test: press a clean tissue to your face first thing in the morning. Oil on all areas indicates oily skin, just the T-zone means combination, and little to no oil suggests dry skin.</p>
-    </div>
-    <div class="sidebar-benefits">
-        <h4><i class="fas fa-star"></i> Why Complete This Assessment?</h4>
-        <ul>
-            <li>Personalized product matches</li>
-            <li>Tailored skincare routine</li>
-            <li>Avoid products that won't work for you</li>
-            <li>Save time and money</li>
-        </ul>
-    </div>
+<!-- Mobile Navigation Footer -->
+<div class="mobile-nav-footer">
+    <button class="mobile-nav-btn" data-target="skin-type-section">
+        <i class="fas fa-user"></i>
+        <span>Skin Type</span>
+    </button>
+    <button class="mobile-nav-btn" data-target="undertone-section">
+        <i class="fas fa-palette"></i>
+        <span>Undertone</span>
+    </button>
+    <button class="mobile-nav-btn" data-target="concerns-section">
+        <i class="fas fa-heartbeat"></i>
+        <span>Concerns</span>
+    </button>
+    <button class="mobile-nav-btn" data-target="sliders-section">
+        <i class="fas fa-sliders-h"></i>
+        <span>Profile</span>
+    </button>
+    <button class="mobile-nav-btn" data-target="preferences-section">
+        <i class="fas fa-heart"></i>
+        <span>Preferences</span>
+    </button>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/skin_assessment.css' %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/skin_assessment.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form navigation
+    const nextButtons = document.querySelectorAll('.btn-next');
+    const prevButtons = document.querySelectorAll('.btn-prev');
+    const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
+    const formSections = document.querySelectorAll('.form-section');
+    const progressBar = document.querySelector('.progress-bar');
+    const currentStep = document.querySelector('.current-step');
+    
+    // Update progress bar
+    function updateProgress(currentSection) {
+        const sections = Array.from(formSections);
+        const currentIndex = sections.findIndex(section => section.id === currentSection);
+        const progress = ((currentIndex + 1) / sections.length) * 100;
+        
+        progressBar.style.width = `${progress}%`;
+        currentStep.textContent = currentIndex + 1;
+    }
+    
+    // Navigate between sections
+    function navigateTo(sectionId) {
+        formSections.forEach(section => {
+            section.classList.remove('active');
+            if (section.id === sectionId) {
+                section.classList.add('active');
+                updateProgress(sectionId);
+                
+                // Scroll to top of section
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+        
+        // Update mobile nav active state
+        mobileNavButtons.forEach(btn => {
+            if (btn.dataset.target === sectionId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    // Next button click
+    nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const nextSection = this.dataset.next;
+            navigateTo(nextSection);
+        });
+    });
+    
+    // Previous button click
+    prevButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const prevSection = this.dataset.prev;
+            navigateTo(prevSection);
+        });
+    });
+    
+    // Mobile nav button click
+    mobileNavButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetSection = this.dataset.target;
+            navigateTo(targetSection);
+        });
+    });
+    
+    // Initialize first section
+    navigateTo('skin-type-section');
+    
+    // Slider value updates
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        const valueElement = document.getElementById(`${slider.id}-value`);
+        if (valueElement) {
+            slider.addEventListener('input', function() {
+                valueElement.textContent = this.value;
+            });
+        }
+    });
+    
+    // Limit concerns selection to 3
+    const concernCheckboxes = document.querySelectorAll('input[name="concerns"]');
+    concernCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('input[name="concerns"]:checked').length;
+            if (checkedCount > 3) {
+                this.checked = false;
+                alert('Please select a maximum of 3 concerns for best results.');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

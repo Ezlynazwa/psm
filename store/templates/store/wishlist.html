@@ -1,0 +1,50 @@
+{% extends "store/basestore.html" %}
+{% load static %}
+
+{% block title %}Wishlist | Brew Beauty{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/wishlist.css' %}" />
+
+
+<div class="wishlist-container">
+    <div class="wishlist-header">
+        <h1 class="wishlist-title">My Wishlist</h1>
+        <div class="wishlist-count">{{ wishlist_items|length }} items</div>
+    </div>
+    
+    {% if wishlist_items %}
+        <div class="wishlist-grid">
+            {% for item in wishlist_items %}
+            <div class="wishlist-card">
+                <div class="wishlist-card-image">
+                    {% with images=item.product.product_images.all %}
+                        {% if images %}
+                            <img src="{{ images.0.image.url }}" alt="{{ item.product.name }}" class="product-image">
+                        {% else %}
+                            <div class="no-image-placeholder"><i class="fas fa-image"></i></div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="wishlist-card-content">
+                    <h3 class="product-name">{{ item.product.name }}</h3>
+                    <p class="product-brand">{{ item.product.brand }}</p>
+                    <p class="product-price">RM {{ item.product.price|floatformat:2 }}</p>
+                    <div class="wishlist-actions">
+                        <a href="{% url 'store:remove_from_wishlist' item.id %}" class="remove-btn">
+                            <i class="fas fa-trash-alt"></i> Remove
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-wishlist">
+            <i class="fas fa-heart"></i>
+            <p>Your wishlist is empty.</p>
+            <a href="{% url 'store:product_list' %}" class="shop-btn">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -2,28 +2,36 @@
 {% load static %}
 {% block title %}Home | Brew Beauty{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 
+{% block content %}
 <!-- Hero Section -->
 <section class="hero-banner">
-    <div class="hero-content">
-        <div class="hero-text">
-            <h1>Discover Your Perfect Beauty Match</h1>
-            <p class="hero-subtitle">Personalized cosmetics tailored to your unique skin needs</p>
-            <div class="hero-cta">
-                <a href="{% url 'store:catalog' %}" class="cta-button">
-                    <span>Shop Now</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-                <a href="{% url 'recommendation:dashboard' %}" class="cta-button secondary">
-                    <span>Get Recommendations</span>
-                    <i class="fas fa-magic"></i>
-                </a>
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Discover Your Perfect Beauty Match</h1>
+                <p class="hero-subtitle">Personalized cosmetics tailored to your unique skin needs</p>
+                <div class="hero-cta">
+                    <a href="{% url 'store:catalog' %}" class="cta-button primary">
+                        <span>Shop Now</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="{% url 'recommendation:dashboard' %}" class="cta-button secondary">
+                        <span>Get Recommendations</span>
+                        <i class="fas fa-magic"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="{% static 'images/herobeauty.jfif' %}" alt="Beauty Products" loading="lazy">
             </div>
         </div>
-        
     </div>
     <div class="hero-scroll">
         <span>Scroll to explore</span>
@@ -34,26 +42,40 @@
 <!-- Benefits Section -->
 <section class="benefits-section">
     <div class="container">
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-leaf"></i>
-            </div>
-            <h3>Clean Ingredients</h3>
-            <p>Formulated with natural, skin-loving components</p>
+        <div class="section-intro">
+            <span class="section-tag">Why Choose Us</span>
+            <h2>Your Beauty, Our Priority</h2>
+            <p>We combine science and nature to create products that work</p>
         </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-heart"></i>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Clean Ingredients</h3>
+                <p>Formulated with natural, skin-loving components free from harsh chemicals</p>
             </div>
-            <h3>Personalized</h3>
-            <p>Customized for your skin type and tone</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-truck"></i>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Personalized</h3>
+                <p>Customized for your skin type, tone and specific concerns</p>
             </div>
-            <h3>Fast Shipping</h3>
-            <p>Delivered to your door in 2-3 days</p>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3>Science-Backed</h3>
+                <p>Developed with dermatologists and cosmetic scientists</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3>Fast Shipping</h3>
+                <p>Delivered to your door in 2-3 business days</p>
+            </div>
         </div>
     </div>
 </section>
@@ -61,10 +83,10 @@
 <!-- Featured Products -->
 <section class="featured-section">
     <div class="container">
-        <div class="section-header">
-            <h2>Our Featured Collection</h2>
+        <div class="section-intro">
+            <span class="section-tag">Our Collection</span>
+            <h2>Featured Products</h2>
             <p>Discover products loved by our community</p>
-            <a href="{% url 'store:catalog' %}" class="view-all">View All Products <i class="fas fa-arrow-right"></i></a>
         </div>
         
         <div class="product-grid">
@@ -83,8 +105,13 @@
                 <div class="product-info">
                     <span class="product-category">{{ item.product.category }}</span>
                     <h3><a href="{% url 'store:view_product' item.product.id %}">{{ item.product.name }}</a></h3>
-                    <div class="product-price">RM {{ item.product.price }}</div>
-                    <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button">
+                    <div class="product-price">
+                        RM {{ item.product.price }}
+                        {% if item.product.old_price %}
+                            <span class="old-price">RM {{ item.product.old_price }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'store:add_to_cart' item.product.id %}" class="cta-button add-to-cart">
                         <i class="fas fa-shopping-cart"></i> Add to cart
                     </a>
                 </div>
@@ -97,15 +124,68 @@
             </div>
             {% endfor %}
         </div>
-    </div>
-</section>
-
-<!-- Newsletter Section -->
-<section class="newsletter-section">
-    <div class="container">
-        <div class="newsletter-content">
-            <h2>Follow Us On Social Media</h2>
+        
+        <div class="section-footer">
+            <a href="{% url 'store:catalog' %}" class="view-all">
+                View All Products <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
+
+
+<!-- Social Media Section -->
+<section class="social-section">
+    <div class="container">
+        <div class="section-intro">
+            <span class="section-tag">Follow Us</span>
+            <h2>#BrewBeauty</h2>
+            <p>Tag us in your beauty transformations</p>
+        </div>
+    </div>
+</section>
+
+<script>
+// Quick view functionality
+document.querySelectorAll('.quick-view').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        fetch(`/store/products/${productId}/quickview/`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('quickViewContent').innerHTML = html;
+                document.getElementById('quickViewModal').style.display = 'flex';
+            });
+    });
+});
+
+// Close modal
+document.querySelector('.close-modal').addEventListener('click', function() {
+    document.getElementById('quickViewModal').style.display = 'none';
+});
+
+// Add to cart animation
+document.querySelectorAll('.add-to-cart').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        if (!this.classList.contains('adding')) {
+            e.preventDefault();
+            const originalText = this.innerHTML;
+            this.classList.add('adding');
+            this.innerHTML = '<i class="fas fa-check"></i> Added';
+            
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 1000);
+        }
+    });
+});
+
+// Smooth scroll for hero button
+document.querySelector('.hero-scroll').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('.benefits-section').scrollIntoView({
+        behavior: 'smooth'
+    });
+});
+</script>
 {% endblock %}

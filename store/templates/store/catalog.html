@@ -36,7 +36,6 @@
     <div class="product-grid">
         {% for item in product_data %}
         <div class="product-card">
-            <div class="card-badge">New</div>
             
             <div class="product-image">
                 {% if item.image %}
@@ -48,10 +47,13 @@
                 {% endif %}
                 
                 <div class="quick-actions">
-                    <button class="quick-btn wishlist-btn" title="Add to wishlist">
+                    {% if item.product.id %}
+                    <a href="{% url 'store:add_to_wishlist' item.product.id %}" class="quick-btn wishlist-btn" title="Add to wishlist">
                         <i class="far fa-heart"></i>
-                    </button>
+                    </a>
+                    {% endif %}
                 </div>
+
             </div>
 
             <div class="product-info">

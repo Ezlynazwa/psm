@@ -58,7 +58,32 @@ def homeadmin(request):
 
 @staff_member_required
 def homestaff(request):
-    return render(request,'dashboard/homestaff.html')
+    total_users = CustomerProfile.objects.count()
+    total_products = Product.objects.count()
+    today = now().date()
+    orders_today = Order.objects.filter(date_ordered__date=today).count()
+    revenue_today = Order.objects.filter(date_ordered__date=today, complete=True).aggregate(
+        total=Sum('total'))['total'] or 0
+    
+    total_revenue = Order.objects.filter(complete=True).aggregate(
+    total=Sum('total'))['total'] or 0
+
+
+    recent_orders = Order.objects.filter(complete=True).order_by('-date_ordered')[:3]
+    low_stock_products = Product.objects.filter(quantity__lt=10)
+    new_users = CustomerProfile.objects.order_by('-created_at')[:3]
+
+    context = {
+        'total_users': total_users,
+        'total_products': total_products,
+        'orders_today': orders_today,
+        'revenue_today': revenue_today,
+        'total_revenue':total_revenue,
+        'recent_orders': recent_orders,
+        'low_stock_products': low_stock_products,
+        'new_users': new_users,
+    }
+    return render(request,'dashboard/homestaff.html', context)
 
 @staff_member_required
 def staffproduct(request):

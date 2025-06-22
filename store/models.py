@@ -217,6 +217,18 @@ class ProductVariation(models.Model):
         )['total'] or 0
 
 
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variation = models.ForeignKey(ProductVariation, null=True, blank=True, on_delete=models.SET_NULL)
+    added_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'product', 'variation']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+
 # Keep product.quantity in sync with sum of variation quantities
 @receiver([post_save, post_delete], sender=ProductVariation)
 def update_product_quantity(sender, instance, **kwargs):
