@@ -270,7 +270,6 @@ class Order(models.Model):
         ('verified', 'Verified - Payment Confirmed'),
         ('preparing', 'Preparing Order'),
         ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     )
 

@@ -53,7 +53,6 @@ def homeadmin(request):
         'low_stock_products': low_stock_products,
         'new_users': new_users,
     }
-
     return render(request, 'dashboard/homeadmin.html', context)
 
 @staff_member_required
