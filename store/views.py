@@ -118,14 +118,11 @@ def view_product(request, product_id):
 @login_required
 def cart(request):
     if request.user.is_authenticated:
-        # Ambil semua order yang belum lengkap untuk user ini
         orders = Order.objects.filter(user=request.user, complete=False).order_by('-date_ordered')
         
-        # Buang order yang lebih, simpan hanya satu (paling terkini)
         if orders.count() > 1:
             orders.exclude(id=orders.first().id).delete()
 
-        # Jika tiada satu pun, buat satu order baru (keranjang baru)
         if not orders.exists():
             order = Order.objects.create(user=request.user, complete=False, total=Decimal('0.00'))
         else:
@@ -186,7 +183,6 @@ def checkout(request, order_id):
             messages.error(request, "Selected items no longer available")
             return redirect('store:cart')
 
-        # Kira subtotal, shipping fee, dan total
         subtotal = sum(item.get_total for item in selected_items)
         shipping_fee = Decimal('8.00')
         total = subtotal + shipping_fee
@@ -194,7 +190,6 @@ def checkout(request, order_id):
         if request.method == 'POST':
             form = CheckoutForm(request.POST, request.FILES)
             if form.is_valid():
-                # 1) Buat order baru (complete=True)
                 new_order = Order.objects.create(
                     user=request.user,
                     complete=True,
@@ -202,7 +197,6 @@ def checkout(request, order_id):
                     status='pending'
                 )
 
-                # 2) Salin setiap OrderItem terpilih ke new_order
                 for item in selected_items:
                     OrderItem.objects.create(
                         product=item.product,
@@ -211,8 +205,6 @@ def checkout(request, order_id):
                         order=new_order
                     )
 
-                # 3) Proses alamat
-               # Validasi: Mesti pilih salah satu - alamat sedia ada atau masukkan alamat baru
                     if form.cleaned_data.get('add_new_address'):
                         if not all([
                             form.cleaned_data.get('address'),
@@ -360,11 +352,11 @@ def remove_from_cart(request, item_id):
     return redirect('store:cart')
 
 
-def increase_quantity(request, product_id):
+def increase_quantity(request, item_id):
     if request.user.is_authenticated:
         order_item = get_object_or_404(
             OrderItem,
-            product__id=product_id,
+            id=item_id,
             order__user=request.user,
             order__complete=False
         )
@@ -374,11 +366,11 @@ def increase_quantity(request, product_id):
     else:
         return redirect('users:login')
 
-def decrease_quantity(request, product_id):
+def decrease_quantity(request, item_id):
     if request.user.is_authenticated:
         order_item = get_object_or_404(
             OrderItem,
-            product__id=product_id,
+            id=item_id,
             order__user=request.user,
             order__complete=False
         )

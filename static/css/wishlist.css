@@ -121,7 +121,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: #1a1a1a;
+    background-color: rgb(185, 0, 0);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -133,7 +133,8 @@
 }
 
 .remove-btn:hover {
-    background-color: #e63946;
+    background-color: #ffffff;
+    color:  rgb(185, 0, 0);
 }
 
 .remove-btn i {
